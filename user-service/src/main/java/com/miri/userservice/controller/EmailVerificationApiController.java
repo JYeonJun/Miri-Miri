@@ -1,7 +1,7 @@
 package com.miri.userservice.controller;
 
 
-import com.miri.userservice.dto.RequestUser.VerifyEmailDto;
+import com.miri.userservice.dto.RequestUserDto.VerifyEmailDto;
 import com.miri.userservice.dto.ResponseDto;
 import com.miri.userservice.service.EmailVerificationService;
 import jakarta.validation.Valid;
