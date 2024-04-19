@@ -1,7 +1,9 @@
 package com.miri.userservice.domain.user;
 
-import com.jyj.mirimiri.domain.common.BaseTimeEntity;
+import com.miri.userservice.domain.common.BaseTimeEntity;
+import com.miri.userservice.util.StringEncryptUniqueConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -28,18 +30,22 @@ public class User extends BaseTimeEntity {
     @Column(name = "user_id")
     private Long id;
 
+    @Convert(converter = StringEncryptUniqueConverter.class)
     @Column(unique = true, nullable = false, length = 255)
     private String email;
 
+    @Convert(converter = StringEncryptUniqueConverter.class)
     @Column(nullable = false, length = 255)
     private String userName;
 
     @Column(nullable = false, length = 80) // 패스워드 인코딩(BCrypt)
     private String password;
 
+    @Convert(converter = StringEncryptUniqueConverter.class)
     @Column(nullable = false, length = 255)
     private String phoneNumber;
 
+    @Convert(converter = StringEncryptUniqueConverter.class)
     @Column(nullable = false, length = 255)
     private String address;
 
