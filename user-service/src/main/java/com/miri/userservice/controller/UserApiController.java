@@ -4,6 +4,7 @@ import static com.miri.userservice.dto.RequestUser.*;
 
 import com.miri.userservice.service.UserService;
 import com.miri.userservice.dto.ResponseDto;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -31,5 +32,10 @@ public class UserApiController {
         userService.createUser(signUpReqDto);
 
         return new ResponseEntity<>(new ResponseDto<>(1, "회원가입에 성공했습니다", null), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/auth/logout")
+    public ResponseEntity<?> logout() {
+        return new ResponseEntity<>(new ResponseDto<>(1, "로그아웃 되었습니다", null), HttpStatus.CREATED);
     }
 }

@@ -39,4 +39,16 @@ public class RequestUser {
         @Pattern(regexp = "^[a-zA-Z0-9가-힣\\s-_.]{1,100}$", message = "주소 형식이 올바르지 않습니다.")
         private String address;
     }
+
+    @Data
+    public static class LoginReqDto {
+        @NotEmpty
+        @Length(min = 2, max = 30)
+        @Email(message = "잘못된 이메일 형식입니다.")
+        private String email;
+
+        @NotEmpty
+        @Pattern(regexp = "^[a-zA-Z0-9!@#$%^&*()-_=+\\[\\]{}|;:'\",.<>/?]{1,20}$", message = "영문/숫자/특수 기호 10~20자 이내로 작성해주세요")
+        private String password;
+    }
 }
