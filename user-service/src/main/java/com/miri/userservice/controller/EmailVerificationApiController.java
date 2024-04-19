@@ -5,7 +5,6 @@ import com.miri.userservice.dto.RequestUser.VerifyEmailDto;
 import com.miri.userservice.dto.ResponseDto;
 import com.miri.userservice.service.EmailVerificationService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,12 +15,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api")
 @Slf4j
 public class EmailVerificationApiController {
 
     private final EmailVerificationService emailVerificationService;
+
+    public EmailVerificationApiController(EmailVerificationService emailVerificationService) {
+        this.emailVerificationService = emailVerificationService;
+    }
 
     @PostMapping("/verify-email")
     public ResponseEntity<?> verifyEmail(@RequestBody @Valid VerifyEmailDto verifyEmailDto,

@@ -7,7 +7,6 @@ import com.miri.userservice.handler.ex.CustomApiException;
 import com.miri.userservice.handler.ex.EmailAlreadyExistsException;
 import com.miri.userservice.util.AESUtils;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
@@ -16,13 +15,21 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class EmailVerificationServiceImpl implements EmailVerificationService {
 
     private final UserRepository userRepository;
     private final EmailVerificationCodeRepository emailVerificationCodeRepository;
     private final JavaMailSender javaMailSender;
     private final AESUtils aesUtils;
+
+    public EmailVerificationServiceImpl(UserRepository userRepository,
+                                        EmailVerificationCodeRepository emailVerificationCodeRepository,
+                                        JavaMailSender javaMailSender, AESUtils aesUtils) {
+        this.userRepository = userRepository;
+        this.emailVerificationCodeRepository = emailVerificationCodeRepository;
+        this.javaMailSender = javaMailSender;
+        this.aesUtils = aesUtils;
+    }
 
     @Override
     public void sendVerificationEmail(String email) {
