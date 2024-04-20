@@ -1,7 +1,7 @@
 package com.miri.userservice.service;
 
-import com.miri.userservice.domain.EmailVerificationCode;
-import com.miri.userservice.domain.EmailVerificationCodeRepository;
+import com.miri.userservice.domain.email.EmailVerificationCode;
+import com.miri.userservice.domain.email.EmailVerificationCodeRepository;
 import com.miri.userservice.domain.user.UserRepository;
 import com.miri.userservice.handler.ex.CustomApiException;
 import com.miri.userservice.handler.ex.EmailAlreadyExistsException;
