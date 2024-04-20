@@ -1,9 +1,8 @@
 package com.miri.userservice.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.miri.userservice.dto.ResponseDto;
+import com.miri.userservice.dto.user.ResponseDto;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

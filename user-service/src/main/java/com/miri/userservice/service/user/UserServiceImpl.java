@@ -1,15 +1,15 @@
-package com.miri.userservice.service;
+package com.miri.userservice.service.user;
 
 import com.miri.userservice.domain.email.EmailVerificationCode;
 import com.miri.userservice.domain.email.EmailVerificationCodeRepository;
 import com.miri.userservice.domain.user.User;
 import com.miri.userservice.domain.user.UserRepository;
 import com.miri.userservice.domain.user.UserRole;
-import com.miri.userservice.dto.RequestUserDto.SignUpReqDto;
-import com.miri.userservice.dto.RequestUserDto.UpdateUserPasswordReqDto;
-import com.miri.userservice.dto.RequestUserDto.UpdateUserProfileReqDto;
-import com.miri.userservice.dto.ResponseUserDto.GetUserRespDto;
-import com.miri.userservice.dto.ResponseUserDto.UpdateUserProfileRespDto;
+import com.miri.userservice.dto.user.RequestUserDto.SignUpReqDto;
+import com.miri.userservice.dto.user.RequestUserDto.UpdateUserPasswordReqDto;
+import com.miri.userservice.dto.user.RequestUserDto.UpdateUserProfileReqDto;
+import com.miri.userservice.dto.common.ResponseUserDto.GetUserRespDto;
+import com.miri.userservice.dto.common.ResponseUserDto.UpdateUserProfileRespDto;
 import com.miri.userservice.handler.ex.CustomApiException;
 import com.miri.userservice.util.AESUtils;
 import lombok.extern.slf4j.Slf4j;

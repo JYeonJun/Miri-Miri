@@ -1,4 +1,4 @@
-package com.miri.userservice.service;
+package com.miri.userservice.service.email;
 
 import com.miri.userservice.domain.email.EmailVerificationCode;
 import com.miri.userservice.domain.email.EmailVerificationCodeRepository;
