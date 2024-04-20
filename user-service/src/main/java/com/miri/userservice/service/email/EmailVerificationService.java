@@ -1,4 +1,4 @@
-package com.miri.userservice.service;
+package com.miri.userservice.service.email;
 
 public interface EmailVerificationService {
 

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.miri.userservice.domain.user.User;
 import com.miri.userservice.security.PrincipalDetails;
 import com.miri.userservice.util.CustomResponseUtil;
-import com.miri.userservice.dto.RequestUserDto.LoginReqDto;
+import com.miri.userservice.dto.user.RequestUserDto.LoginReqDto;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;

@@ -1,9 +1,9 @@
 package com.miri.userservice.controller;
 
 
-import com.miri.userservice.dto.RequestUserDto.VerifyEmailDto;
-import com.miri.userservice.dto.ResponseDto;
-import com.miri.userservice.service.EmailVerificationService;
+import com.miri.userservice.dto.user.RequestUserDto.VerifyEmailDto;
+import com.miri.userservice.dto.user.ResponseDto;
+import com.miri.userservice.service.email.EmailVerificationService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

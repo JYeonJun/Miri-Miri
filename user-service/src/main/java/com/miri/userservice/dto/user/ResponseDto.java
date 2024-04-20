@@ -1,4 +1,4 @@
-package com.miri.userservice.dto;
+package com.miri.userservice.dto.user;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

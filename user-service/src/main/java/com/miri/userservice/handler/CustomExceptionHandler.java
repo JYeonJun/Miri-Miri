@@ -3,7 +3,7 @@ package com.miri.userservice.handler;
 import com.miri.userservice.handler.ex.CustomApiException;
 import com.miri.userservice.handler.ex.CustomValidationException;
 import com.miri.userservice.handler.ex.EmailAlreadyExistsException;
-import com.miri.userservice.dto.ResponseDto;
+import com.miri.userservice.dto.user.ResponseDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

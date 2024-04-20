@@ -1,15 +1,14 @@
 package com.miri.userservice.controller;
 
-import static com.miri.userservice.dto.RequestUserDto.*;
-import static com.miri.userservice.dto.RequestUserDto.SignUpReqDto;
-import static com.miri.userservice.dto.RequestUserDto.UpdateUserProfileReqDto;
+import static com.miri.userservice.dto.user.RequestUserDto.*;
+import static com.miri.userservice.dto.user.RequestUserDto.SignUpReqDto;
+import static com.miri.userservice.dto.user.RequestUserDto.UpdateUserProfileReqDto;
 
-import com.miri.userservice.dto.RequestUserDto;
-import com.miri.userservice.dto.ResponseDto;
-import com.miri.userservice.dto.ResponseUserDto.GetUserRespDto;
-import com.miri.userservice.dto.ResponseUserDto.UpdateUserProfileRespDto;
+import com.miri.userservice.dto.user.ResponseDto;
+import com.miri.userservice.dto.common.ResponseUserDto.GetUserRespDto;
+import com.miri.userservice.dto.common.ResponseUserDto.UpdateUserProfileRespDto;
 import com.miri.userservice.security.PrincipalDetails;
-import com.miri.userservice.service.UserService;
+import com.miri.userservice.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
