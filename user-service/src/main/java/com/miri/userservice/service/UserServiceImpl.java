@@ -1,11 +1,15 @@
 package com.miri.userservice.service;
 
-import com.miri.userservice.domain.EmailVerificationCode;
-import com.miri.userservice.domain.EmailVerificationCodeRepository;
+import com.miri.userservice.domain.email.EmailVerificationCode;
+import com.miri.userservice.domain.email.EmailVerificationCodeRepository;
 import com.miri.userservice.domain.user.User;
 import com.miri.userservice.domain.user.UserRepository;
 import com.miri.userservice.domain.user.UserRole;
-import com.miri.userservice.dto.RequestUser.SignUpReqDto;
+import com.miri.userservice.dto.RequestUserDto.SignUpReqDto;
+import com.miri.userservice.dto.RequestUserDto.UpdateUserPasswordReqDto;
+import com.miri.userservice.dto.RequestUserDto.UpdateUserProfileReqDto;
+import com.miri.userservice.dto.ResponseUserDto.GetUserRespDto;
+import com.miri.userservice.dto.ResponseUserDto.UpdateUserProfileRespDto;
 import com.miri.userservice.handler.ex.CustomApiException;
 import com.miri.userservice.util.AESUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +37,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void createUser(SignUpReqDto signUpReqDto) {
         String userEmail = verifyEmailAndGetUserEmail(signUpReqDto.getEmailVerificationToken());
         createUserInRepository(signUpReqDto, userEmail);
@@ -55,5 +60,33 @@ public class UserServiceImpl implements UserService {
                 .address(signUpReqDto.getAddress())
                 .role(UserRole.USER)
                 .build());
+    }
+
+    @Override
+    @Transactional
+    public UpdateUserProfileRespDto updateUserProfile(Long userId, UpdateUserProfileReqDto userProfile) {
+
+        User findUser = findUserByIdOrThrow(userId);
+        findUser.changeUserProfile(userProfile.getPhoneNumber(), userProfile.getAddress());
+
+        return new UpdateUserProfileRespDto(findUser);
+    }
+
+    @Override
+    @Transactional
+    public void updateUserPassword(Long userId, UpdateUserPasswordReqDto userPassword) {
+        User findUser = findUserByIdOrThrow(userId);
+        findUser.changePassword(passwordEncoder.encode(userPassword.getPassword()));
+    }
+
+    @Override
+    public GetUserRespDto getUserProfile(Long userId) {
+        User findUser = findUserByIdOrThrow(userId);
+        return new GetUserRespDto(findUser);
+    }
+
+    private User findUserByIdOrThrow(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomApiException("해당 사용자가 존재하지 않습니다."));
     }
 }

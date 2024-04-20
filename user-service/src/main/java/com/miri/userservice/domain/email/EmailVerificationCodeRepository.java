@@ -1,4 +1,4 @@
-package com.miri.userservice.domain;
+package com.miri.userservice.domain.email;
 
 import org.springframework.data.repository.CrudRepository;
 

@@ -1,6 +1,7 @@
 package com.miri.userservice.handler;
 
 import com.miri.userservice.handler.ex.CustomApiException;
+import com.miri.userservice.handler.ex.CustomValidationException;
 import com.miri.userservice.handler.ex.EmailAlreadyExistsException;
 import com.miri.userservice.dto.ResponseDto;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,13 @@ public class CustomExceptionHandler {
 
         log.error(e.getMessage());
         return new ResponseEntity<>(new ResponseDto<>(-1, e.getMessage(), null), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(CustomValidationException.class)
+    public ResponseEntity<?> validationApiException(CustomValidationException e) {
+
+        log.error(e.getMessage());
+        return new ResponseEntity<>(new ResponseDto<>(-1, e.getMessage(), e.getErrorMap()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)

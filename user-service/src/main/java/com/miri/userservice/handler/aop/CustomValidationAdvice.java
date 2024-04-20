@@ -23,15 +23,15 @@ public class CustomValidationAdvice {
     public void putMapping() {
     }
 
+    @Pointcut("@annotation(org.springframework.web.bind.annotation.PatchMapping)")
+    public void patchMapping() {
+    }
+
     @Pointcut("@annotation(org.springframework.web.bind.annotation.GetMapping)")
     public void getMapping() {
     }
 
-    @Pointcut("execution(* com.miri.userservice.controller..*.*(..))")
-    public void excludeControllers() {
-    }
-
-    @Around("(postMapping() || putMapping() || getMapping()) && !excludeControllers()") // joinPoint의 전후 제어
+    @Around("postMapping() || putMapping() || patchMapping() || getMapping()")
     public Object validationAdvice(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
 
         Object[] args = proceedingJoinPoint.getArgs(); // joinPoint의 매개변수

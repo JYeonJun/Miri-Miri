@@ -52,4 +52,17 @@ public class User extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role; // USER, ADMIN
+
+    public void changeUserProfile(String phoneNumber, String address) {
+        if (phoneNumber != null) {
+            this.phoneNumber = phoneNumber;
+        }
+        if (address != null) {
+            this.address = address;
+        }
+    }
+
+    public void changePassword(String password) {
+        this.password = password;
+    }
 }
