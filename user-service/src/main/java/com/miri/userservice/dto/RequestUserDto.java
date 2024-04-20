@@ -36,7 +36,7 @@ public class RequestUserDto {
         private String phoneNumber;
 
         @NotEmpty
-        @Pattern(regexp = "^[a-zA-Z0-9가-힣\\s-_.]{1,100}$", message = "주소 형식이 올바르지 않습니다.")
+        @Pattern(regexp = "^[a-zA-Z0-9가-힣\\s-_.]{1,50}$", message = "주소 형식이 올바르지 않습니다.")
         private String address;
     }
 
@@ -57,7 +57,14 @@ public class RequestUserDto {
         @Pattern(regexp = "^\\d{3}-\\d{4}-\\d{4}$", message = "전화번호 형식이 유효하지 않습니다. 예: 010-1234-5678")
         private String phoneNumber;
 
-        @Pattern(regexp = "^[a-zA-Z0-9가-힣\\s-_.]{1,100}$", message = "주소 형식이 올바르지 않습니다.")
+        @Pattern(regexp = "^[a-zA-Z0-9가-힣\\s-_.]{1,50}$", message = "주소 형식이 올바르지 않습니다.")
         private String address;
+    }
+
+    @Data
+    public static class UpdateUserPasswordReqDto {
+        @NotEmpty
+        @Pattern(regexp = "^[a-zA-Z0-9!@#$%^&*()-_=+\\[\\]{}|;:'\",.<>/?]{1,20}$", message = "영문/숫자/특수 기호 10~20자 이내로 작성해주세요")
+        private String password;
     }
 }
