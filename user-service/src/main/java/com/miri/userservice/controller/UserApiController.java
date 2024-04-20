@@ -4,9 +4,9 @@ import static com.miri.userservice.dto.user.RequestUserDto.*;
 import static com.miri.userservice.dto.user.RequestUserDto.SignUpReqDto;
 import static com.miri.userservice.dto.user.RequestUserDto.UpdateUserProfileReqDto;
 
-import com.miri.userservice.dto.user.ResponseDto;
-import com.miri.userservice.dto.common.ResponseUserDto.GetUserRespDto;
-import com.miri.userservice.dto.common.ResponseUserDto.UpdateUserProfileRespDto;
+import com.miri.userservice.dto.common.ResponseDto;
+import com.miri.userservice.dto.user.ResponseUserDto.GetUserRespDto;
+import com.miri.userservice.dto.user.ResponseUserDto.UpdateUserProfileRespDto;
 import com.miri.userservice.security.PrincipalDetails;
 import com.miri.userservice.service.user.UserService;
 import jakarta.validation.Valid;
@@ -34,7 +34,8 @@ public class UserApiController {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<?> signUp(@RequestBody @Valid SignUpReqDto signUpReqDto) {
+    public ResponseEntity<?> signUp(@RequestBody @Valid SignUpReqDto signUpReqDto,
+                                    BindingResult bindingResult) {
 
         userService.createUser(signUpReqDto);
 

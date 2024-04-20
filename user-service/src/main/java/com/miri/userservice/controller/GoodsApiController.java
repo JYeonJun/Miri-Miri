@@ -4,7 +4,7 @@ import com.miri.userservice.dto.goods.RequestGoodsDto.GoodsRegistrationReqDto;
 import com.miri.userservice.dto.goods.ResponseGoodsDto.GoodsDetailRespDto;
 import com.miri.userservice.dto.goods.ResponseGoodsDto.GoodsListRespDto;
 import com.miri.userservice.dto.goods.ResponseGoodsDto.GoodsRegistrationRespDto;
-import com.miri.userservice.dto.user.ResponseDto;
+import com.miri.userservice.dto.common.ResponseDto;
 import com.miri.userservice.security.PrincipalDetails;
 import com.miri.userservice.service.goods.GoodsService;
 import jakarta.validation.Valid;

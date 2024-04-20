@@ -1,7 +1,7 @@
 package com.miri.userservice.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.miri.userservice.dto.user.ResponseDto;
+import com.miri.userservice.dto.common.ResponseDto;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

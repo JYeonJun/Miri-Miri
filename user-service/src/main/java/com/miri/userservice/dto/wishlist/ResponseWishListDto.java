@@ -1,0 +1,70 @@
+package com.miri.userservice.dto.wishlist;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.miri.userservice.domain.goods.Goods;
+import com.miri.userservice.domain.wishlist.WishList;
+import java.time.LocalDate;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+public class ResponseWishListDto {
+
+    @Data
+    public static class AddToWishListRespDto {
+
+        private String goodsName; // 장바구니에 담은 상품명
+        private int goodsQuantity; // 장바구니에 담은 상품 수량
+        private int unitPrice; // 장바구니에 담은 상품 가격
+        private int totalPrice; // 장바구니에 담은 현재 상품의 총 가격
+
+        public AddToWishListRespDto(Goods goods, WishList wishList) {
+            this.goodsName = goods.getGoodsName();
+            this.goodsQuantity = wishList.getQuantity();
+            this.unitPrice = goods.getGoodsPrice();
+            this.totalPrice = unitPrice * goodsQuantity;
+        }
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class WishListUpdateRespDto {
+        private Long wishListId;
+        private Long goodsId;
+        private int wishGoodsQuantity; // 장바구니에 담은 상품 수량
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class WishListRespDto {
+        List<GoodsInWishListRespDto> goods;
+        private int goodsCount; // 장바구니에 담은 상품 종류 수
+        private long totalPrice; // 장바구니에 담은 상품 총 가격
+    }
+
+    @Data
+    public static class GoodsInWishListRespDto {
+        private Long wishListId;
+        private Long goodsId;
+        private String goodsName;
+        private int unitPrice;
+        private long subTotalPrice;
+        private int quantity; // 상품의 남은 재고 수
+        private String category;
+        private int wishGoodsQuantity; // 장바구니에 담은 상품 수량
+        @JsonFormat(pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
+        private LocalDate addToWishListDate; // 장바구니에 추가한 날짜
+
+        public GoodsInWishListRespDto(Goods goods, WishList wishList, long subTotalPrice) {
+            this.wishListId = wishList.getId();
+            this.goodsId = goods.getId();
+            this.goodsName = goods.getGoodsName();
+            this.unitPrice = goods.getGoodsPrice();
+            this.subTotalPrice = subTotalPrice;
+            this.quantity = goods.getStockQuantity();
+            this.category = goods.getCategory().getValue();
+            this.wishGoodsQuantity = wishList.getQuantity();
+            this.addToWishListDate = wishList.getCreatedDate().toLocalDate();
+        }
+    }
+}
