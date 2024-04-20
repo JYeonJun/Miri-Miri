@@ -1,4 +1,4 @@
-package com.miri.userservice.dto.common;
+package com.miri.userservice.dto.user;
 
 import com.miri.userservice.domain.user.User;
 import lombok.Data;
