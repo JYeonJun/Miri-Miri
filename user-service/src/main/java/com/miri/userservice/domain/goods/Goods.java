@@ -2,6 +2,7 @@ package com.miri.userservice.domain.goods;
 
 import com.miri.userservice.domain.common.CreatedDateEntity;
 import com.miri.userservice.dto.goods.RequestGoodsDto.GoodsRegistrationReqDto;
+import com.miri.userservice.handler.ex.CustomApiException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -55,5 +56,14 @@ public class Goods extends CreatedDateEntity {
         this.goodsPrice = goodsDto.getGoodsPrice();
         this.stockQuantity = goodsDto.getStockQuantity();
         this.category = goodsDto.getCategory();
+    }
+
+    // 재고 수량 감소 메소드
+    public void decreaseStock(int quantity) {
+        int restStock = this.stockQuantity - quantity;
+        if (restStock < 0) {
+            throw new CustomApiException("상품의 재고가 부족합니다.");
+        }
+        this.stockQuantity = restStock;
     }
 }
