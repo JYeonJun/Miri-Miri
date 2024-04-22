@@ -2,7 +2,8 @@ package com.miri.userservice.domain.goods;
 
 import static com.miri.userservice.domain.goods.QGoods.goods;
 
-import com.miri.userservice.dto.goods.ResponseGoodsDto.GoodsListRespDto;
+import com.miri.userservice.dto.goods.ResponseGoodsDto.GoodsListDto;
+import com.miri.userservice.dto.goods.ResponseGoodsDto.RegisterGoodsDto;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
@@ -25,9 +26,9 @@ public class GoodsRepositoryImpl implements GoodsRepositoryCustom {
     }
 
     @Override
-    public Page<GoodsListRespDto> findPagingGoods(Pageable pageable) {
-        JPAQuery<GoodsListRespDto> query = queryFactory
-                .select(Projections.constructor(GoodsListRespDto.class,
+    public Page<GoodsListDto> findPagingGoods(Pageable pageable) {
+        JPAQuery<GoodsListDto> query = queryFactory
+                .select(Projections.constructor(GoodsListDto.class,
                         goods.id,
                         goods.goodsName,
                         goods.goodsPrice,
@@ -45,11 +46,40 @@ public class GoodsRepositoryImpl implements GoodsRepositoryCustom {
                     pathBuilder.get(o.getProperty())));
         }
 
-        List<GoodsListRespDto> content = query.fetch();
+        List<GoodsListDto> content = query.fetch();
 
         JPAQuery<Long> countQuery = queryFactory
                 .select(goods.count())
                 .from(goods);
+
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+    }
+
+    @Override
+    public Page<RegisterGoodsDto> findPagingRegisterGoods(Long userId, Pageable pageable) {
+        JPAQuery<RegisterGoodsDto> query = queryFactory
+                .select(Projections.constructor(RegisterGoodsDto.class,
+                        goods
+                ))
+                .from(goods)
+                .where(goods.sellerId.eq(userId))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize());
+
+        for (Sort.Order o : pageable.getSort()) {
+            PathBuilder pathBuilder = new PathBuilder(
+                    goods.getType(), goods.getMetadata()
+            );
+            query.orderBy(new OrderSpecifier(o.isAscending() ? Order.ASC : Order.DESC,
+                    pathBuilder.get(o.getProperty())));
+        }
+
+        List<RegisterGoodsDto> content = query.fetch();
+
+        JPAQuery<Long> countQuery = queryFactory
+                .select(goods.count())
+                .from(goods)
+                .where(goods.sellerId.eq(userId));
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
