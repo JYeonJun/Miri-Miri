@@ -10,6 +10,9 @@ import com.miri.userservice.dto.wishlist.ResponseWishListDto.WishListUpdateRespD
 import com.miri.userservice.security.PrincipalDetails;
 import com.miri.userservice.service.wishlist.WishListService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -45,10 +48,11 @@ public class WishListApiController {
     }
 
     @GetMapping("/wishlist")
-    public ResponseEntity<?> getWishListGoods(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+    public ResponseEntity<?> getWishListGoods(@AuthenticationPrincipal PrincipalDetails principalDetails,
+                                              @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
 
         WishListRespDto result
-                = wishListService.getWishListGoods(principalDetails.getUser().getId());
+                = wishListService.getWishListGoods(principalDetails.getUser().getId(), pageable);
         return new ResponseEntity<>(new ResponseDto<>(1, "장바구니 목록 조회에 성공하였습니다.", result), HttpStatus.OK);
     }
 
