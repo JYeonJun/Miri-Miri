@@ -8,9 +8,9 @@ import com.miri.userservice.dto.goods.RequestGoodsDto.GoodsRegistrationReqDto;
 import com.miri.userservice.dto.goods.ResponseGoodsDto.GoodsDetailRespDto;
 import com.miri.userservice.dto.goods.ResponseGoodsDto.GoodsListRespDto;
 import com.miri.userservice.dto.goods.ResponseGoodsDto.GoodsRegistrationRespDto;
+import com.miri.userservice.dto.goods.ResponseGoodsDto.RegisterGoodsListRespDto;
 import com.miri.userservice.handler.ex.CustomApiException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,8 +36,8 @@ public class GoodsServiceImpl implements GoodsService {
     }
 
     @Override
-    public Page<GoodsListRespDto> findGoodsList(Pageable pageable) {
-        return goodsRepository.findPagingGoods(pageable);
+    public GoodsListRespDto findGoodsList(Pageable pageable) {
+        return new GoodsListRespDto(goodsRepository.findPagingGoods(pageable));
     }
 
     @Override
@@ -45,6 +45,11 @@ public class GoodsServiceImpl implements GoodsService {
         Goods findGoods = findGoodsByIdOrThrow(goodsId);
         User findUser = findUserByIdOrThrow(findGoods.getSellerId());
         return new GoodsDetailRespDto(findGoods, findUser);
+    }
+
+    @Override
+    public RegisterGoodsListRespDto findRegisterGoodsList(Long userId, Pageable pageable) {
+        return new RegisterGoodsListRespDto(goodsRepository.findPagingRegisterGoods(userId, pageable));
     }
 
     private User findUserByIdOrThrow(Long userId) {
