@@ -1,15 +1,15 @@
 package com.miri.userservice.controller;
 
+import com.miri.userservice.dto.common.ResponseDto;
 import com.miri.userservice.dto.goods.RequestGoodsDto.GoodsRegistrationReqDto;
 import com.miri.userservice.dto.goods.ResponseGoodsDto.GoodsDetailRespDto;
 import com.miri.userservice.dto.goods.ResponseGoodsDto.GoodsListRespDto;
 import com.miri.userservice.dto.goods.ResponseGoodsDto.GoodsRegistrationRespDto;
-import com.miri.userservice.dto.common.ResponseDto;
+import com.miri.userservice.dto.goods.ResponseGoodsDto.RegisterGoodsListRespDto;
 import com.miri.userservice.security.PrincipalDetails;
 import com.miri.userservice.service.goods.GoodsService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -47,7 +47,7 @@ public class GoodsApiController {
     @GetMapping("/goods")
     public ResponseEntity<?> getGoodsList(
             @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<GoodsListRespDto> result = goodsService.findGoodsList(pageable);
+        GoodsListRespDto result = goodsService.findGoodsList(pageable);
         return new ResponseEntity<>(new ResponseDto<>(1, "상품 목록 조회에 성공했습니다.", result), HttpStatus.OK);
     }
 
@@ -56,4 +56,15 @@ public class GoodsApiController {
         GoodsDetailRespDto result = goodsService.findGoods(goodsId);
         return new ResponseEntity<>(new ResponseDto<>(1, "상품 상세 조회에 성공했습니다.", result), HttpStatus.OK);
     }
+
+    @GetMapping("/wishlist")
+    public ResponseEntity<?> getRegisterGoodsList(@AuthenticationPrincipal PrincipalDetails principalDetails,
+                                                  @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        RegisterGoodsListRespDto result
+                = goodsService.findRegisterGoodsList(principalDetails.getUser().getId(), pageable);
+        return new ResponseEntity<>(new ResponseDto<>(1, "등록한 상품 목록 조회에 성공하였습니다.", result), HttpStatus.OK);
+    }
+
+    // TODO: 상품 정보 수정!!
 }

@@ -39,12 +39,12 @@ public class UserApiController {
 
         userService.createUser(signUpReqDto);
 
-        return new ResponseEntity<>(new ResponseDto<>(1, "회원가입에 성공했습니다", null), HttpStatus.CREATED);
+        return new ResponseEntity<>(new ResponseDto<>(1, "회원가입에 성공했습니다.", null), HttpStatus.CREATED);
     }
 
     @PostMapping("/auth/logout")
     public ResponseEntity<?> logout() {
-        return new ResponseEntity<>(new ResponseDto<>(1, "로그아웃 되었습니다", null), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto<>(1, "로그아웃 되었습니다.", null), HttpStatus.OK);
     }
 
     @PatchMapping("/auth/users")
@@ -53,7 +53,7 @@ public class UserApiController {
                                         @AuthenticationPrincipal PrincipalDetails principalDetails) {
         UpdateUserProfileRespDto result
                 = userService.updateUserProfile(principalDetails.getUser().getId(), updateUserProfileReqDto);
-        return new ResponseEntity<>(new ResponseDto<>(1, "사용자 정보 변경이 완료되었습니다", result), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto<>(1, "사용자 정보 변경이 완료되었습니다.", result), HttpStatus.OK);
     }
 
     @PatchMapping("/auth/users/change-password")
@@ -61,13 +61,13 @@ public class UserApiController {
                                             BindingResult bindingResult,
                                             @AuthenticationPrincipal PrincipalDetails principalDetails) {
         userService.updateUserPassword(principalDetails.getUser().getId(), updateUserPasswordReqDto);
-        return new ResponseEntity<>(new ResponseDto<>(1, "비밀번호 변경이 완료되었습니다", null), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto<>(1, "비밀번호 변경이 완료되었습니다.", null), HttpStatus.OK);
     }
 
     @GetMapping("/auth/users")
-    public ResponseEntity<?> getUserProfile(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+    public ResponseEntity<?> getUserInfo(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         GetUserRespDto result
-                = userService.getUserProfile(principalDetails.getUser().getId());
-        return new ResponseEntity<>(new ResponseDto<>(1, "사용자 정보 변경이 완료되었습니다", result), HttpStatus.OK);
+                = userService.getUserInfo(principalDetails.getUser().getId());
+        return new ResponseEntity<>(new ResponseDto<>(1, "사용자 정보가 조회되었습니다.", result), HttpStatus.OK);
     }
 }

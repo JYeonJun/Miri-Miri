@@ -5,14 +5,22 @@ import com.miri.userservice.domain.email.EmailVerificationCodeRepository;
 import com.miri.userservice.domain.user.User;
 import com.miri.userservice.domain.user.UserRepository;
 import com.miri.userservice.domain.user.UserRole;
+import com.miri.userservice.dto.goods.ResponseGoodsDto.RegisterGoodsListRespDto;
+import com.miri.userservice.dto.order.ResponseOrderDto.OrderGoodsListRespDto;
 import com.miri.userservice.dto.user.RequestUserDto.SignUpReqDto;
 import com.miri.userservice.dto.user.RequestUserDto.UpdateUserPasswordReqDto;
 import com.miri.userservice.dto.user.RequestUserDto.UpdateUserProfileReqDto;
 import com.miri.userservice.dto.user.ResponseUserDto.GetUserRespDto;
 import com.miri.userservice.dto.user.ResponseUserDto.UpdateUserProfileRespDto;
+import com.miri.userservice.dto.wishlist.ResponseWishListDto.WishListRespDto;
 import com.miri.userservice.handler.ex.CustomApiException;
+import com.miri.userservice.service.goods.GoodsService;
+import com.miri.userservice.service.order.OrderService;
+import com.miri.userservice.service.wishlist.WishListService;
 import com.miri.userservice.util.AESUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,14 +31,20 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final GoodsService goodsService;
+    private final WishListService wishListService;
+    private final OrderService orderService;
     private final EmailVerificationCodeRepository emailVerificationCodeRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final AESUtils aesUtils;
 
-    public UserServiceImpl(UserRepository userRepository,
-                           EmailVerificationCodeRepository emailVerificationCodeRepository,
+    public UserServiceImpl(UserRepository userRepository, GoodsService goodsService, WishListService wishListService,
+                           OrderService orderService, EmailVerificationCodeRepository emailVerificationCodeRepository,
                            BCryptPasswordEncoder passwordEncoder, AESUtils aesUtils) {
         this.userRepository = userRepository;
+        this.goodsService = goodsService;
+        this.wishListService = wishListService;
+        this.orderService = orderService;
         this.emailVerificationCodeRepository = emailVerificationCodeRepository;
         this.passwordEncoder = passwordEncoder;
         this.aesUtils = aesUtils;
@@ -80,9 +94,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public GetUserRespDto getUserProfile(Long userId) {
+    public GetUserRespDto getUserInfo(Long userId) {
         User findUser = findUserByIdOrThrow(userId);
-        return new GetUserRespDto(findUser);
+        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.fromString("desc"), "createdDate"));
+        // 등록한 상품 목록(GoodsService)
+        RegisterGoodsListRespDto registerGoodsList = goodsService.findRegisterGoodsList(userId, pageRequest);
+        // 장바구니에 추가한 상품 목록(WishListService)
+        WishListRespDto wishListGoods = wishListService.getWishListGoods(userId, pageRequest);
+        // 주문한 상품 목록(OrderService)
+        OrderGoodsListRespDto orderGoodsList = orderService.getOrderGoodsList(userId, pageRequest);
+
+        return new GetUserRespDto(findUser, registerGoodsList, wishListGoods, orderGoodsList);
     }
 
     private User findUserByIdOrThrow(Long userId) {

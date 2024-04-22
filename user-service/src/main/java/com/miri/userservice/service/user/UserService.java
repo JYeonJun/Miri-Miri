@@ -14,5 +14,5 @@ public interface UserService {
 
     void updateUserPassword(Long userId, UpdateUserPasswordReqDto userPassword);
 
-    GetUserRespDto getUserProfile(Long userId);
+    GetUserRespDto getUserInfo(Long userId);
 }

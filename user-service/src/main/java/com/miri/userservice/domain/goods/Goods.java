@@ -1,5 +1,6 @@
 package com.miri.userservice.domain.goods;
 
+import com.miri.userservice.domain.common.BaseTimeEntity;
 import com.miri.userservice.domain.common.CreatedDateEntity;
 import com.miri.userservice.dto.goods.RequestGoodsDto.GoodsRegistrationReqDto;
 import com.miri.userservice.handler.ex.CustomApiException;
@@ -23,7 +24,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Table(name = "goods")
-public class Goods extends CreatedDateEntity {
+public class Goods extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
