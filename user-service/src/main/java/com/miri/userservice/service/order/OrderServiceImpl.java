@@ -10,12 +10,14 @@ import com.miri.userservice.domain.wishlist.WishListRepository;
 import com.miri.userservice.dto.order.RequestOrderDto.CreateOrderReqDto;
 import com.miri.userservice.dto.order.ResponseOrderDto.CreateOrderRespDto;
 import com.miri.userservice.dto.order.ResponseOrderDto.OrderGoodsRespDto;
+import com.miri.userservice.dto.order.ResponseOrderDto.OrderGoodsListRespDto;
 import com.miri.userservice.handler.ex.CustomApiException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,7 +53,8 @@ public class OrderServiceImpl implements OrderService {
 
         List<OrderDetail> orderDetails = new ArrayList<>();
         List<OrderGoodsRespDto> orderGoods = new ArrayList<>();
-        int totalOrderPrice = calculateTotalOrderPriceAndPrepareOrderDetails(wishLists, order, orderDetails, orderGoods);
+        int totalOrderPrice = calculateTotalOrderPriceAndPrepareOrderDetails(wishLists, order, orderDetails,
+                orderGoods);
 
         orderDetailRepository.saveAll(orderDetails);
         wishListRepository.deleteAll(wishLists);
@@ -66,7 +69,9 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    private int calculateTotalOrderPriceAndPrepareOrderDetails(List<WishList> wishLists, Order order, List<OrderDetail> orderDetails, List<OrderGoodsRespDto> orderGoods) {
+    private int calculateTotalOrderPriceAndPrepareOrderDetails(List<WishList> wishLists, Order order,
+                                                               List<OrderDetail> orderDetails,
+                                                               List<OrderGoodsRespDto> orderGoods) {
         int totalOrderPrice = 0;
         for (WishList wishList : wishLists) {
             Goods goods = wishList.getGoods();
@@ -79,5 +84,10 @@ public class OrderServiceImpl implements OrderService {
             orderGoods.add(new OrderGoodsRespDto(wishList, goods, totalPriceForGoods));
         }
         return totalOrderPrice;
+    }
+
+    @Override
+    public OrderGoodsListRespDto getOrderGoodsList(Long userId, Pageable pageable) {
+        return new OrderGoodsListRespDto(orderRepository.findPagingOrderList(userId, pageable));
     }
 }
