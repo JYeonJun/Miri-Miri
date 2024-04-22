@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface WishListRepository extends JpaRepository<WishList, Long> {
+public interface WishListRepository extends JpaRepository<WishList, Long>, WishListRepositoryCustom {
 
     boolean existsByUserIdAndGoods_Id(Long userId, Long goodsId);
 

@@ -10,10 +10,9 @@ import com.miri.userservice.dto.wishlist.ResponseWishListDto.GoodsInWishListResp
 import com.miri.userservice.dto.wishlist.ResponseWishListDto.WishListRespDto;
 import com.miri.userservice.dto.wishlist.ResponseWishListDto.WishListUpdateRespDto;
 import com.miri.userservice.handler.ex.CustomApiException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,39 +48,11 @@ public class WishListServiceImpl implements WishListService {
     }
 
     @Override
-    public WishListRespDto getWishListGoods(Long userId) {
-        // 사용자의 장바구니 목록 조회 및 최신순으로 정렬
-        List<WishList> wishLists = wishListRepository.findByUserIdWithGoods(userId);
-        wishLists.sort(Comparator.comparing(WishList::getCreatedDate).reversed());
+    public WishListRespDto getWishListGoods(Long userId, Pageable pageable) {
+        Page<GoodsInWishListRespDto> goodsInWishList
+                = wishListRepository.findPagingGoodsInWishList(userId, pageable);
 
-        // 조회된 목록을 DTO로 변환
-        List<GoodsInWishListRespDto> goodsInWishListRespDtos = convertToWishGoodsRespDtos(wishLists);
-        // 전체 상품 가격 계산
-        long totalPrice = calculateTotalPrice(goodsInWishListRespDtos);
-
-        return new WishListRespDto(goodsInWishListRespDtos, goodsInWishListRespDtos.size(), totalPrice);
-    }
-
-    private List<GoodsInWishListRespDto> convertToWishGoodsRespDtos(List<WishList> wishLists) {
-        List<GoodsInWishListRespDto> goodsInWishListRespDtos = new ArrayList<>();
-        for (WishList wishList : wishLists) {
-            goodsInWishListRespDtos.add(createWishGoodsRespDto(wishList));
-        }
-        return goodsInWishListRespDtos;
-    }
-
-    private GoodsInWishListRespDto createWishGoodsRespDto(WishList wishList) {
-        Goods goods = wishList.getGoods();
-        long subTotalPrice = (long) goods.getGoodsPrice() * wishList.getQuantity();
-        return new GoodsInWishListRespDto(goods, wishList, subTotalPrice);
-    }
-
-    private long calculateTotalPrice(List<GoodsInWishListRespDto> goodsInWishListRespDtos) {
-        long totalPrice = 0;
-        for (GoodsInWishListRespDto dto : goodsInWishListRespDtos) {
-            totalPrice += dto.getSubTotalPrice();
-        }
-        return totalPrice;
+        return new WishListRespDto(goodsInWishList);
     }
 
     @Override

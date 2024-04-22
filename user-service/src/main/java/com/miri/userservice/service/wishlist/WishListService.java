@@ -2,8 +2,9 @@ package com.miri.userservice.service.wishlist;
 
 import com.miri.userservice.dto.wishlist.RequestWishListDto.AddToCartReqDto;
 import com.miri.userservice.dto.wishlist.ResponseWishListDto.AddToWishListRespDto;
-import com.miri.userservice.dto.wishlist.ResponseWishListDto.WishListUpdateRespDto;
 import com.miri.userservice.dto.wishlist.ResponseWishListDto.WishListRespDto;
+import com.miri.userservice.dto.wishlist.ResponseWishListDto.WishListUpdateRespDto;
+import org.springframework.data.domain.Pageable;
 
 public interface WishListService {
 
@@ -11,7 +12,7 @@ public interface WishListService {
     AddToWishListRespDto addToWishList(Long userId, AddToCartReqDto addToCartReqDto);
 
     // 장바구니에 담긴 상품 목록 조회 기능
-    WishListRespDto getWishListGoods(Long userId);
+    WishListRespDto getWishListGoods(Long userId, Pageable pageable);
 
     // 장바구니에 담은 상품 수량 변경 기능
     WishListUpdateRespDto updateGoodsQuantityInWishList(Long userId, Long wishListId, int goodsQuantity);
