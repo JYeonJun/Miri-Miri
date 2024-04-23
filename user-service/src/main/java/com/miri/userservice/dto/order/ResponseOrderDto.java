@@ -47,6 +47,15 @@ public class ResponseOrderDto {
             this.subTotalPrice = subTotalPrice;
             this.orderStatus = orderDetail.getOrderStatus().getValue();
         }
+
+        public OrderGoodsRespDto(OrderDetail orderDetail, Goods goods) {
+            this.goodsId = goods.getId();
+            this.goodsName = goods.getGoodsName();
+            this.quantity = orderDetail.getQuantity();
+            this.unitPrice = orderDetail.getUnitPrice();
+            this.subTotalPrice = this.unitPrice * this.quantity;
+            this.orderStatus = orderDetail.getOrderStatus().getValue();
+        }
     }
 
     @Data

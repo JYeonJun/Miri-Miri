@@ -5,6 +5,8 @@ import com.miri.userservice.domain.goods.Goods;
 import com.miri.userservice.domain.wishlist.WishList;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -38,6 +40,10 @@ public class OrderDetail extends BaseTimeEntity {
     @Column(nullable = false)
     private Long goodsId;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private OrderStatus orderStatus;
+
     private int quantity; // 상품 주문 개수
 
     private int unitPrice; // 주문 상품 가격
@@ -47,5 +53,10 @@ public class OrderDetail extends BaseTimeEntity {
         this.goodsId = goods.getId();
         this.quantity = wishList.getQuantity();
         this.unitPrice = goods.getGoodsPrice();
+        this.orderStatus = OrderStatus.PENDING;
+    }
+
+    public void changeOrderStatus(OrderStatus orderStatus) {
+        this.orderStatus = orderStatus;
     }
 }
