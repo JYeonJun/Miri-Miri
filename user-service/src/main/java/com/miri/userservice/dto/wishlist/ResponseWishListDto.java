@@ -2,7 +2,6 @@ package com.miri.userservice.dto.wishlist;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.miri.userservice.domain.goods.Goods;
-import com.miri.userservice.domain.goods.GoodsCategory;
 import com.miri.userservice.domain.wishlist.WishList;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
@@ -14,12 +13,14 @@ public class ResponseWishListDto {
     @Data
     public static class AddToWishListRespDto {
 
+        private Long wishListId;
         private String goodsName; // 장바구니에 담은 상품명
         private int goodsQuantity; // 장바구니에 담은 상품 수량
         private int unitPrice; // 장바구니에 담은 상품 가격
         private int totalPrice; // 장바구니에 담은 현재 상품의 총 가격
 
         public AddToWishListRespDto(Goods goods, WishList wishList) {
+            this.wishListId = wishList.getId();
             this.goodsName = goods.getGoodsName();
             this.goodsQuantity = wishList.getQuantity();
             this.unitPrice = goods.getGoodsPrice();

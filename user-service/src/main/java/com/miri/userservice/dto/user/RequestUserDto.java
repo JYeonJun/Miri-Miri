@@ -48,7 +48,7 @@ public class RequestUserDto {
         private String email;
 
         @NotEmpty
-        @Pattern(regexp = "^[a-zA-Z0-9!@#$%^&*()-_=+\\[\\]{}|;:'\",.<>/?]{1,20}$", message = "영문/숫자/특수 기호 10~20자 이내로 작성해주세요")
+        @Pattern(regexp = "^[a-zA-Z0-9!@#$%^&*()-_=+\\[\\]{}|;:'\",.<>/?]{10,20}$", message = "영문/숫자/특수 기호 10~20자 이내로 작성해주세요")
         private String password;
     }
 
@@ -64,7 +64,7 @@ public class RequestUserDto {
     @Data
     public static class UpdateUserPasswordReqDto {
         @NotEmpty
-        @Pattern(regexp = "^[a-zA-Z0-9!@#$%^&*()-_=+\\[\\]{}|;:'\",.<>/?]{1,20}$", message = "영문/숫자/특수 기호 10~20자 이내로 작성해주세요")
+        @Pattern(regexp = "^[a-zA-Z0-9!@#$%^&*()-_=+\\[\\]{}|;:'\",.<>/?]{10,20}$", message = "영문/숫자/특수 기호 10~20자 이내로 작성해주세요")
         private String password;
     }
 }

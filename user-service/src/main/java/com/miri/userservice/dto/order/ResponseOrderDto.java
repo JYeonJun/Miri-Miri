@@ -2,7 +2,6 @@ package com.miri.userservice.dto.order;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.miri.userservice.domain.goods.Goods;
-import com.miri.userservice.domain.goods.GoodsCategory;
 import com.miri.userservice.domain.order.Order;
 import com.miri.userservice.domain.order.OrderDetail;
 import com.miri.userservice.domain.wishlist.WishList;
@@ -18,7 +17,6 @@ public class ResponseOrderDto {
     public static class CreateOrderRespDto {
 
         private Long orderId;
-        private String orderStatus;
         private List<OrderGoodsRespDto> orderGoods;
         private int totalOrderPrice;
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
@@ -26,7 +24,6 @@ public class ResponseOrderDto {
 
         public CreateOrderRespDto(Order order, List<OrderGoodsRespDto> orderGoods, int totalOrderPrice) {
             this.orderId = order.getId();
-            this.orderStatus = order.getOrderStatus().getValue();
             this.orderGoods = orderGoods;
             this.totalOrderPrice = totalOrderPrice;
             this.orderDate = order.getCreatedDate();
@@ -40,13 +37,15 @@ public class ResponseOrderDto {
         private int quantity;
         private int unitPrice;
         private int subTotalPrice;
+        private String orderStatus;
 
-        public OrderGoodsRespDto(WishList wishList, Goods goods, int subTotalPrice) {
+        public OrderGoodsRespDto(WishList wishList, OrderDetail orderDetail, Goods goods, int subTotalPrice) {
             this.goodsId = goods.getId();
             this.goodsName = goods.getGoodsName();
             this.quantity = wishList.getQuantity();
             this.unitPrice = goods.getGoodsPrice();
             this.subTotalPrice = subTotalPrice;
+            this.orderStatus = orderDetail.getOrderStatus().getValue();
         }
     }
 
@@ -59,6 +58,8 @@ public class ResponseOrderDto {
     @Data
     public static class OrderGoodsDto {
         private Long orderId; // 주문 ID
+        private Long orderDetailId; // 상세 주문 ID
+        private Long goodsId; // 상품 ID
         private String orderStatus; // 주문 상태
         private int orderQuantity; // 주문한 상품 개수
         private int unitPrice; // 주문한 상품 가격
@@ -69,7 +70,9 @@ public class ResponseOrderDto {
 
         public OrderGoodsDto(Order order, OrderDetail orderDetail, Goods goods) {
             this.orderId = order.getId();
-            this.orderStatus = order.getOrderStatus().getValue();
+            this.orderDetailId = orderDetail.getId();
+            this.goodsId = goods.getId();
+            this.orderStatus = orderDetail.getOrderStatus().getValue();
             this.orderQuantity = orderDetail.getQuantity();
             this.unitPrice = goods.getGoodsPrice();
             this.subTotalPrice = orderDetail.getQuantity() * goods.getGoodsPrice();
