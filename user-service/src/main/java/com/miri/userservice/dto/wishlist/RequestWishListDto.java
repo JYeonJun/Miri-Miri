@@ -2,11 +2,11 @@ package com.miri.userservice.dto.wishlist;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
+import lombok.Data;
 
 public class RequestWishListDto {
 
-    @Getter
+    @Data
     public static class AddToCartReqDto {
 
         @NotNull(message = "상품 ID는 필수입니다.")
@@ -17,7 +17,7 @@ public class RequestWishListDto {
         private Integer goodsQuantity;
     }
 
-    @Getter
+    @Data
     public static class WishListUpdateReqDto {
 
         @NotNull(message = "상품 수량은 필수입니다.")
