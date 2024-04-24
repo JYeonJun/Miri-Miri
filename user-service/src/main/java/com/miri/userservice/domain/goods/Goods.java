@@ -1,7 +1,6 @@
 package com.miri.userservice.domain.goods;
 
 import com.miri.userservice.domain.common.BaseTimeEntity;
-import com.miri.userservice.domain.common.CreatedDateEntity;
 import com.miri.userservice.dto.goods.RequestGoodsDto.GoodsRegistrationReqDto;
 import com.miri.userservice.handler.ex.CustomApiException;
 import jakarta.persistence.Column;
@@ -66,5 +65,9 @@ public class Goods extends BaseTimeEntity {
             throw new CustomApiException("상품의 재고가 부족합니다.");
         }
         this.stockQuantity = restStock;
+    }
+
+    public void increaseStock(int stockQuantity) {
+        this.stockQuantity += stockQuantity;
     }
 }

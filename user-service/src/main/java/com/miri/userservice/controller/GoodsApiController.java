@@ -57,7 +57,7 @@ public class GoodsApiController {
         return new ResponseEntity<>(new ResponseDto<>(1, "상품 상세 조회에 성공했습니다.", result), HttpStatus.OK);
     }
 
-    @GetMapping("/wishlist")
+    @GetMapping("/auth/my/goods")
     public ResponseEntity<?> getRegisterGoodsList(@AuthenticationPrincipal PrincipalDetails principalDetails,
                                                   @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
 

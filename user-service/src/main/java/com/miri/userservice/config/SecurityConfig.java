@@ -1,8 +1,8 @@
 package com.miri.userservice.config;
 
 import com.miri.userservice.domain.user.UserRole;
-import com.miri.userservice.security.filter.JwtAuthenticationFilter;
 import com.miri.userservice.security.PrincipalDetailsService;
+import com.miri.userservice.security.filter.JwtAuthenticationFilter;
 import com.miri.userservice.security.filter.JwtAuthorizationFilter;
 import com.miri.userservice.util.CustomResponseUtil;
 import org.springframework.context.annotation.Bean;
@@ -17,9 +17,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity

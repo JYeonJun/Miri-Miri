@@ -1,6 +1,7 @@
 package com.miri.userservice.controller;
 
 import static com.miri.userservice.dto.order.RequestOrderDto.CreateOrderReqDto;
+import static com.miri.userservice.dto.order.RequestOrderDto.ReturnOrderReqDto;
 
 import com.miri.userservice.dto.common.ResponseDto;
 import com.miri.userservice.dto.order.ResponseOrderDto.CreateOrderRespDto;
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,5 +50,24 @@ public class OrderApiController {
         OrderGoodsListRespDto result
                 = orderService.getOrderGoodsList(principalDetails.getUser().getId(), pageable);
         return new ResponseEntity<>(new ResponseDto<>(1, "주문한 상품 목록 조회가 완료되었습니다.", result), HttpStatus.OK);
+    }
+
+    @PostMapping("/orders/{orderDetailId}/cancel")
+    public ResponseEntity<?> cancelOrder(@PathVariable("orderDetailId") Long orderDetailId,
+                                         @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        // 주문 취소 기능 구현
+        orderService.cancelOrder(principalDetails.getUser().getId(), orderDetailId);
+        // 반품 요청 기능 구현
+        return new ResponseEntity<>(new ResponseDto<>(1, "주문 취소 되었습니다.", null), HttpStatus.OK);
+    }
+
+    @PostMapping("/orders/{orderDetailId}/return")
+    public ResponseEntity<?> returnOrder(@PathVariable("orderDetailId") Long orderDetailId,
+                                         @RequestBody @Valid ReturnOrderReqDto reqDto,
+                                         BindingResult bindingResult,
+                                         @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        // 주문 취소 기능 구현
+        orderService.returnOrder(principalDetails.getUser().getId(), orderDetailId, reqDto);
+        return new ResponseEntity<>(new ResponseDto<>(1, "반품 완료 되었습니다.", null), HttpStatus.OK);
     }
 }

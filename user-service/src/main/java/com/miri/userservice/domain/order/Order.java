@@ -3,8 +3,6 @@ package com.miri.userservice.domain.order;
 import com.miri.userservice.domain.common.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,12 +29,7 @@ public class Order extends BaseTimeEntity {
     @Column(nullable = false)
     private Long userId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private OrderStatus orderStatus;
-
     public Order(Long userId) {
         this.userId = userId;
-        this.orderStatus = OrderStatus.PENDING;
     }
 }

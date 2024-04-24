@@ -1,17 +1,25 @@
 package com.miri.userservice.service.order;
 
 import com.miri.userservice.domain.goods.Goods;
+import com.miri.userservice.domain.goods.GoodsRepository;
 import com.miri.userservice.domain.order.Order;
 import com.miri.userservice.domain.order.OrderDetail;
 import com.miri.userservice.domain.order.OrderDetailRepository;
 import com.miri.userservice.domain.order.OrderRepository;
+import com.miri.userservice.domain.order.OrderStatus;
+import com.miri.userservice.domain.returnrequest.ReturnRequest;
+import com.miri.userservice.domain.returnrequest.ReturnRequestRepository;
+import com.miri.userservice.domain.shipping.Shipping;
+import com.miri.userservice.domain.shipping.ShippingRepository;
 import com.miri.userservice.domain.wishlist.WishList;
 import com.miri.userservice.domain.wishlist.WishListRepository;
 import com.miri.userservice.dto.order.RequestOrderDto.CreateOrderReqDto;
+import com.miri.userservice.dto.order.RequestOrderDto.ReturnOrderReqDto;
 import com.miri.userservice.dto.order.ResponseOrderDto.CreateOrderRespDto;
-import com.miri.userservice.dto.order.ResponseOrderDto.OrderGoodsRespDto;
 import com.miri.userservice.dto.order.ResponseOrderDto.OrderGoodsListRespDto;
+import com.miri.userservice.dto.order.ResponseOrderDto.OrderGoodsRespDto;
 import com.miri.userservice.handler.ex.CustomApiException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -29,12 +37,19 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final WishListRepository wishListRepository;
+    private final ShippingRepository shippingRepository;
+    private final GoodsRepository goodsRepository;
+    private final ReturnRequestRepository returnRequestRepository;
 
     public OrderServiceImpl(OrderRepository orderRepository, OrderDetailRepository orderDetailRepository,
-                            WishListRepository wishListRepository) {
+                            WishListRepository wishListRepository, ShippingRepository shippingRepository,
+                            GoodsRepository goodsRepository, ReturnRequestRepository returnRequestRepository) {
         this.orderRepository = orderRepository;
         this.orderDetailRepository = orderDetailRepository;
         this.wishListRepository = wishListRepository;
+        this.shippingRepository = shippingRepository;
+        this.goodsRepository = goodsRepository;
+        this.returnRequestRepository = returnRequestRepository;
     }
 
     // 상품 주문할 때, 상품 재고 마이너스!!
@@ -45,19 +60,25 @@ public class OrderServiceImpl implements OrderService {
 
         Order order = orderRepository.save(new Order(userId));
 
-        // userId와 wishListId 목록으로 조회한 List<WishList> 가지고 처리하기!!
-        List<WishList> wishLists
-                = wishListRepository.findByIdInAndUserId(reqDto.getWishListIds(), userId);
+        List<Long> wishListIds = reqDto.getWishListIds();
+        List<WishList> wishLists = wishListRepository.findByIdInAndUserIdWithGoods(wishListIds, userId);
 
-        validateWishListIds(reqDto.getWishListIds(), wishLists);
+        validateWishListIds(wishListIds, wishLists);
 
         List<OrderDetail> orderDetails = new ArrayList<>();
         List<OrderGoodsRespDto> orderGoods = new ArrayList<>();
-        int totalOrderPrice = calculateTotalOrderPriceAndPrepareOrderDetails(wishLists, order, orderDetails,
-                orderGoods);
+        int totalOrderPrice
+                = calculateTotalOrderPriceAndPrepareOrderDetails(wishLists, order, orderDetails, orderGoods);
 
-        orderDetailRepository.saveAll(orderDetails);
+        List<OrderDetail> createdOrderDetails = orderDetailRepository.saveAll(orderDetails);
         wishListRepository.deleteAll(wishLists);
+
+        List<Shipping> shippings = new ArrayList<>();
+        for (OrderDetail createdOrderDetail : createdOrderDetails) {
+            shippings.add(new Shipping(createdOrderDetail.getId(), reqDto.getAddress()));
+        }
+
+        shippingRepository.saveAll(shippings);
 
         return new CreateOrderRespDto(order, orderGoods, totalOrderPrice);
     }
@@ -80,14 +101,78 @@ public class OrderServiceImpl implements OrderService {
             int totalPriceForGoods = goods.getGoodsPrice() * wishList.getQuantity();
             totalOrderPrice += totalPriceForGoods;
 
-            orderDetails.add(new OrderDetail(order, wishList, goods));
-            orderGoods.add(new OrderGoodsRespDto(wishList, goods, totalPriceForGoods));
+            OrderDetail orderDetail = new OrderDetail(order, wishList, goods);
+            orderDetails.add(orderDetail);
+            orderGoods.add(new OrderGoodsRespDto(wishList, orderDetail, goods, totalPriceForGoods));
         }
         return totalOrderPrice;
     }
 
+
     @Override
     public OrderGoodsListRespDto getOrderGoodsList(Long userId, Pageable pageable) {
         return new OrderGoodsListRespDto(orderRepository.findPagingOrderList(userId, pageable));
+    }
+
+    @Override
+    @Transactional
+    public void cancelOrder(Long userId, Long orderDetailId) {
+        OrderDetail findOrderDetail = validateOrderDetail(userId, orderDetailId);
+
+        validateCancelCondition(findOrderDetail);
+
+        Goods goods = findGoodsOrThrow(findOrderDetail);
+
+        restoreGoodsStock(goods, findOrderDetail);
+
+        updateOrderStatusToCanceled(findOrderDetail);
+    }
+
+    @Override
+    @Transactional
+    public void returnOrder(Long userId, Long orderDetailId, ReturnOrderReqDto reqDto) {
+        OrderDetail findOrderDetail = validateOrderDetail(userId, orderDetailId);
+
+        validateReturnCondition(findOrderDetail);
+
+        processReturnRequest(findOrderDetail, reqDto);
+    }
+
+    private void validateReturnCondition(OrderDetail findOrderDetail) {
+        LocalDate now = LocalDate.now();
+        if (findOrderDetail.getOrderStatus() == OrderStatus.DELIVERED
+                && !now.isAfter(findOrderDetail.getLastModifiedDate().toLocalDate().plusDays(1))) {
+            return;
+        }
+        throw new CustomApiException("반품이 불가능한 상태입니다.");
+    }
+
+    private void processReturnRequest(OrderDetail findOrderDetail, ReturnOrderReqDto reqDto) {
+        findOrderDetail.changeOrderStatus(OrderStatus.RETURN_IN_PROGRESS);
+        returnRequestRepository.save(new ReturnRequest(findOrderDetail, reqDto.getReason()));
+    }
+
+    private OrderDetail validateOrderDetail(Long userId, Long orderDetailId) {
+        return orderDetailRepository.findByIdAndUserId(orderDetailId, userId)
+                .orElseThrow(() -> new CustomApiException("유효하지 않은 주문입니다."));
+    }
+
+    private void validateCancelCondition(OrderDetail findOrderDetail) {
+        if (findOrderDetail.getOrderStatus() != OrderStatus.PENDING) {
+            throw new CustomApiException("주문 취소가 불가능한 상태입니다.");
+        }
+    }
+
+    private Goods findGoodsOrThrow(OrderDetail findOrderDetail) {
+        return goodsRepository.findById(findOrderDetail.getGoodsId())
+                .orElseThrow(() -> new CustomApiException("존재하지 않는 상품입니다."));
+    }
+
+    private void restoreGoodsStock(Goods goods, OrderDetail findOrderDetail) {
+        goods.increaseStock(findOrderDetail.getQuantity());
+    }
+
+    private void updateOrderStatusToCanceled(OrderDetail findOrderDetail) {
+        findOrderDetail.changeOrderStatus(OrderStatus.CANCELED);
     }
 }

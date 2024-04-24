@@ -40,40 +40,18 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
-        if (!isRequestValid(request)) {
-            chain.doFilter(request, response);
-            return;
-        }
-
         String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            fail(response, "로그인이 필요합니다", HttpStatus.BAD_REQUEST);
-            return;
-        }
-
-        String jwt = authorizationHeader.replace("Bearer ", "");
-
         try {
-            setAuthenticationFromAccessToken(jwt);
+            if (authorizationHeader != null) {
+                String jwt = authorizationHeader.replace("Bearer ", "");
+                setAuthenticationFromAccessToken(jwt);
+            }
             chain.doFilter(request, response);
         } catch (Exception e) {
             fail(response, "유효하지 않은 토큰입니다.", HttpStatus.FORBIDDEN);
             return;
         }
-    }
-
-    private boolean isRequestValid(HttpServletRequest request) {
-        String requestUrl = request.getRequestURL().toString();
-        return isApiAuthRequest(requestUrl) || isAdminRequest(requestUrl);
-    }
-
-    private boolean isApiAuthRequest(String requestUrl) {
-        return requestUrl.contains("/api/auth/");
-    }
-
-    private boolean isAdminRequest(String requestUrl) {
-        return requestUrl.contains("/api/admin/");
     }
 
     private void setAuthenticationFromAccessToken(String jwt) {
