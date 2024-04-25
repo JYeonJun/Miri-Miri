@@ -1,4 +1,4 @@
-package com.miri.userservice.handler.ex;
+package com.miri.coremodule.handler.ex;
 
 import java.util.Map;
 import lombok.Getter;

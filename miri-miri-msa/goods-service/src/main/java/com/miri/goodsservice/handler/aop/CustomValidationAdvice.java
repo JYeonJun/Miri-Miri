@@ -1,6 +1,6 @@
 package com.miri.goodsservice.handler.aop;
 
-import com.miri.goodsservice.handler.ex.CustomValidationException;
+import com.miri.coremodule.handler.ex.CustomValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import org.aspectj.lang.ProceedingJoinPoint;

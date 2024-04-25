@@ -1,5 +1,6 @@
 package com.miri.userservice.service.wishlist;
 
+import com.miri.coremodule.handler.ex.CustomApiException;
 import com.miri.userservice.domain.goods.Goods;
 import com.miri.userservice.domain.goods.GoodsRepository;
 import com.miri.userservice.domain.wishlist.WishList;
@@ -9,7 +10,6 @@ import com.miri.userservice.dto.wishlist.ResponseWishListDto.AddToWishListRespDt
 import com.miri.userservice.dto.wishlist.ResponseWishListDto.GoodsInWishListRespDto;
 import com.miri.userservice.dto.wishlist.ResponseWishListDto.WishListRespDto;
 import com.miri.userservice.dto.wishlist.ResponseWishListDto.WishListUpdateRespDto;
-import com.miri.userservice.handler.ex.CustomApiException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -3,7 +3,7 @@ package com.miri.goodsservice.controller;
 import static com.miri.goodsservice.dto.order.RequestOrderDto.CreateOrderReqDto;
 import static com.miri.goodsservice.dto.order.RequestOrderDto.ReturnOrderReqDto;
 
-import com.miri.goodsservice.dto.common.ResponseDto;
+import com.miri.coremodule.dto.ResponseDto;
 import com.miri.goodsservice.dto.order.ResponseOrderDto.CreateOrderRespDto;
 import com.miri.goodsservice.dto.order.ResponseOrderDto.OrderGoodsListRespDto;
 import com.miri.goodsservice.security.PrincipalDetails;

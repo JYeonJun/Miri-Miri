@@ -1,5 +1,6 @@
 package com.miri.orderservice.service.user;
 
+import com.miri.coremodule.handler.ex.CustomApiException;
 import com.miri.orderservice.domain.email.EmailVerificationCode;
 import com.miri.orderservice.domain.email.EmailVerificationCodeRepository;
 import com.miri.orderservice.domain.user.User;
@@ -13,7 +14,6 @@ import com.miri.orderservice.dto.user.RequestUserDto.UpdateUserProfileReqDto;
 import com.miri.orderservice.dto.user.ResponseUserDto.GetUserRespDto;
 import com.miri.orderservice.dto.user.ResponseUserDto.UpdateUserProfileRespDto;
 import com.miri.orderservice.dto.wishlist.ResponseWishListDto.WishListRespDto;
-import com.miri.orderservice.handler.ex.CustomApiException;
 import com.miri.orderservice.service.goods.GoodsService;
 import com.miri.orderservice.service.order.OrderService;
 import com.miri.orderservice.service.wishlist.WishListService;

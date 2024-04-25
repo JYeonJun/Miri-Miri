@@ -3,7 +3,7 @@ package com.miri.userservice.controller;
 import static com.miri.userservice.dto.order.RequestOrderDto.CreateOrderReqDto;
 import static com.miri.userservice.dto.order.RequestOrderDto.ReturnOrderReqDto;
 
-import com.miri.userservice.dto.common.ResponseDto;
+import com.miri.coremodule.dto.ResponseDto;
 import com.miri.userservice.dto.order.ResponseOrderDto.CreateOrderRespDto;
 import com.miri.userservice.dto.order.ResponseOrderDto.OrderGoodsListRespDto;
 import com.miri.userservice.security.PrincipalDetails;

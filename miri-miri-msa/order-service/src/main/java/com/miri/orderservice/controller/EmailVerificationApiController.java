@@ -1,8 +1,8 @@
 package com.miri.orderservice.controller;
 
 
+import com.miri.coremodule.dto.ResponseDto;
 import com.miri.orderservice.dto.user.RequestUserDto.VerifyEmailDto;
-import com.miri.orderservice.dto.common.ResponseDto;
 import com.miri.orderservice.service.email.EmailVerificationService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;

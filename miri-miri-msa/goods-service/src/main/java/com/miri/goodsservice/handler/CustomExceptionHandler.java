@@ -1,9 +1,9 @@
 package com.miri.goodsservice.handler;
 
-import com.miri.goodsservice.handler.ex.CustomApiException;
-import com.miri.goodsservice.handler.ex.CustomValidationException;
-import com.miri.goodsservice.handler.ex.EmailAlreadyExistsException;
-import com.miri.goodsservice.dto.common.ResponseDto;
+import com.miri.coremodule.dto.ResponseDto;
+import com.miri.coremodule.handler.ex.CustomApiException;
+import com.miri.coremodule.handler.ex.CustomValidationException;
+import com.miri.coremodule.handler.ex.EmailAlreadyExistsException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

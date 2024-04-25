@@ -1,6 +1,6 @@
 package com.miri.goodsservice.controller;
 
-import com.miri.goodsservice.dto.common.ResponseDto;
+import com.miri.coremodule.dto.ResponseDto;
 import com.miri.goodsservice.dto.goods.RequestGoodsDto.GoodsRegistrationReqDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsDetailRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsListRespDto;

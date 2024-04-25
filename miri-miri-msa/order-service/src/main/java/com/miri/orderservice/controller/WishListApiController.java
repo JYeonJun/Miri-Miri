@@ -2,7 +2,7 @@ package com.miri.orderservice.controller;
 
 import static com.miri.orderservice.dto.wishlist.RequestWishListDto.WishListUpdateReqDto;
 
-import com.miri.orderservice.dto.common.ResponseDto;
+import com.miri.coremodule.dto.ResponseDto;
 import com.miri.orderservice.dto.wishlist.RequestWishListDto.AddToCartReqDto;
 import com.miri.orderservice.dto.wishlist.ResponseWishListDto.AddToWishListRespDto;
 import com.miri.orderservice.dto.wishlist.ResponseWishListDto.WishListRespDto;

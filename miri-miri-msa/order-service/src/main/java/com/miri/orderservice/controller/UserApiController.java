@@ -4,7 +4,7 @@ import static com.miri.orderservice.dto.user.RequestUserDto.*;
 import static com.miri.orderservice.dto.user.RequestUserDto.SignUpReqDto;
 import static com.miri.orderservice.dto.user.RequestUserDto.UpdateUserProfileReqDto;
 
-import com.miri.orderservice.dto.common.ResponseDto;
+import com.miri.coremodule.dto.ResponseDto;
 import com.miri.orderservice.dto.user.ResponseUserDto.GetUserRespDto;
 import com.miri.orderservice.dto.user.ResponseUserDto.UpdateUserProfileRespDto;
 import com.miri.orderservice.security.PrincipalDetails;

@@ -1,4 +1,4 @@
-package com.miri.userservice.handler.ex;
+package com.miri.coremodule.handler.ex;
 
 public class EmailAlreadyExistsException extends RuntimeException {
     public EmailAlreadyExistsException() {

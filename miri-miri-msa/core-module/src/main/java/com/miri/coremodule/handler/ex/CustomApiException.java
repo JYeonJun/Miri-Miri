@@ -1,4 +1,4 @@
-package com.miri.goodsservice.handler.ex;
+package com.miri.coremodule.handler.ex;
 
 public class CustomApiException extends RuntimeException {
 

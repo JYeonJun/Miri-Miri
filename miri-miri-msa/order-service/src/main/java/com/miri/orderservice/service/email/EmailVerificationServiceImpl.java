@@ -1,10 +1,10 @@
 package com.miri.orderservice.service.email;
 
+import com.miri.coremodule.handler.ex.CustomApiException;
+import com.miri.coremodule.handler.ex.EmailAlreadyExistsException;
 import com.miri.orderservice.domain.email.EmailVerificationCode;
 import com.miri.orderservice.domain.email.EmailVerificationCodeRepository;
 import com.miri.orderservice.domain.user.UserRepository;
-import com.miri.orderservice.handler.ex.CustomApiException;
-import com.miri.orderservice.handler.ex.EmailAlreadyExistsException;
 import com.miri.orderservice.util.AESUtils;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;

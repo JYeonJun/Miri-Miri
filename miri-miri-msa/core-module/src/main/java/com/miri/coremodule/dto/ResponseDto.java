@@ -1,4 +1,4 @@
-package com.miri.orderservice.dto.common;
+package com.miri.coremodule.dto;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

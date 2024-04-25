@@ -1,7 +1,7 @@
 package com.miri.goodsservice.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.miri.goodsservice.dto.common.ResponseDto;
+import com.miri.coremodule.dto.ResponseDto;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

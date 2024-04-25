@@ -4,7 +4,7 @@ import static com.miri.userservice.dto.user.RequestUserDto.*;
 import static com.miri.userservice.dto.user.RequestUserDto.SignUpReqDto;
 import static com.miri.userservice.dto.user.RequestUserDto.UpdateUserProfileReqDto;
 
-import com.miri.userservice.dto.common.ResponseDto;
+import com.miri.coremodule.dto.ResponseDto;
 import com.miri.userservice.dto.user.ResponseUserDto.GetUserRespDto;
 import com.miri.userservice.dto.user.ResponseUserDto.UpdateUserProfileRespDto;
 import com.miri.userservice.security.PrincipalDetails;
