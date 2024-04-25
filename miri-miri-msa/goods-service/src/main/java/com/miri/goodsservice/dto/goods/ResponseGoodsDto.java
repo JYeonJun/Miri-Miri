@@ -3,7 +3,6 @@ package com.miri.goodsservice.dto.goods;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.miri.goodsservice.domain.goods.Goods;
 import com.miri.goodsservice.domain.goods.GoodsCategory;
-import com.miri.goodsservice.domain.user.User;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -62,10 +61,21 @@ public class ResponseGoodsDto {
         private int stockQuantity;
         private String category;
 
-        public GoodsDetailRespDto(Goods goods, User user) {
+//        public GoodsDetailRespDto(Goods goods, User user) {
+//            this.goodsId = goods.getId();
+//            this.sellerId = user.getId();
+//            this.sellerName = user.getUserName();
+//            this.goodsName = goods.getGoodsName();
+//            this.goodsDescription = goods.getGoodsDescription();
+//            this.goodsPrice = goods.getGoodsPrice();
+//            this.stockQuantity = goods.getStockQuantity();
+//            this.category = goods.getCategory().getValue();
+//        }
+
+        public GoodsDetailRespDto(Goods goods) {
             this.goodsId = goods.getId();
-            this.sellerId = user.getId();
-            this.sellerName = user.getUserName();
+//            this.sellerId = user.getId();
+//            this.sellerName = user.getUserName();
             this.goodsName = goods.getGoodsName();
             this.goodsDescription = goods.getGoodsDescription();
             this.goodsPrice = goods.getGoodsPrice();

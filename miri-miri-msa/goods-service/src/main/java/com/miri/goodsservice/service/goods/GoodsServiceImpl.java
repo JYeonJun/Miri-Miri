@@ -3,8 +3,6 @@ package com.miri.goodsservice.service.goods;
 import com.miri.coremodule.handler.ex.CustomApiException;
 import com.miri.goodsservice.domain.goods.Goods;
 import com.miri.goodsservice.domain.goods.GoodsRepository;
-import com.miri.goodsservice.domain.user.User;
-import com.miri.goodsservice.domain.user.UserRepository;
 import com.miri.goodsservice.dto.goods.RequestGoodsDto.GoodsRegistrationReqDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsDetailRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsListRespDto;
@@ -20,11 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class GoodsServiceImpl implements GoodsService {
 
-    private final UserRepository userRepository;
     private final GoodsRepository goodsRepository;
 
-    public GoodsServiceImpl(UserRepository userRepository, GoodsRepository goodsRepository) {
-        this.userRepository = userRepository;
+    public GoodsServiceImpl(GoodsRepository goodsRepository) {
         this.goodsRepository = goodsRepository;
     }
 
@@ -43,18 +39,14 @@ public class GoodsServiceImpl implements GoodsService {
     @Override
     public GoodsDetailRespDto findGoods(Long goodsId) {
         Goods findGoods = findGoodsByIdOrThrow(goodsId);
-        User findUser = findUserByIdOrThrow(findGoods.getSellerId());
-        return new GoodsDetailRespDto(findGoods, findUser);
+//        User findUser = findUserByIdOrThrow(findGoods.getSellerId());
+//        return new GoodsDetailRespDto(findGoods, findUser);
+        return new GoodsDetailRespDto(findGoods);
     }
 
     @Override
     public RegisterGoodsListRespDto findRegisterGoodsList(Long userId, Pageable pageable) {
         return new RegisterGoodsListRespDto(goodsRepository.findPagingRegisterGoods(userId, pageable));
-    }
-
-    private User findUserByIdOrThrow(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new CustomApiException("해당 사용자가 존재하지 않습니다."));
     }
 
     private Goods findGoodsByIdOrThrow(Long goodsId) {

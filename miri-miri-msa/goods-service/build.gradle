@@ -17,18 +17,13 @@ repositories {
 
 dependencies {
     implementation project(':core-module')
-    implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     testImplementation 'org.springframework.security:spring-security-test'
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
     /* jjwt */
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
-
-    /* converter 사용*/
-    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
 
     /* Querydsl 추가 */
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
