@@ -1,6 +1,6 @@
 package com.miri.orderservice.domain.order;
 
-import com.miri.orderservice.domain.common.BaseTimeEntity;
+import com.miri.coremodule.domain.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

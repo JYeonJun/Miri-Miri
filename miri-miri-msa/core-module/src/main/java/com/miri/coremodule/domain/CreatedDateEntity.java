@@ -1,4 +1,4 @@
-package com.miri.orderservice.domain.common;
+package com.miri.coremodule.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

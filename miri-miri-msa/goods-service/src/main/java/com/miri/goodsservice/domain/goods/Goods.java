@@ -1,7 +1,7 @@
 package com.miri.goodsservice.domain.goods;
 
+import com.miri.coremodule.domain.BaseTimeEntity;
 import com.miri.coremodule.handler.ex.CustomApiException;
-import com.miri.goodsservice.domain.common.BaseTimeEntity;
 import com.miri.goodsservice.dto.goods.RequestGoodsDto.GoodsRegistrationReqDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

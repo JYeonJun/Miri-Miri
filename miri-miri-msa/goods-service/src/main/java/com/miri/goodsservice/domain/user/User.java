@@ -1,6 +1,6 @@
 package com.miri.goodsservice.domain.user;
 
-import com.miri.goodsservice.domain.common.BaseTimeEntity;
+import com.miri.coremodule.domain.BaseTimeEntity;
 import com.miri.goodsservice.util.StringEncryptUniqueConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;

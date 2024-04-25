@@ -1,4 +1,4 @@
-package com.miri.userservice.domain.common;
+package com.miri.coremodule.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;

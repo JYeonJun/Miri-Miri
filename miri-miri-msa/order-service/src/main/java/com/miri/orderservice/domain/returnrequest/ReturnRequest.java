@@ -1,6 +1,6 @@
 package com.miri.orderservice.domain.returnrequest;
 
-import com.miri.orderservice.domain.common.CreatedDateEntity;
+import com.miri.coremodule.domain.CreatedDateEntity;
 import com.miri.orderservice.domain.order.OrderDetail;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

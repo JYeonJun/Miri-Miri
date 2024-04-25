@@ -1,6 +1,6 @@
 package com.miri.userservice.domain.wishlist;
 
-import com.miri.userservice.domain.common.BaseTimeEntity;
+import com.miri.coremodule.domain.BaseTimeEntity;
 import com.miri.userservice.domain.goods.Goods;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
