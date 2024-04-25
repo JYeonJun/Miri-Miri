@@ -13,9 +13,9 @@ spring:
     hibernate:
       ddl-auto: update
   datasource:
-#    url: jdbc:mariadb://user_mariadb:3306/miri_user
+#    url: jdbc:mariadb://goods_mariadb:3306/miri_user
 #    driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://localhost:3308/miri_user
+    url: jdbc:mariadb://localhost:3310/miri_user
     driver-class-name: org.mariadb.jdbc.Driver
     username: root
     password: mariadb1234
