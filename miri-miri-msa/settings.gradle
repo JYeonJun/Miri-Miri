@@ -1,0 +1,6 @@
+rootProject.name = 'miri-miri-msa'
+
+include 'core-module'
+include 'user-service'
+include 'goods-service'
+include 'order-service'
