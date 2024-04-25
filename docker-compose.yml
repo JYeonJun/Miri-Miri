@@ -1,0 +1,84 @@
+version: '3.1'
+
+services:
+  user-mariadb:
+    container_name: user_mariadb
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: mariadb1234
+      MYSQL_DATABASE: miri_user
+      TZ: Asia/Seoul
+    ports:
+      - 3308:3306
+    volumes:
+      - miri_user_data:/var/lib/mysql
+    networks:
+      - miri-network
+
+  order-mariadb:
+    container_name: order_mariadb
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: mariadb1234
+      MYSQL_DATABASE: miri_user
+      TZ: Asia/Seoul
+    ports:
+      - 3309:3306
+    volumes:
+      - miri_order_data:/var/lib/mysql
+    networks:
+      - miri-network
+
+  goods-mariadb:
+    container_name: goods_mariadb
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: mariadb1234
+      MYSQL_DATABASE: miri_user
+      TZ: Asia/Seoul
+    ports:
+      - 3310:3306
+    volumes:
+      - miri_goods_data:/var/lib/mysql
+    networks:
+      - miri-network
+
+  user-redis:
+    container_name: user_redis
+    image: redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_user_data:/data
+    networks:
+      - miri-network
+
+  # user-service:
+  #   build:
+  #     context: ./user-service
+  #   container_name: miri_user_service
+  #   ports:
+  #     - 8080:8080
+  #   networks:
+  #     - miri-network
+  #   depends_on:
+  #     - user-mariadb
+  #     - user-redis
+
+volumes:
+  miri_user_data:
+  miri_order_data:
+  miri_goods_data:
+  redis_user_data:
+
+networks:
+  miri-network:
+    # driver: bridge
+    # ipam:
+    #   driver: default
+    #   config:
+    #     - subnet: 172.31.0.0/16
+    #       gateway: 172.31.0.1
