@@ -6,7 +6,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @EnableJpaAuditing
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.miri.coremodule", "com.miri.goodsservice"})
 @EnableDiscoveryClient
 public class GoodsServiceApplication {
 
