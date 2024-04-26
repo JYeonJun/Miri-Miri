@@ -1,6 +1,5 @@
 package com.miri.orderservice.domain.order;
 
-import static com.miri.orderservice.domain.goods.QGoods.goods;
 import static com.miri.orderservice.domain.order.QOrder.order;
 import static com.miri.orderservice.domain.order.QOrderDetail.orderDetail;
 
@@ -8,7 +7,6 @@ import com.miri.orderservice.dto.order.ResponseOrderDto.OrderGoodsDto;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -33,12 +31,12 @@ public class OrderRepositoryImpl implements OrderRepositoryCustom {
         JPAQuery<OrderGoodsDto> query = queryFactory
                 .select(Projections.constructor(OrderGoodsDto.class,
                         order,
-                        orderDetail,
-                        goods
+                        orderDetail
+//                        goods
                 ))
                 .from(orderDetail)
                 .join(orderDetail.order, order)
-                .leftJoin(goods).on(orderDetail.goodsId.eq(goods.id))
+//                .leftJoin(goods).on(orderDetail.goodsId.eq(goods.id))
                 .where(order.userId.eq(userId))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize());

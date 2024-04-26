@@ -1,15 +1,11 @@
 package com.miri.orderservice.service.order;
 
-import com.miri.orderservice.domain.goods.Goods;
-import com.miri.orderservice.domain.goods.GoodsRepository;
 import com.miri.orderservice.domain.order.OrderDetail;
 import com.miri.orderservice.domain.order.OrderDetailRepository;
 import com.miri.orderservice.domain.order.OrderStatus;
-import com.miri.orderservice.domain.shipping.ShippingRepository;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -20,14 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class OrderStatusScheduler {
 
     private final OrderDetailRepository orderDetailRepository;
-    private final ShippingRepository shippingRepository;
-    private final GoodsRepository goodsRepository;
 
-    public OrderStatusScheduler(OrderDetailRepository orderDetailRepository, ShippingRepository shippingRepository,
-                                GoodsRepository goodsRepository) {
+    public OrderStatusScheduler(OrderDetailRepository orderDetailRepository) {
         this.orderDetailRepository = orderDetailRepository;
-        this.shippingRepository = shippingRepository;
-        this.goodsRepository = goodsRepository;
     }
 
     @Scheduled(cron = "0 0 6 * * *") // 매일 오전 6시에 실행
@@ -74,8 +65,8 @@ public class OrderStatusScheduler {
     }
 
     private void updateToReturnCompleted(OrderDetail orderDetail) {
-        Optional<Goods> goodsOpt = goodsRepository.findById(orderDetail.getGoodsId());
-        goodsOpt.ifPresent(goods -> goods.increaseStock(orderDetail.getQuantity()));
+//        Optional<Goods> goodsOpt = goodsRepository.findById(orderDetail.getGoodsId());
+//        goodsOpt.ifPresent(goods -> goods.increaseStock(orderDetail.getQuantity()));
         // ex) 1~ 10, 10개의 반품 1번은 양말 한개, 2번은 티셔츠 두개, 3번은 양말 세개
         // -> 실제로는 양말이랑 티셔츠에 대해 쿼리가 2번만 발생하면 된다. (첫번째 개선 방법)
         // orderDetail을 여러개 받으면 상품ID도 알 수 있으니 In절로 처리 가능 -> Set 같은 자료구조를 활용해서 상품 처리 가능

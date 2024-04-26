@@ -1,8 +1,6 @@
 package com.miri.orderservice.domain.order;
 
 import com.miri.coremodule.domain.BaseTimeEntity;
-import com.miri.orderservice.domain.goods.Goods;
-import com.miri.orderservice.domain.wishlist.WishList;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -48,11 +46,19 @@ public class OrderDetail extends BaseTimeEntity {
 
     private int unitPrice; // 주문 상품 가격
 
-    public OrderDetail(Order order, WishList wishList, Goods goods) {
+//    public OrderDetail(Order order, WishList wishList, Goods goods) {
+//        this.order = order;
+//        this.goodsId = goods.getId();
+//        this.quantity = wishList.getQuantity();
+//        this.unitPrice = goods.getGoodsPrice();
+//        this.orderStatus = OrderStatus.PENDING;
+//    }
+
+    public OrderDetail(Order order) {
         this.order = order;
-        this.goodsId = goods.getId();
-        this.quantity = wishList.getQuantity();
-        this.unitPrice = goods.getGoodsPrice();
+//        this.goodsId = goods.getId();
+//        this.quantity = wishList.getQuantity();
+//        this.unitPrice = goods.getGoodsPrice();
         this.orderStatus = OrderStatus.PENDING;
     }
 

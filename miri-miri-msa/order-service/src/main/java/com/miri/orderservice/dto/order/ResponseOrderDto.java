@@ -1,10 +1,8 @@
 package com.miri.orderservice.dto.order;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.miri.orderservice.domain.goods.Goods;
 import com.miri.orderservice.domain.order.Order;
 import com.miri.orderservice.domain.order.OrderDetail;
-import com.miri.orderservice.domain.wishlist.WishList;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -39,18 +37,36 @@ public class ResponseOrderDto {
         private int subTotalPrice;
         private String orderStatus;
 
-        public OrderGoodsRespDto(WishList wishList, OrderDetail orderDetail, Goods goods, int subTotalPrice) {
-            this.goodsId = goods.getId();
-            this.goodsName = goods.getGoodsName();
-            this.quantity = wishList.getQuantity();
-            this.unitPrice = goods.getGoodsPrice();
-            this.subTotalPrice = subTotalPrice;
+//        public OrderGoodsRespDto(WishList wishList, OrderDetail orderDetail, Goods goods, int subTotalPrice) {
+//            this.goodsId = goods.getId();
+//            this.goodsName = goods.getGoodsName();
+//            this.quantity = wishList.getQuantity();
+//            this.unitPrice = goods.getGoodsPrice();
+//            this.subTotalPrice = subTotalPrice;
+//            this.orderStatus = orderDetail.getOrderStatus().getValue();
+//        }
+
+        public OrderGoodsRespDto(OrderDetail orderDetail, Long goodsId) {
+            this.goodsId = goodsId;
+//            this.goodsName = goods.getGoodsName();
+//            this.quantity = wishList.getQuantity();
+//            this.unitPrice = goods.getGoodsPrice();
+//            this.subTotalPrice = subTotalPrice;
             this.orderStatus = orderDetail.getOrderStatus().getValue();
         }
 
-        public OrderGoodsRespDto(OrderDetail orderDetail, Goods goods) {
-            this.goodsId = goods.getId();
-            this.goodsName = goods.getGoodsName();
+//        public OrderGoodsRespDto(OrderDetail orderDetail, Goods goods) {
+//            this.goodsId = goods.getId();
+//            this.goodsName = goods.getGoodsName();
+//            this.quantity = orderDetail.getQuantity();
+//            this.unitPrice = orderDetail.getUnitPrice();
+//            this.subTotalPrice = this.unitPrice * this.quantity;
+//            this.orderStatus = orderDetail.getOrderStatus().getValue();
+//        }
+
+        public OrderGoodsRespDto(OrderDetail orderDetail) {
+            this.goodsId = orderDetail.getGoodsId();
+//            this.goodsName = goods.getGoodsName();
             this.quantity = orderDetail.getQuantity();
             this.unitPrice = orderDetail.getUnitPrice();
             this.subTotalPrice = this.unitPrice * this.quantity;
@@ -77,15 +93,27 @@ public class ResponseOrderDto {
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
         private LocalDateTime orderDate; // 주문 날짜
 
-        public OrderGoodsDto(Order order, OrderDetail orderDetail, Goods goods) {
+//        public OrderGoodsDto(Order order, OrderDetail orderDetail, Goods goods) {
+//            this.orderId = order.getId();
+//            this.orderDetailId = orderDetail.getId();
+//            this.goodsId = goods.getId();
+//            this.orderStatus = orderDetail.getOrderStatus().getValue();
+//            this.orderQuantity = orderDetail.getQuantity();
+//            this.unitPrice = goods.getGoodsPrice();
+//            this.subTotalPrice = orderDetail.getQuantity() * goods.getGoodsPrice();
+//            this.category = goods.getCategory().getValue();
+//            this.orderDate = orderDetail.getCreatedDate();
+//        }
+
+        public OrderGoodsDto(Order order, OrderDetail orderDetail) {
             this.orderId = order.getId();
             this.orderDetailId = orderDetail.getId();
-            this.goodsId = goods.getId();
+            this.goodsId = orderDetail.getGoodsId();
             this.orderStatus = orderDetail.getOrderStatus().getValue();
             this.orderQuantity = orderDetail.getQuantity();
-            this.unitPrice = goods.getGoodsPrice();
-            this.subTotalPrice = orderDetail.getQuantity() * goods.getGoodsPrice();
-            this.category = goods.getCategory().getValue();
+//            this.unitPrice = goods.getGoodsPrice();
+//            this.subTotalPrice = orderDetail.getQuantity() * goods.getGoodsPrice();
+//            this.category = goods.getCategory().getValue();
             this.orderDate = orderDetail.getCreatedDate();
         }
     }
