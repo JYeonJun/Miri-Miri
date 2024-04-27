@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth")
 public class WishListApiController {
-
+    private static final String USER_ID_HEADER = "X-User-Id";
     private final WishListService wishListService;
 
     public WishListApiController(WishListService wishListService) {
@@ -38,7 +38,7 @@ public class WishListApiController {
     @PostMapping("/wishlist")
     public ResponseEntity<?> addToWishList(@RequestBody @Valid AddToCartReqDto addToCartReqDto,
                                            BindingResult bindingResult,
-                                           @RequestHeader("X-User-Id") String userId) {
+                                           @RequestHeader(USER_ID_HEADER) String userId) {
 
         AddToWishListRespDto result
                 = wishListService.addToWishList(Long.valueOf(userId), addToCartReqDto);
@@ -47,7 +47,7 @@ public class WishListApiController {
     }
 
     @GetMapping("/wishlist")
-    public ResponseEntity<?> getWishListGoods(@RequestHeader("X-User-Id") String userId,
+    public ResponseEntity<?> getWishListGoods(@RequestHeader(USER_ID_HEADER) String userId,
                                               @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
 
         WishListRespDto result
@@ -59,7 +59,7 @@ public class WishListApiController {
     public ResponseEntity<?> updateGoodsQuantityInWishList(@PathVariable("wishListId") Long wishListId,
                                                            @RequestBody @Valid WishListUpdateReqDto reqDto,
                                                            BindingResult bindingResult,
-                                                           @RequestHeader("X-User-Id") String userId) {
+                                                           @RequestHeader(USER_ID_HEADER) String userId) {
 
         WishListUpdateRespDto result
                 = wishListService.updateGoodsQuantityInWishList(
@@ -69,7 +69,7 @@ public class WishListApiController {
 
     @DeleteMapping("/wishlist/{wishListId}")
     public ResponseEntity<?> deleteGoodsInWishList(@PathVariable("wishListId") Long wishListId,
-                                                   @RequestHeader("X-User-Id") String userId) {
+                                                   @RequestHeader(USER_ID_HEADER) String userId) {
         wishListService.deleteGoodsInWishList(Long.valueOf(userId), wishListId);
         return new ResponseEntity<>(new ResponseDto<>(1, "장바구니 상품 삭제에 성공하였습니다.", null), HttpStatus.OK);
     }

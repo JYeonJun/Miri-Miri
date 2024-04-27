@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class GoodsApiController {
 
+    private static final String USER_ID_HEADER = "X-User-Id";
     private final GoodsService goodsService;
 
     public GoodsApiController(GoodsService goodsService) {
@@ -37,7 +38,7 @@ public class GoodsApiController {
     @PostMapping("/auth/goods")
     public ResponseEntity<?> registerGoods(@RequestBody @Valid GoodsRegistrationReqDto goodsRegistrationReqDto,
                                            BindingResult bindingResult,
-                                           @RequestHeader("X-User-Id") String userId) {
+                                           @RequestHeader(USER_ID_HEADER) String userId) {
         GoodsRegistrationRespDto result
                 = goodsService.createGoods(Long.valueOf(userId), goodsRegistrationReqDto);
         return new ResponseEntity<>(new ResponseDto<>(1, "상품 등록에 성공했습니다.", result), HttpStatus.CREATED);
@@ -57,7 +58,7 @@ public class GoodsApiController {
     }
 
     @GetMapping("/auth/my/goods")
-    public ResponseEntity<?> getRegisterGoodsList(@RequestHeader("X-User-Id") String userId,
+    public ResponseEntity<?> getRegisterGoodsList(@RequestHeader(USER_ID_HEADER) String userId,
                                                   @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
 
         RegisterGoodsListRespDto result
