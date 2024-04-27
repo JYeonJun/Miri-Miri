@@ -1,9 +1,7 @@
 package com.miri.userservice.config;
 
-import com.miri.userservice.domain.user.UserRole;
 import com.miri.userservice.security.PrincipalDetailsService;
 import com.miri.userservice.security.filter.JwtAuthenticationFilter;
-import com.miri.userservice.security.filter.JwtAuthorizationFilter;
 import com.miri.userservice.util.CustomResponseUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +14,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 
 @Configuration
 @EnableWebSecurity
@@ -43,9 +41,16 @@ public class SecurityConfig {
 
         http.csrf((csrf) -> csrf.disable());
         http.authorizeHttpRequests((authz) -> authz
-                        .requestMatchers(new AntPathRequestMatcher("/api/auth/**")).authenticated()
-                        .requestMatchers(new AntPathRequestMatcher("/api/admin/**")).hasRole("" + UserRole.ADMIN)
-                        .requestMatchers(new AntPathRequestMatcher("/**")).permitAll())
+//                        .requestMatchers(new AntPathRequestMatcher("/api/auth/**")).authenticated()
+//                        .requestMatchers(new AntPathRequestMatcher("/api/admin/**")).hasRole("" + UserRole.ADMIN)
+//                        .requestMatchers(new AntPathRequestMatcher("/**")).permitAll())
+                                .requestMatchers("/actuator/**").permitAll()
+                                .requestMatchers("/**").access(
+                                        new WebExpressionAuthorizationManager(
+                                                // 접근 제어를 위한 IP 기반의 조건
+                                                "hasIpAddress('127.0.0.1') or hasIpAddress('::1') or " +  "hasIpAddress('" + env.getProperty("api.gateway.ip") + "')"))
+                                .anyRequest().authenticated()
+                )
                 .authenticationManager(authenticationManager)
                 .exceptionHandling((exceptions) -> exceptions
                         .authenticationEntryPoint((request, response, authException) ->
@@ -57,7 +62,6 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http.addFilter(new JwtAuthenticationFilter(authenticationManager, env));
-        http.addFilter(new JwtAuthorizationFilter(authenticationManager, env));
         http.headers((headers) -> headers.frameOptions((frameOptions) -> frameOptions.disable()));
         return http.build();
     }
