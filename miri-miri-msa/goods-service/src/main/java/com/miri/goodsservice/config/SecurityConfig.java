@@ -2,6 +2,7 @@ package com.miri.goodsservice.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,6 +14,12 @@ import org.springframework.security.web.access.expression.WebExpressionAuthoriza
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private final Environment env;
+
+    public SecurityConfig(Environment env) {
+        this.env = env;
+    }
 
     @Bean
     protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
@@ -30,7 +37,7 @@ public class SecurityConfig {
                                 .requestMatchers("/**").access(
                                         new WebExpressionAuthorizationManager(
                                                 // 접근 제어를 위한 IP 기반의 조건
-                                                "hasIpAddress('127.0.0.1') or hasIpAddress('::1')"))
+                                                "hasIpAddress('127.0.0.1') or hasIpAddress('::1') or " +  "hasIpAddress('" + env.getProperty("api.gateway.ip") + "')"))
                                 .anyRequest().authenticated()
                 )
                 .authenticationManager(authenticationManager)
