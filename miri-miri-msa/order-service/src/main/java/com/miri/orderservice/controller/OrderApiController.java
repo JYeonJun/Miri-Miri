@@ -28,6 +28,8 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class OrderApiController {
 
+    private static final String USER_ID_HEADER = "X-User-Id";
+
     private final OrderService orderService;
 
     public OrderApiController(OrderService orderService) {
@@ -38,7 +40,7 @@ public class OrderApiController {
     @PostMapping("/orders")
     public ResponseEntity<?> createOrder(@RequestBody @Valid CreateOrderReqDto reqDto,
                                          BindingResult bindingResult,
-                                         @RequestHeader("X-User-Id") Long userId) {
+                                         @RequestHeader(USER_ID_HEADER) Long userId) {
         CreateOrderRespDto result = orderService.createOrder(userId, reqDto);
         return new ResponseEntity<>(new ResponseDto<>(1, "주문이 완료되었습니다.", result), HttpStatus.CREATED);
     }
@@ -53,7 +55,7 @@ public class OrderApiController {
 
     @PostMapping("/orders/{orderDetailId}/cancel")
     public ResponseEntity<?> cancelOrder(@PathVariable("orderDetailId") Long orderDetailId,
-                                         @RequestHeader("X-User-Id") Long userId) {
+                                         @RequestHeader(USER_ID_HEADER) Long userId) {
         // 주문 취소 기능 구현
         orderService.cancelOrder(userId, orderDetailId);
         // 반품 요청 기능 구현
@@ -64,7 +66,7 @@ public class OrderApiController {
     public ResponseEntity<?> returnOrder(@PathVariable("orderDetailId") Long orderDetailId,
                                          @RequestBody @Valid ReturnOrderReqDto reqDto,
                                          BindingResult bindingResult,
-                                         @RequestHeader("X-User-Id") Long userId) {
+                                         @RequestHeader(USER_ID_HEADER) Long userId) {
         // 주문 취소 기능 구현
         orderService.returnOrder(userId, orderDetailId, reqDto);
         return new ResponseEntity<>(new ResponseDto<>(1, "반품 완료 되었습니다.", null), HttpStatus.OK);
