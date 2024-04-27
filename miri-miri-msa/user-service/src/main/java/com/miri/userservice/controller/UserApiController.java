@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,6 +27,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 @Slf4j
 public class UserApiController {
+
+    private static final String USER_ID_HEADER = "X-User-Id";
 
     private final UserService userService;
 
@@ -50,24 +53,24 @@ public class UserApiController {
     @PatchMapping("/auth/users")
     public ResponseEntity<?> updateUser(@RequestBody @Valid UpdateUserProfileReqDto updateUserProfileReqDto,
                                         BindingResult bindingResult,
-                                        @AuthenticationPrincipal PrincipalDetails principalDetails) {
+                                        @RequestHeader(USER_ID_HEADER) Long userId) {
         UpdateUserProfileRespDto result
-                = userService.updateUserProfile(principalDetails.getUser().getId(), updateUserProfileReqDto);
+                = userService.updateUserProfile(userId, updateUserProfileReqDto);
         return new ResponseEntity<>(new ResponseDto<>(1, "사용자 정보 변경이 완료되었습니다.", result), HttpStatus.OK);
     }
 
     @PatchMapping("/auth/users/change-password")
     public ResponseEntity<?> updatePassword(@RequestBody @Valid UpdateUserPasswordReqDto updateUserPasswordReqDto,
                                             BindingResult bindingResult,
-                                            @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        userService.updateUserPassword(principalDetails.getUser().getId(), updateUserPasswordReqDto);
+                                            @RequestHeader(USER_ID_HEADER) Long userId) {
+        userService.updateUserPassword(userId, updateUserPasswordReqDto);
         return new ResponseEntity<>(new ResponseDto<>(1, "비밀번호 변경이 완료되었습니다.", null), HttpStatus.OK);
     }
 
     @GetMapping("/auth/users")
-    public ResponseEntity<?> getUserInfo(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+    public ResponseEntity<?> getUserInfo(@RequestHeader(USER_ID_HEADER) Long userId) {
         GetUserRespDto result
-                = userService.getUserInfo(principalDetails.getUser().getId());
+                = userService.getUserInfo(userId);
         return new ResponseEntity<>(new ResponseDto<>(1, "사용자 정보가 조회되었습니다.", result), HttpStatus.OK);
     }
 }
