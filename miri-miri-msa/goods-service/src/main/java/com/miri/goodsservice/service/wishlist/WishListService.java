@@ -1,9 +1,11 @@
 package com.miri.goodsservice.service.wishlist;
 
+import com.miri.coremodule.dto.wishlist.FeignWishListRespDto.WishListOrderedRespDto;
 import com.miri.goodsservice.dto.wishlist.RequestWishListDto.AddToCartReqDto;
 import com.miri.goodsservice.dto.wishlist.ResponseWishListDto.AddToWishListRespDto;
 import com.miri.goodsservice.dto.wishlist.ResponseWishListDto.WishListRespDto;
 import com.miri.goodsservice.dto.wishlist.ResponseWishListDto.WishListUpdateRespDto;
+import java.util.List;
 import org.springframework.data.domain.Pageable;
 
 public interface WishListService {
@@ -18,4 +20,8 @@ public interface WishListService {
     WishListUpdateRespDto updateGoodsQuantityInWishList(Long userId, Long wishListId, int goodsQuantity);
 
     void deleteGoodsInWishList(Long userId, Long wishListId);
+
+    List<WishListOrderedRespDto> getOrderedWishLists(Long userId, List<Long> wishListIds);
+
+    void deleteOrderedWishLists(List<Long> wishListIds);
 }

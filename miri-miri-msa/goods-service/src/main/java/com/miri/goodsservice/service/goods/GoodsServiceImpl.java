@@ -1,5 +1,7 @@
 package com.miri.goodsservice.service.goods;
 
+import com.miri.coremodule.dto.goods.FeignGoodsReqDto.GoodsStockDecreaseReqDto;
+import com.miri.coremodule.dto.goods.FeignGoodsRespDto.GoodsStockDecreaseRespDto;
 import com.miri.coremodule.handler.ex.CustomApiException;
 import com.miri.goodsservice.client.UserServiceClient;
 import com.miri.goodsservice.domain.goods.Goods;
@@ -9,6 +11,10 @@ import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsDetailRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsListRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsRegistrationRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.RegisterGoodsListRespDto;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
@@ -63,6 +69,21 @@ public class GoodsServiceImpl implements GoodsService {
     @Override
     public RegisterGoodsListRespDto findRegisterGoodsList(Long userId, Pageable pageable) {
         return new RegisterGoodsListRespDto(goodsRepository.findPagingRegisterGoods(userId, pageable));
+    }
+
+    @Override
+    @Transactional
+    public List<GoodsStockDecreaseRespDto> decreaseOrderedGoodsStock(Map<Long, Integer> reqDtos) {
+        List<GoodsStockDecreaseRespDto> responseList = new ArrayList<>();
+        List<Long> goodsIds = reqDtos.keySet().stream().toList();
+
+        List<Goods> goodsList = goodsRepository.findAllById(goodsIds);
+        for (Goods goods : goodsList) {
+            Long goodsId = goods.getId();
+            int remainStockQuantity = goods.decreaseStock(reqDtos.get(goodsId));
+            responseList.add(new GoodsStockDecreaseRespDto(goodsId, remainStockQuantity));
+        }
+        return responseList;
     }
 
     private Goods findGoodsByIdOrThrow(Long goodsId) {

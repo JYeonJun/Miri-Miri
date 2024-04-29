@@ -1,5 +1,6 @@
 package com.miri.goodsservice.service.wishlist;
 
+import com.miri.coremodule.dto.wishlist.FeignWishListRespDto.WishListOrderedRespDto;
 import com.miri.coremodule.handler.ex.CustomApiException;
 import com.miri.goodsservice.domain.goods.Goods;
 import com.miri.goodsservice.domain.goods.GoodsRepository;
@@ -10,6 +11,8 @@ import com.miri.goodsservice.dto.wishlist.ResponseWishListDto.AddToWishListRespD
 import com.miri.goodsservice.dto.wishlist.ResponseWishListDto.GoodsInWishListRespDto;
 import com.miri.goodsservice.dto.wishlist.ResponseWishListDto.WishListRespDto;
 import com.miri.goodsservice.dto.wishlist.ResponseWishListDto.WishListUpdateRespDto;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -74,6 +77,27 @@ public class WishListServiceImpl implements WishListService {
     public void deleteGoodsInWishList(Long userId, Long wishListId) {
         wishListRepository.deleteByIdAndUserId(wishListId, userId);
 
+    }
+
+    @Override
+    public List<WishListOrderedRespDto> getOrderedWishLists(Long userId, List<Long> wishListIds) {
+        List<WishList> findWishLists = wishListRepository.findByIdInAndUserIdWithGoods(wishListIds, userId);
+        return findWishLists.stream().map((wishList -> {
+            Goods goods = wishList.getGoods();
+            return WishListOrderedRespDto.builder()
+                    .wishListId(wishList.getId())
+                    .orderQuantity(wishList.getQuantity())
+                    .goodsId(goods.getId())
+                    .goodsName(goods.getGoodsName())
+                    .unitPrice(goods.getGoodsPrice())
+                    .build();
+        })).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void deleteOrderedWishLists(List<Long> wishListIds) {
+        wishListRepository.deleteByIdIn(wishListIds);
     }
 
     private Goods findGoodsByIdOrThrow(Long goodsId) {

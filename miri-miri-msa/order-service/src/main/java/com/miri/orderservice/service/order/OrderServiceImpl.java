@@ -1,6 +1,9 @@
 package com.miri.orderservice.service.order;
 
+import com.miri.coremodule.dto.wishlist.FeignWishListReqDto.WishListOrderedReqDto;
+import com.miri.coremodule.dto.wishlist.FeignWishListRespDto.WishListOrderedRespDto;
 import com.miri.coremodule.handler.ex.CustomApiException;
+import com.miri.orderservice.client.GoodsServiceClient;
 import com.miri.orderservice.domain.order.Order;
 import com.miri.orderservice.domain.order.OrderDetail;
 import com.miri.orderservice.domain.order.OrderDetailRepository;
@@ -18,7 +21,11 @@ import com.miri.orderservice.dto.order.ResponseOrderDto.OrderGoodsRespDto;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,71 +39,109 @@ public class OrderServiceImpl implements OrderService {
     private final OrderDetailRepository orderDetailRepository;
     private final ShippingRepository shippingRepository;
     private final ReturnRequestRepository returnRequestRepository;
+    private final GoodsServiceClient goodsServiceClient;
+    private final CircuitBreakerFactory circuitBreakerFactory;
 
     public OrderServiceImpl(OrderRepository orderRepository, OrderDetailRepository orderDetailRepository,
-                            ShippingRepository shippingRepository, ReturnRequestRepository returnRequestRepository) {
+                            ShippingRepository shippingRepository, ReturnRequestRepository returnRequestRepository,
+                            GoodsServiceClient goodsServiceClient, CircuitBreakerFactory circuitBreakerFactory) {
         this.orderRepository = orderRepository;
         this.orderDetailRepository = orderDetailRepository;
         this.shippingRepository = shippingRepository;
         this.returnRequestRepository = returnRequestRepository;
+        this.goodsServiceClient = goodsServiceClient;
+        this.circuitBreakerFactory = circuitBreakerFactory;
     }
 
-    // 상품 주문할 때, 상품 재고 마이너스!!
-    // 장바구니에 있는 상품 구매하고, 해당 객체 삭제하기
     @Override
     @Transactional
     public CreateOrderRespDto createOrder(Long userId, CreateOrderReqDto reqDto) {
 
-        Order order = orderRepository.save(new Order(userId));
+        CircuitBreaker circuitbreaker = circuitBreakerFactory.create("circuitbreaker");
 
         List<Long> wishListIds = reqDto.getWishListIds();
-//        List<WishList> wishLists = wishListRepository.findByIdInAndUserIdWithGoods(wishListIds, userId);
 
-//        validateWishListIds(wishListIds, wishLists);
+        // 위시리스트 유효성 검사
+        List<WishListOrderedRespDto> foundWishLists = validateWishLists(userId, reqDto.getWishListIds(),
+                circuitbreaker);
 
-        List<OrderDetail> orderDetails = new ArrayList<>();
-        List<OrderGoodsRespDto> orderGoods = new ArrayList<>();
-//        int totalOrderPrice = calculateTotalOrderPriceAndPrepareOrderDetails(wishLists, order, orderDetails, orderGoods);
+        // 재고 감소 처리
+        Map<Long, Integer> goodsIdToOrderQuantityMap = generateGoodsIdToOrderQuantityMap(foundWishLists);
+        decreaseStocks(goodsIdToOrderQuantityMap, circuitbreaker);
 
-        List<OrderDetail> createdOrderDetails = orderDetailRepository.saveAll(orderDetails);
-//        wishListRepository.deleteAll(wishLists);
+        // 주문 생성
+        Order order = orderRepository.save(new Order(userId));
 
-        List<Shipping> shippings = new ArrayList<>();
-        for (OrderDetail createdOrderDetail : createdOrderDetails) {
-            shippings.add(new Shipping(createdOrderDetail.getId(), reqDto.getAddress()));
-        }
+        // 주문 상세 및 배송 정보 생성
+        List<OrderGoodsRespDto> orderGoods = createOrderDetailsAndShippings(order, foundWishLists, reqDto.getAddress());
 
-        shippingRepository.saveAll(shippings);
+        // 위시리스트 삭제 요청
+        deleteOrderedWishLists(reqDto.getWishListIds(), circuitbreaker);
 
-//        return new CreateOrderRespDto(order, orderGoods, totalOrderPrice);
-        return new CreateOrderRespDto(order, orderGoods, -1);
+        int totalOrderPrice = calculateTotalOrderPrice(foundWishLists);
+
+        return new CreateOrderRespDto(order, orderGoods, totalOrderPrice);
     }
 
-//    private void validateWishListIds(List<Long> requestedIds, List<WishList> foundWishLists) {
-//        Set<Long> foundIds = foundWishLists.stream().map(WishList::getId).collect(Collectors.toSet());
-//        if (!foundIds.containsAll(requestedIds)) {
-//            throw new CustomApiException("유효하지 않은 위시리스트 ID가 포함되어 있습니다.");
-//        }
-//    }
+    private List<WishListOrderedRespDto> validateWishLists(Long userId, List<Long> wishListIds,
+                                                           CircuitBreaker circuitbreaker) {
+        List<WishListOrderedRespDto> foundWishLists = circuitbreaker.run(
+                () -> goodsServiceClient.getOrderedWishLists(new WishListOrderedReqDto(userId, wishListIds)),
+                throwable -> null);
+        if (foundWishLists == null || foundWishLists.size() != wishListIds.size()) {
+            throw new CustomApiException("유효하지 않은 위시리스트 ID가 포함되어 있습니다.");
+        }
+        return foundWishLists;
+    }
 
-//    private int calculateTotalOrderPriceAndPrepareOrderDetails(List<WishList> wishLists, Order order,
-//                                                               List<OrderDetail> orderDetails,
-//                                                               List<OrderGoodsRespDto> orderGoods) {
-//        int totalOrderPrice = 0;
-//        for (WishList wishList : wishLists) {
-//            Goods goods = wishList.getGoods();
-//            goods.decreaseStock(wishList.getQuantity());
-//
-//            int totalPriceForGoods = goods.getGoodsPrice() * wishList.getQuantity();
-//            totalOrderPrice += totalPriceForGoods;
-//
-//            OrderDetail orderDetail = new OrderDetail(order, wishList, goods);
-//            orderDetails.add(orderDetail);
-//            orderGoods.add(new OrderGoodsRespDto(wishList, orderDetail, goods, totalPriceForGoods));
-//        }
-//        return totalOrderPrice;
-//    }
+    private Map<Long, Integer> generateGoodsIdToOrderQuantityMap(List<WishListOrderedRespDto> foundWishLists) {
+        return foundWishLists.stream()
+                .collect(Collectors.toMap(
+                        WishListOrderedRespDto::getGoodsId, // 키로 사용될 goodsId
+                        WishListOrderedRespDto::getOrderQuantity, // 값으로 사용될 orderQuantity
+                        Integer::sum));// 동일한 키에 대한 값 병합
+    }
 
+    private void decreaseStocks(Map<Long, Integer> goodsIdToOrderQuantityMap, CircuitBreaker circuitbreaker) {
+        circuitbreaker.run(
+                () -> goodsServiceClient.decreaseStock(goodsIdToOrderQuantityMap),
+                throwable -> {
+                    throw new CustomApiException("재고 감소 요청이 실패했습니다.");
+                }
+        );
+    }
+
+    private List<OrderGoodsRespDto> createOrderDetailsAndShippings(Order order,
+                                                                   List<WishListOrderedRespDto> foundWishLists,
+                                                                   String address) {
+        List<OrderDetail> orderDetails = new ArrayList<>();
+        List<OrderGoodsRespDto> orderGoods = new ArrayList<>();
+        for (WishListOrderedRespDto foundWishList : foundWishLists) {
+            OrderDetail orderDetail = new OrderDetail(order, foundWishList);
+            orderDetails.add(orderDetail);
+            orderGoods.add(new OrderGoodsRespDto(orderDetail, foundWishList.getGoodsName()));
+        }
+        orderDetailRepository.saveAll(orderDetails);
+        shippingRepository.saveAll(
+                orderDetails.stream().map(od -> new Shipping(od.getId(), address)).collect(Collectors.toList()));
+        return orderGoods;
+    }
+
+    private void deleteOrderedWishLists(List<Long> wishListIds, CircuitBreaker circuitbreaker) {
+        try {
+            goodsServiceClient.deleteOrderedWishLists(wishListIds);
+        } catch (Exception e) {
+            log.error(e.toString());
+            // TODO: 롤백 요청
+            throw new CustomApiException("위시리스트 목록 삭제에 실패하였습니다.");
+        }
+    }
+
+    private int calculateTotalOrderPrice(List<WishListOrderedRespDto> foundWishLists) {
+        return foundWishLists.stream()
+                .mapToInt(wish -> wish.getOrderQuantity() * wish.getUnitPrice())
+                .sum();
+    }
 
     @Override
     public OrderGoodsListRespDto getOrderGoodsList(Long userId, Pageable pageable) {
