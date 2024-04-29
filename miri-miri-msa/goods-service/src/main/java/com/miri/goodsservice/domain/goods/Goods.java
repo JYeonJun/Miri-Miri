@@ -59,12 +59,13 @@ public class Goods extends BaseTimeEntity {
     }
 
     // 재고 수량 감소 메소드
-    public void decreaseStock(int quantity) {
+    public int decreaseStock(int quantity) {
         int restStock = this.stockQuantity - quantity;
         if (restStock < 0) {
             throw new CustomApiException("상품의 재고가 부족합니다.");
         }
         this.stockQuantity = restStock;
+        return this.stockQuantity;
     }
 
     public void increaseStock(int stockQuantity) {

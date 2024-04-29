@@ -42,6 +42,10 @@ dependencies {
 
     /* Eureka Discovery Client */
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+
+    /* Feign Client 적용 */
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
 }
 
 dependencyManagement {

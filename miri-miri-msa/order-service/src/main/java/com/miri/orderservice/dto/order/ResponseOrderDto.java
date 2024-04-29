@@ -32,41 +32,14 @@ public class ResponseOrderDto {
     public static class OrderGoodsRespDto {
         private Long goodsId;
         private String goodsName;
-        private int quantity;
+        private int quantity; // 상품의 주문 개수
         private int unitPrice;
         private int subTotalPrice;
         private String orderStatus;
 
-//        public OrderGoodsRespDto(WishList wishList, OrderDetail orderDetail, Goods goods, int subTotalPrice) {
-//            this.goodsId = goods.getId();
-//            this.goodsName = goods.getGoodsName();
-//            this.quantity = wishList.getQuantity();
-//            this.unitPrice = goods.getGoodsPrice();
-//            this.subTotalPrice = subTotalPrice;
-//            this.orderStatus = orderDetail.getOrderStatus().getValue();
-//        }
-
-        public OrderGoodsRespDto(OrderDetail orderDetail, Long goodsId) {
-            this.goodsId = goodsId;
-//            this.goodsName = goods.getGoodsName();
-//            this.quantity = wishList.getQuantity();
-//            this.unitPrice = goods.getGoodsPrice();
-//            this.subTotalPrice = subTotalPrice;
-            this.orderStatus = orderDetail.getOrderStatus().getValue();
-        }
-
-//        public OrderGoodsRespDto(OrderDetail orderDetail, Goods goods) {
-//            this.goodsId = goods.getId();
-//            this.goodsName = goods.getGoodsName();
-//            this.quantity = orderDetail.getQuantity();
-//            this.unitPrice = orderDetail.getUnitPrice();
-//            this.subTotalPrice = this.unitPrice * this.quantity;
-//            this.orderStatus = orderDetail.getOrderStatus().getValue();
-//        }
-
-        public OrderGoodsRespDto(OrderDetail orderDetail) {
+        public OrderGoodsRespDto(OrderDetail orderDetail, String goodsName) {
             this.goodsId = orderDetail.getGoodsId();
-//            this.goodsName = goods.getGoodsName();
+            this.goodsName = goodsName;
             this.quantity = orderDetail.getQuantity();
             this.unitPrice = orderDetail.getUnitPrice();
             this.subTotalPrice = this.unitPrice * this.quantity;

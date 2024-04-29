@@ -3,12 +3,15 @@ package com.miri.goodsservice.controller;
 import static com.miri.goodsservice.dto.wishlist.RequestWishListDto.WishListUpdateReqDto;
 
 import com.miri.coremodule.dto.ResponseDto;
+import com.miri.coremodule.dto.wishlist.FeignWishListReqDto.WishListOrderedReqDto;
+import com.miri.coremodule.dto.wishlist.FeignWishListRespDto.WishListOrderedRespDto;
 import com.miri.goodsservice.dto.wishlist.RequestWishListDto.AddToCartReqDto;
 import com.miri.goodsservice.dto.wishlist.ResponseWishListDto.AddToWishListRespDto;
 import com.miri.goodsservice.dto.wishlist.ResponseWishListDto.WishListRespDto;
 import com.miri.goodsservice.dto.wishlist.ResponseWishListDto.WishListUpdateRespDto;
 import com.miri.goodsservice.service.wishlist.WishListService;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -63,7 +66,7 @@ public class WishListApiController {
 
         WishListUpdateRespDto result
                 = wishListService.updateGoodsQuantityInWishList(
-                        Long.valueOf(userId), wishListId, reqDto.getGoodsQuantity());
+                Long.valueOf(userId), wishListId, reqDto.getGoodsQuantity());
         return new ResponseEntity<>(new ResponseDto<>(1, "장바구니 상품 수량 변경에 성공하였습니다.", result), HttpStatus.OK);
     }
 
@@ -72,5 +75,20 @@ public class WishListApiController {
                                                    @RequestHeader(USER_ID_HEADER) String userId) {
         wishListService.deleteGoodsInWishList(Long.valueOf(userId), wishListId);
         return new ResponseEntity<>(new ResponseDto<>(1, "장바구니 상품 삭제에 성공하였습니다.", null), HttpStatus.OK);
+    }
+
+    // 주문한 상품에 대한 위시리스트 목록 조회
+    @PostMapping("/ordered-wishlist")
+    public ResponseEntity<?> getOrderedWishLists(@RequestBody WishListOrderedReqDto reqDto) {
+        List<WishListOrderedRespDto> result
+                = wishListService.getOrderedWishLists(reqDto.getUserId(), reqDto.getWishListIds());
+        return ResponseEntity.ok(result);
+    }
+
+    // 주문한 상품에 대한 위시리스트 삭제 요청
+    @PostMapping("/wishlist/delete")
+    public ResponseEntity<?> deleteOrderedWishLists(@RequestBody List<Long> wishListIds) {
+        wishListService.deleteOrderedWishLists(wishListIds);
+        return ResponseEntity.ok().build();
     }
 }
