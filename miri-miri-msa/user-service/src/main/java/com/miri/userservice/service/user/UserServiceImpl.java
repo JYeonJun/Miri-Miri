@@ -95,6 +95,12 @@ public class UserServiceImpl implements UserService {
         return new GetUserRespDto(findUser);
     }
 
+    @Override
+    public String findUserNameById(Long userId) {
+        User findUser = findUserByIdOrThrow(userId);
+        return findUser.getUserName();
+    }
+
     private User findUserByIdOrThrow(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new CustomApiException("해당 사용자가 존재하지 않습니다."));

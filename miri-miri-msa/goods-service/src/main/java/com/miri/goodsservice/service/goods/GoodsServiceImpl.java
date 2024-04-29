@@ -1,6 +1,7 @@
 package com.miri.goodsservice.service.goods;
 
 import com.miri.coremodule.handler.ex.CustomApiException;
+import com.miri.goodsservice.client.UserServiceClient;
 import com.miri.goodsservice.domain.goods.Goods;
 import com.miri.goodsservice.domain.goods.GoodsRepository;
 import com.miri.goodsservice.dto.goods.RequestGoodsDto.GoodsRegistrationReqDto;
@@ -9,6 +10,8 @@ import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsListRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsRegistrationRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.RegisterGoodsListRespDto;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,9 +22,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class GoodsServiceImpl implements GoodsService {
 
     private final GoodsRepository goodsRepository;
+    private final UserServiceClient userServiceClient;
+    private final CircuitBreakerFactory circuitBreakerFactory;
 
-    public GoodsServiceImpl(GoodsRepository goodsRepository) {
+    public GoodsServiceImpl(GoodsRepository goodsRepository, UserServiceClient userServiceClient,
+                            CircuitBreakerFactory circuitBreakerFactory) {
         this.goodsRepository = goodsRepository;
+        this.userServiceClient = userServiceClient;
+        this.circuitBreakerFactory = circuitBreakerFactory;
     }
 
     @Override
@@ -39,9 +47,17 @@ public class GoodsServiceImpl implements GoodsService {
     @Override
     public GoodsDetailRespDto findGoods(Long goodsId) {
         Goods findGoods = findGoodsByIdOrThrow(goodsId);
-//        User findUser = findUserByIdOrThrow(findGoods.getSellerId());
-//        return new GoodsDetailRespDto(findGoods, findUser);
-        return new GoodsDetailRespDto(findGoods);
+        String sellerName = getSellerName(findGoods);
+        return new GoodsDetailRespDto(findGoods, sellerName);
+    }
+
+    private String getSellerName(Goods goods) {
+        CircuitBreaker circuitbreaker = circuitBreakerFactory.create("circuitbreaker");
+        return circuitbreaker.run(() -> userServiceClient.getUserNameById(goods.getSellerId()),
+                throwable -> {
+                    log.error("상품 상세 조회(goods-service -> user-service): 사용자 이름 요청");
+                    return null;
+                });
     }
 
     @Override

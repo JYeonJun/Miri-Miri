@@ -15,4 +15,6 @@ public interface UserService {
     void updateUserPassword(Long userId, UpdateUserPasswordReqDto userPassword);
 
     GetUserRespDto getUserInfo(Long userId);
+
+    String findUserNameById(Long userId);
 }

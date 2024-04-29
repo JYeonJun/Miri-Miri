@@ -17,6 +17,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -72,5 +73,11 @@ public class UserApiController {
         GetUserRespDto result
                 = userService.getUserInfo(userId);
         return new ResponseEntity<>(new ResponseDto<>(1, "사용자 정보가 조회되었습니다.", result), HttpStatus.OK);
+    }
+
+    @GetMapping("/admin/users/{userId}/name")
+    public ResponseEntity<String> getUserNameById(@PathVariable Long userId) {
+        String userName = userService.findUserNameById(userId);
+        return ResponseEntity.ok(userName);
     }
 }
