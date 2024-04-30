@@ -1,6 +1,7 @@
 package com.miri.goodsservice.service.goods;
 
-import com.miri.coremodule.dto.goods.FeignGoodsRespDto.GoodsStockDecreaseRespDto;
+import com.miri.coremodule.dto.goods.FeignGoodsReqDto.GoodsStockIncreaseReqDto;
+import com.miri.coremodule.dto.goods.FeignGoodsRespDto.GoodsStockRespDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.OrderedGoodsDetailRespDto;
 import com.miri.goodsservice.dto.goods.RequestGoodsDto.GoodsRegistrationReqDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsDetailRespDto;
@@ -25,7 +26,8 @@ public interface GoodsService {
 
     RegisterGoodsListRespDto findRegisterGoodsList(Long userId, Pageable pageable);
 
-    List<GoodsStockDecreaseRespDto> decreaseOrderedGoodsStock(Map<Long, Integer> reqDtos);
+    List<GoodsStockRespDto> decreaseOrderedGoodsStock(Map<Long, Integer> reqDtos);
+    GoodsStockRespDto increaseOrderedGoodsStock(GoodsStockIncreaseReqDto reqDto);
 
     Map<Long, OrderedGoodsDetailRespDto> getOrderedGoodsDetailsAsMap(Set<Long> goodsIds);
 }

@@ -7,7 +7,7 @@ public class FeignGoodsRespDto {
 
     @Data
     @AllArgsConstructor
-    public static class GoodsStockDecreaseRespDto {
+    public static class GoodsStockRespDto {
         private Long goodsId;
         private int remainStockQuantity;
     }
