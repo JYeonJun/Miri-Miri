@@ -1,6 +1,7 @@
 package com.miri.goodsservice.service.goods;
 
-import com.miri.coremodule.dto.goods.FeignGoodsRespDto.GoodsStockDecreaseRespDto;
+import com.miri.coremodule.dto.goods.FeignGoodsReqDto.GoodsStockIncreaseReqDto;
+import com.miri.coremodule.dto.goods.FeignGoodsRespDto.GoodsStockRespDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.OrderedGoodsDetailRespDto;
 import com.miri.coremodule.handler.ex.CustomApiException;
 import com.miri.goodsservice.client.UserServiceClient;
@@ -12,7 +13,6 @@ import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsListRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsRegistrationRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.RegisterGoodsListRespDto;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -75,17 +75,25 @@ public class GoodsServiceImpl implements GoodsService {
 
     @Override
     @Transactional
-    public List<GoodsStockDecreaseRespDto> decreaseOrderedGoodsStock(Map<Long, Integer> reqDtos) {
-        List<GoodsStockDecreaseRespDto> responseList = new ArrayList<>();
+    public List<GoodsStockRespDto> decreaseOrderedGoodsStock(Map<Long, Integer> reqDtos) {
+        List<GoodsStockRespDto> responseList = new ArrayList<>();
         List<Long> goodsIds = reqDtos.keySet().stream().toList();
 
         List<Goods> goodsList = goodsRepository.findAllById(goodsIds);
         for (Goods goods : goodsList) {
             Long goodsId = goods.getId();
             int remainStockQuantity = goods.decreaseStock(reqDtos.get(goodsId));
-            responseList.add(new GoodsStockDecreaseRespDto(goodsId, remainStockQuantity));
+            responseList.add(new GoodsStockRespDto(goodsId, remainStockQuantity));
         }
         return responseList;
+    }
+
+    @Override
+    @Transactional
+    public GoodsStockRespDto increaseOrderedGoodsStock(GoodsStockIncreaseReqDto reqDto) {
+        Goods findGoods = findGoodsByIdOrThrow(reqDto.getGoodsId());
+        findGoods.increaseStock(reqDto.getQuantity());
+        return new GoodsStockRespDto(reqDto.getGoodsId(), findGoods.getStockQuantity());
     }
 
     @Override

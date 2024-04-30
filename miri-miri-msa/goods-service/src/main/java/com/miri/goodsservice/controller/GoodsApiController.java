@@ -1,8 +1,6 @@
 package com.miri.goodsservice.controller;
 
 import com.miri.coremodule.dto.ResponseDto;
-import com.miri.coremodule.dto.goods.FeignGoodsReqDto.GoodsStockDecreaseReqDto;
-import com.miri.coremodule.dto.goods.FeignGoodsRespDto.GoodsStockDecreaseRespDto;
 import com.miri.goodsservice.dto.goods.RequestGoodsDto.GoodsRegistrationReqDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsDetailRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsListRespDto;
@@ -10,8 +8,6 @@ import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsRegistrationRespDto
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.RegisterGoodsListRespDto;
 import com.miri.goodsservice.service.goods.GoodsService;
 import jakarta.validation.Valid;
-import java.util.List;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;

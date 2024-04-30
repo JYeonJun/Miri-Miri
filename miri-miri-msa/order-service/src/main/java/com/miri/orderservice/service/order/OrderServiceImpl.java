@@ -1,5 +1,6 @@
 package com.miri.orderservice.service.order;
 
+import com.miri.coremodule.dto.goods.FeignGoodsReqDto.GoodsStockIncreaseReqDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.OrderedGoodsDetailRespDto;
 import com.miri.coremodule.dto.wishlist.FeignWishListReqDto.WishListOrderedReqDto;
 import com.miri.coremodule.dto.wishlist.FeignWishListRespDto.WishListOrderedRespDto;
@@ -67,8 +68,8 @@ public class OrderServiceImpl implements OrderService {
         List<Long> wishListIds = reqDto.getWishListIds();
 
         // 위시리스트 유효성 검사
-        List<WishListOrderedRespDto> foundWishLists = validateWishLists(userId, reqDto.getWishListIds(),
-                circuitbreaker);
+        List<WishListOrderedRespDto> foundWishLists
+                = validateWishLists(userId, reqDto.getWishListIds(), circuitbreaker);
 
         // 재고 감소 처리
         Map<Long, Integer> goodsIdToOrderQuantityMap = generateGoodsIdToOrderQuantityMap(foundWishLists);
@@ -157,7 +158,8 @@ public class OrderServiceImpl implements OrderService {
         Map<Long, OrderedGoodsDetailRespDto> orderedGoodsDetails = fetchOrderedGoodsDetails(goodsIds);
 
         // OrderGoodsDto에 상품 정보 매핑
-        pagingOrderList.getContent().forEach(orderGoodsDto -> mapGoodsInfoToOrderGoodsDto(orderGoodsDto, orderedGoodsDetails));
+        pagingOrderList.getContent()
+                .forEach(orderGoodsDto -> mapGoodsInfoToOrderGoodsDto(orderGoodsDto, orderedGoodsDetails));
 
         return new OrderGoodsListRespDto(pagingOrderList);
     }
@@ -178,7 +180,8 @@ public class OrderServiceImpl implements OrderService {
                 });
     }
 
-    private void mapGoodsInfoToOrderGoodsDto(OrderGoodsDto orderGoodsDto, Map<Long, OrderedGoodsDetailRespDto> orderedGoodsDetails) {
+    private void mapGoodsInfoToOrderGoodsDto(OrderGoodsDto orderGoodsDto,
+                                             Map<Long, OrderedGoodsDetailRespDto> orderedGoodsDetails) {
         OrderedGoodsDetailRespDto goodsInfo = orderedGoodsDetails.get(orderGoodsDto.getGoodsId());
         if (goodsInfo != null) {
             orderGoodsDto.setUnitPrice(goodsInfo.getGoodsPrice());
@@ -190,13 +193,16 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public void cancelOrder(Long userId, Long orderDetailId) {
-        OrderDetail findOrderDetail = validateOrderDetail(userId, orderDetailId);
 
+        OrderDetail findOrderDetail = validateOrderDetail(userId, orderDetailId);
         validateCancelCondition(findOrderDetail);
 
-//        Goods goods = findGoodsOrThrow(findOrderDetail);
-
-//        restoreGoodsStock(goods, findOrderDetail);
+        CircuitBreaker circuitbreaker = circuitBreakerFactory.create("circuitbreaker");
+        circuitbreaker.run(
+                () -> goodsServiceClient.increaseStock(new GoodsStockIncreaseReqDto(findOrderDetail.getGoodsId(), findOrderDetail.getQuantity())),
+                throwable -> {
+                    throw new CustomApiException("재고 증가 요청에 실패했습니다.");
+                });
 
         updateOrderStatusToCanceled(findOrderDetail);
     }
@@ -235,10 +241,6 @@ public class OrderServiceImpl implements OrderService {
             throw new CustomApiException("주문 취소가 불가능한 상태입니다.");
         }
     }
-
-//    private void restoreGoodsStock(Goods goods, OrderDetail findOrderDetail) {
-//        goods.increaseStock(findOrderDetail.getQuantity());
-//    }
 
     private void updateOrderStatusToCanceled(OrderDetail findOrderDetail) {
         findOrderDetail.changeOrderStatus(OrderStatus.CANCELED);
