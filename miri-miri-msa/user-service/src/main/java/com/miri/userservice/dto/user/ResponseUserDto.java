@@ -1,6 +1,9 @@
 package com.miri.userservice.dto.user;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.miri.coremodule.dto.goods.FeignGoodsRespDto.RegisterGoodsListRespDto;
+import com.miri.coremodule.dto.goods.FeignGoodsRespDto.WishListRespDto;
+import com.miri.coremodule.dto.order.FeignOrderRespDto.OrderGoodsListRespDto;
 import com.miri.userservice.domain.user.User;
 import java.time.LocalDateTime;
 import lombok.Data;
@@ -28,20 +31,21 @@ public class ResponseUserDto {
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
         private LocalDateTime signupDate;
 
-//        private RegisterGoodsListRespDto registerGoodsList;
-//        private WishListRespDto wishList;
-//        private OrderGoodsListRespDto orders;
+        private RegisterGoodsListRespDto registerGoodsList;
+        private WishListRespDto wishList;
+        private OrderGoodsListRespDto orders;
 
-        public GetUserRespDto(User user) {
+        public GetUserRespDto(User user, RegisterGoodsListRespDto registerGoodsList,
+                              WishListRespDto wishList, OrderGoodsListRespDto orders) {
             this.userId = user.getId();
             this.email = user.getEmail();
             this.userName = user.getUserName();
             this.phoneNumber = user.getPhoneNumber();
             this.address = user.getAddress();
             this.signupDate = user.getCreatedDate();
-//            this.registerGoodsList = registerGoodsList;
-//            this.wishList = wishList;
-//            this.orders = orders;
+            this.registerGoodsList = registerGoodsList;
+            this.wishList = wishList;
+            this.orders = orders;
         }
     }
 }

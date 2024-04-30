@@ -1,6 +1,11 @@
 package com.miri.userservice.service.user;
 
+import com.miri.coremodule.dto.goods.FeignGoodsRespDto.RegisterGoodsListRespDto;
+import com.miri.coremodule.dto.goods.FeignGoodsRespDto.WishListRespDto;
+import com.miri.coremodule.dto.order.FeignOrderRespDto.OrderGoodsListRespDto;
 import com.miri.coremodule.handler.ex.CustomApiException;
+import com.miri.userservice.client.GoodsServiceClient;
+import com.miri.userservice.client.OrderServiceClient;
 import com.miri.userservice.domain.email.EmailVerificationCode;
 import com.miri.userservice.domain.email.EmailVerificationCodeRepository;
 import com.miri.userservice.domain.user.User;
@@ -13,6 +18,8 @@ import com.miri.userservice.dto.user.ResponseUserDto.GetUserRespDto;
 import com.miri.userservice.dto.user.ResponseUserDto.UpdateUserProfileRespDto;
 import com.miri.userservice.util.AESUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -28,13 +35,22 @@ public class UserServiceImpl implements UserService {
     private final EmailVerificationCodeRepository emailVerificationCodeRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final AESUtils aesUtils;
+    private final GoodsServiceClient goodsServiceClient;
+    private final OrderServiceClient orderServiceClient;
+    private final CircuitBreakerFactory circuitBreakerFactory;
 
-    public UserServiceImpl(UserRepository userRepository, EmailVerificationCodeRepository emailVerificationCodeRepository,
-                           BCryptPasswordEncoder passwordEncoder, AESUtils aesUtils) {
+    public UserServiceImpl(UserRepository userRepository,
+                           EmailVerificationCodeRepository emailVerificationCodeRepository,
+                           BCryptPasswordEncoder passwordEncoder, AESUtils aesUtils,
+                           GoodsServiceClient goodsServiceClient,
+                           OrderServiceClient orderServiceClient, CircuitBreakerFactory circuitBreakerFactory) {
         this.userRepository = userRepository;
         this.emailVerificationCodeRepository = emailVerificationCodeRepository;
         this.passwordEncoder = passwordEncoder;
         this.aesUtils = aesUtils;
+        this.goodsServiceClient = goodsServiceClient;
+        this.orderServiceClient = orderServiceClient;
+        this.circuitBreakerFactory = circuitBreakerFactory;
     }
 
     @Override
@@ -83,16 +99,46 @@ public class UserServiceImpl implements UserService {
     @Override
     public GetUserRespDto getUserInfo(Long userId) {
         User findUser = findUserByIdOrThrow(userId);
-        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.fromString("desc"), "createdDate"));
-        // 등록한 상품 목록(GoodsService)
-//        RegisterGoodsListRespDto registerGoodsList = goodsService.findRegisterGoodsList(userId, pageRequest);
-//        // 장바구니에 추가한 상품 목록(WishListService)
-//        WishListRespDto wishListGoods = wishListService.getWishListGoods(userId, pageRequest);
-//        // 주문한 상품 목록(OrderService)
-//        OrderGoodsListRespDto orderGoodsList = orderService.getOrderGoodsList(userId, pageRequest);
+        CircuitBreaker circuitbreaker = circuitBreakerFactory.create("circuitbreaker");
 
-//        return new GetUserRespDto(findUser, registerGoodsList, wishListGoods, orderGoodsList);
-        return new GetUserRespDto(findUser);
+        // 등록한 상품 목록(GoodsService)
+        RegisterGoodsListRespDto registerGoodsList = fetchRegisterGoodsList(userId, circuitbreaker);
+
+        // 장바구니에 추가한 상품 목록(WishListService)
+        WishListRespDto wishListGoods = fetchWishListGoods(userId, circuitbreaker);
+
+        // 주문한 상품 목록(OrderService)
+        OrderGoodsListRespDto orderGoodsList = fetchOrderGoodsList(userId, circuitbreaker);
+
+        return new GetUserRespDto(findUser, registerGoodsList, wishListGoods, orderGoodsList);
+    }
+
+    private RegisterGoodsListRespDto fetchRegisterGoodsList(Long userId, CircuitBreaker circuitbreaker) {
+        return circuitbreaker.run(() -> goodsServiceClient.getRegisteredGoodsList(String.valueOf(userId), 0).getData(),
+                throwable -> {
+                    log.error("마이페이지 정보 조회: 등록한 상품 목록 조회 실패");
+                    return null;
+                });
+    }
+
+    private WishListRespDto fetchWishListGoods(Long userId, CircuitBreaker circuitbreaker) {
+        WishListRespDto wishListGoods = circuitbreaker.run(
+                () -> goodsServiceClient.getWishListGoods(String.valueOf(userId), 0).getData(),
+                throwable -> {
+                    log.error("마이페이지 정보 조회: 위시리스트 목록 조회 실패");
+                    return null;
+                });
+        return wishListGoods;
+    }
+
+    private OrderGoodsListRespDto fetchOrderGoodsList(Long userId, CircuitBreaker circuitbreaker) {
+        OrderGoodsListRespDto orderGoodsList = circuitbreaker.run(
+                () -> orderServiceClient.getOrderGoodsList(String.valueOf(userId), 0).getData(),
+                throwable -> {
+                    log.error("마이페이지 정보 조회: 주문 목록 조회 실패");
+                    return null;
+                });
+        return orderGoodsList;
     }
 
     @Override
