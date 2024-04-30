@@ -29,10 +29,15 @@ import reactor.core.publisher.Mono;
 public class JwtAuthorizationFilter extends AbstractGatewayFilterFactory<JwtAuthorizationFilter.Config> {
     private static final String USER_ID_CLAIM = "id";
     private static final String USER_ID_HEADER = "X-User-Id";
-    private static final String INVALID_TOKEN_RESPONSE = "The requested token is invalid.";
+    private static final String NO_AUTHORIZATION_HEADER_RESPONSE = "No authorization header";
+    private static final String JWT_NOT_VALID_RESPONSE = "JWT token is not valid";
+    private static final String ACCESS_DENIED_RESPONSE = "Access Denied";
+    private static final String UNABLE_TO_EXTRACT_USER_ID_RESPONSE = "Unable to extract user ID from JWT";
+    private static final String INTERNAL_API_ACCESS_DENIED_RESPONSE = "Internal API access is not allowed from client";
     private static final String BEARER_PREFIX = "Bearer ";
     private static final String ROLES_CLAIM = "roles";
     private static final String ADMIN_PATH_PREFIX = "/api/admin/";
+    private static final String INTERNAL_API_PATH_PREFIX = "/api/internal/";
 
     private final SecretKey signingKey;
     private final JwtParser jwtParser;
@@ -51,22 +56,28 @@ public class JwtAuthorizationFilter extends AbstractGatewayFilterFactory<JwtAuth
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
+
+            String requestUri = request.getURI().toString();
+            if (requestUri.contains(INTERNAL_API_PATH_PREFIX)) {
+                return fail(exchange, INTERNAL_API_ACCESS_DENIED_RESPONSE, HttpStatus.UNAUTHORIZED);
+            }
+
             String authorizationHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
 
             if (authorizationHeader == null || !authorizationHeader.startsWith(BEARER_PREFIX)) {
-                return fail(exchange, "No authorization header", HttpStatus.UNAUTHORIZED);
+                return fail(exchange, NO_AUTHORIZATION_HEADER_RESPONSE, HttpStatus.UNAUTHORIZED);
             }
 
             String jwt = authorizationHeader.substring(BEARER_PREFIX.length());
             Claims claims = parseJwt(jwt);
 
             if (!isValidClaims(claims)) {
-                return fail(exchange, "JWT token is not valid", HttpStatus.UNAUTHORIZED);
+                return fail(exchange, JWT_NOT_VALID_RESPONSE, HttpStatus.UNAUTHORIZED);
             }
 
             List<String> userRoles = extractRoles(claims);
             if (!isValidRoles(userRoles) || !isAuthorized(request.getURI().getPath(), userRoles)) {
-                return fail(exchange, "Access Denied", HttpStatus.FORBIDDEN);
+                return fail(exchange, ACCESS_DENIED_RESPONSE, HttpStatus.FORBIDDEN);
             }
 
             return addUserIdToHeaderAndFilter(exchange, chain, claims.get(USER_ID_CLAIM, Long.class));
@@ -87,7 +98,7 @@ public class JwtAuthorizationFilter extends AbstractGatewayFilterFactory<JwtAuth
 
     private Mono<Void> addUserIdToHeaderAndFilter(ServerWebExchange exchange, GatewayFilterChain chain, Long userId) {
         if (userId == null) {
-            return fail(exchange, "Unable to extract user ID from JWT", HttpStatus.INTERNAL_SERVER_ERROR);
+            return fail(exchange, UNABLE_TO_EXTRACT_USER_ID_RESPONSE, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         ServerHttpRequest updatedRequest = exchange.getRequest().mutate()
@@ -101,7 +112,7 @@ public class JwtAuthorizationFilter extends AbstractGatewayFilterFactory<JwtAuth
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(httpStatus);
 
-        byte[] bytes = INVALID_TOKEN_RESPONSE.getBytes(StandardCharsets.UTF_8);
+        byte[] bytes = err.getBytes(StandardCharsets.UTF_8);
         DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(bytes);
         return response.writeWith(Flux.just(buffer));
     }

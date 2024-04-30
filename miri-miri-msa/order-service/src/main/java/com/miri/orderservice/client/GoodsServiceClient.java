@@ -13,14 +13,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface GoodsServiceClient {
 
     // 주문한 상품에 대한 위시리스트 목록 조회
-    @PostMapping("/api/auth/ordered-wishlist")
+    @PostMapping("/api/internal/ordered-wishlist")
     List<WishListOrderedRespDto> getOrderedWishLists(WishListOrderedReqDto wishListOrderedReqDto);
 
     // 상품 재고 감소 요청
-    @PostMapping("/api/auth/goods/decrease")
+    @PostMapping("/api/internal/goods/decrease")
     List<GoodsStockDecreaseRespDto> decreaseStock(@RequestBody Map<Long, Integer> decreaseStockRequests);
 
     // 주문 완료된 위시리스트 목록 삭제 요청
-    @PostMapping("/api/auth/wishlist/delete")
+    @PostMapping("/api/internal/wishlist/delete")
     void deleteOrderedWishLists(List<Long> wishListIds);
+
+    // 주문한 상품에 대한 상품 목록 조회
 }
