@@ -76,19 +76,4 @@ public class WishListApiController {
         wishListService.deleteGoodsInWishList(Long.valueOf(userId), wishListId);
         return new ResponseEntity<>(new ResponseDto<>(1, "장바구니 상품 삭제에 성공하였습니다.", null), HttpStatus.OK);
     }
-
-    // 주문한 상품에 대한 위시리스트 목록 조회
-    @PostMapping("/ordered-wishlist")
-    public ResponseEntity<?> getOrderedWishLists(@RequestBody WishListOrderedReqDto reqDto) {
-        List<WishListOrderedRespDto> result
-                = wishListService.getOrderedWishLists(reqDto.getUserId(), reqDto.getWishListIds());
-        return ResponseEntity.ok(result);
-    }
-
-    // 주문한 상품에 대한 위시리스트 삭제 요청
-    @PostMapping("/wishlist/delete")
-    public ResponseEntity<?> deleteOrderedWishLists(@RequestBody List<Long> wishListIds) {
-        wishListService.deleteOrderedWishLists(wishListIds);
-        return ResponseEntity.ok().build();
-    }
 }

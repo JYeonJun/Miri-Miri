@@ -16,7 +16,6 @@ spring:
   cloud:
     gateway:
       routes:
-        # ??? ?????
         - id: user-login
           uri: lb://USER-SERVICE
           predicates:
@@ -26,7 +25,6 @@ spring:
             - RemoveRequestHeader=Cookie
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
 
-        # ??? ??? ??? ?????
         - id: user-auth
           uri: lb://USER-SERVICE
           predicates:
@@ -37,7 +35,6 @@ spring:
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
             - JwtAuthorizationFilter
 
-        # ??? ?? ?????
         - id: user-admin
           uri: lb://USER-SERVICE
           predicates:
@@ -48,7 +45,16 @@ spring:
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
             - JwtAuthorizationFilter
 
-        # ?? ?? ?????
+        - id: user-internal
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/api/internal/**
+            - Method=GET,POST,PATCH,DELETE
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+            - JwtAuthorizationFilter
+
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
@@ -58,7 +64,6 @@ spring:
             - RemoveRequestHeader=Cookie
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
 
-        # ??? ??? ??? ?????
         - id: goods-auth
           uri: lb://GOODS-SERVICE
           predicates:
@@ -69,7 +74,6 @@ spring:
             - RewritePath=/goods-service/(?<segment>.*), /$\{segment}
             - JwtAuthorizationFilter
 
-        # ??? ?? ?????
         - id: goods-admin
           uri: lb://GOODS-SERVICE
           predicates:
@@ -80,7 +84,16 @@ spring:
             - RewritePath=/goods-service/(?<segment>.*), /$\{segment}
             - JwtAuthorizationFilter
 
-        # ?? ?? ?? ?????
+        - id: goods-internal
+          uri: lb://GOODS-SERVICE
+          predicates:
+            - Path=/goods-service/api/internal/**
+            - Method=GET,POST,PATCH,DELETE
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/goods-service/(?<segment>.*), /$\{segment}
+            - JwtAuthorizationFilter
+
         - id: goods-service
           uri: lb://GOODS-SERVICE
           predicates:
@@ -90,7 +103,6 @@ spring:
             - RemoveRequestHeader=Cookie
             - RewritePath=/goods-service/(?<segment>.*), /$\{segment}
 
-        # ??? ??? ??? ?????
         - id: order-auth
           uri: lb://ORDER-SERVICE
           predicates:
@@ -101,7 +113,6 @@ spring:
             - RewritePath=/order-service/(?<segment>.*), /$\{segment}
             - JwtAuthorizationFilter
 
-        # ??? ?? ?????
         - id: order-admin
           uri: lb://ORDER-SERVICE
           predicates:
@@ -112,7 +123,16 @@ spring:
             - RewritePath=/order-service/(?<segment>.*), /$\{segment}
             - JwtAuthorizationFilter
 
-        # ?? ?? ?? ?????
+        - id: order-internal
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/order-service/api/internal/**
+            - Method=GET,POST,PATCH,DELETE
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/order-service/(?<segment>.*), /$\{segment}
+            - JwtAuthorizationFilter
+
         - id: order-service
           uri: lb://ORDER-SERVICE
           predicates:

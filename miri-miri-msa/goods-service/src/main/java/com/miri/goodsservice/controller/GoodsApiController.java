@@ -70,12 +70,5 @@ public class GoodsApiController {
         return new ResponseEntity<>(new ResponseDto<>(1, "등록한 상품 목록 조회에 성공하였습니다.", result), HttpStatus.OK);
     }
 
-    // 주문한 상품 재고 감소 요청
-    @PostMapping("/auth/goods/decrease")
-    public ResponseEntity<?> decreaseOrderedGoodsStock(@RequestBody Map<Long, Integer> reqDtos) {
-        List<GoodsStockDecreaseRespDto> result = goodsService.decreaseOrderedGoodsStock(reqDtos);
-        return ResponseEntity.ok(result);
-    }
-
     // TODO: 상품 정보 수정!!
 }
