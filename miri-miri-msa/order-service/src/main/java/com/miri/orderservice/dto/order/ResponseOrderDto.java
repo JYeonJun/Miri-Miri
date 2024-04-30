@@ -65,17 +65,6 @@ public class ResponseOrderDto {
         private String category; // 상품 카테고리
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
         private LocalDateTime orderDate; // 주문 날짜
-
-//        public OrderGoodsDto(Order order, OrderDetail orderDetail, Goods goods) {
-//            this.orderId = order.getId();
-//            this.orderDetailId = orderDetail.getId();
-//            this.goodsId = goods.getId();
-//            this.orderStatus = orderDetail.getOrderStatus().getValue();
-//            this.orderQuantity = orderDetail.getQuantity();
-//            this.unitPrice = goods.getGoodsPrice();
-//            this.subTotalPrice = orderDetail.getQuantity() * goods.getGoodsPrice();
-//            this.category = goods.getCategory().getValue();
-//            this.orderDate = orderDetail.getCreatedDate();
 //        }
 
         public OrderGoodsDto(Order order, OrderDetail orderDetail) {
@@ -84,9 +73,6 @@ public class ResponseOrderDto {
             this.goodsId = orderDetail.getGoodsId();
             this.orderStatus = orderDetail.getOrderStatus().getValue();
             this.orderQuantity = orderDetail.getQuantity();
-//            this.unitPrice = goods.getGoodsPrice();
-//            this.subTotalPrice = orderDetail.getQuantity() * goods.getGoodsPrice();
-//            this.category = goods.getCategory().getValue();
             this.orderDate = orderDetail.getCreatedDate();
         }
     }

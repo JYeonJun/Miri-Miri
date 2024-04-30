@@ -1,5 +1,6 @@
 package com.miri.orderservice.service.order;
 
+import com.miri.coremodule.dto.goods.FeignGoodsRespDto.OrderedGoodsDetailRespDto;
 import com.miri.coremodule.dto.wishlist.FeignWishListReqDto.WishListOrderedReqDto;
 import com.miri.coremodule.dto.wishlist.FeignWishListRespDto.WishListOrderedRespDto;
 import com.miri.coremodule.handler.ex.CustomApiException;
@@ -16,16 +17,20 @@ import com.miri.orderservice.domain.shipping.ShippingRepository;
 import com.miri.orderservice.dto.order.RequestOrderDto.CreateOrderReqDto;
 import com.miri.orderservice.dto.order.RequestOrderDto.ReturnOrderReqDto;
 import com.miri.orderservice.dto.order.ResponseOrderDto.CreateOrderRespDto;
+import com.miri.orderservice.dto.order.ResponseOrderDto.OrderGoodsDto;
 import com.miri.orderservice.dto.order.ResponseOrderDto.OrderGoodsListRespDto;
 import com.miri.orderservice.dto.order.ResponseOrderDto.OrderGoodsRespDto;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -145,7 +150,41 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderGoodsListRespDto getOrderGoodsList(Long userId, Pageable pageable) {
-        return new OrderGoodsListRespDto(orderRepository.findPagingOrderList(userId, pageable));
+        Page<OrderGoodsDto> pagingOrderList = orderRepository.findPagingOrderList(userId, pageable);
+
+        // 상품 정보 조회를 위한 상품 ID 추출 및 상품 정보 조회를 별도의 메소드로 분리하여 가독성 향상
+        Set<Long> goodsIds = extractGoodsIds(pagingOrderList);
+        Map<Long, OrderedGoodsDetailRespDto> orderedGoodsDetails = fetchOrderedGoodsDetails(goodsIds);
+
+        // OrderGoodsDto에 상품 정보 매핑
+        pagingOrderList.getContent().forEach(orderGoodsDto -> mapGoodsInfoToOrderGoodsDto(orderGoodsDto, orderedGoodsDetails));
+
+        return new OrderGoodsListRespDto(pagingOrderList);
+    }
+
+    private Set<Long> extractGoodsIds(Page<OrderGoodsDto> pagingOrderList) {
+        return pagingOrderList.getContent().stream()
+                .map(OrderGoodsDto::getGoodsId)
+                .collect(Collectors.toSet());
+    }
+
+    private Map<Long, OrderedGoodsDetailRespDto> fetchOrderedGoodsDetails(Set<Long> goodsIds) {
+        CircuitBreaker circuitbreaker = circuitBreakerFactory.create("circuitbreaker");
+        return circuitbreaker.run(
+                () -> goodsServiceClient.getOrderedGoodsDetailsAsMap(goodsIds),
+                throwable -> {
+                    log.error("주문한 상품 상세 정보 조회 에러", throwable);
+                    return Collections.emptyMap();
+                });
+    }
+
+    private void mapGoodsInfoToOrderGoodsDto(OrderGoodsDto orderGoodsDto, Map<Long, OrderedGoodsDetailRespDto> orderedGoodsDetails) {
+        OrderedGoodsDetailRespDto goodsInfo = orderedGoodsDetails.get(orderGoodsDto.getGoodsId());
+        if (goodsInfo != null) {
+            orderGoodsDto.setUnitPrice(goodsInfo.getGoodsPrice());
+            orderGoodsDto.setSubTotalPrice(orderGoodsDto.getOrderQuantity() * goodsInfo.getGoodsPrice());
+            orderGoodsDto.setCategory(goodsInfo.getCategory());
+        }
     }
 
     @Override
