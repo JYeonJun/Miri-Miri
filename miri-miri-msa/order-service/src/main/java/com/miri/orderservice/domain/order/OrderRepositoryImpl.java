@@ -32,11 +32,10 @@ public class OrderRepositoryImpl implements OrderRepositoryCustom {
                 .select(Projections.constructor(OrderGoodsDto.class,
                         order,
                         orderDetail
-//                        goods
                 ))
+
                 .from(orderDetail)
                 .join(orderDetail.order, order)
-//                .leftJoin(goods).on(orderDetail.goodsId.eq(goods.id))
                 .where(order.userId.eq(userId))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize());
