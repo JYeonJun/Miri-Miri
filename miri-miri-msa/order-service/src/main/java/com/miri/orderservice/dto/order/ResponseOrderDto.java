@@ -65,7 +65,6 @@ public class ResponseOrderDto {
         private String category; // 상품 카테고리
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
         private LocalDateTime orderDate; // 주문 날짜
-//        }
 
         public OrderGoodsDto(Order order, OrderDetail orderDetail) {
             this.orderId = order.getId();
