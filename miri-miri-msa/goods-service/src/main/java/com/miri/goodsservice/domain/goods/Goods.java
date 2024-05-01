@@ -11,6 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -49,6 +50,8 @@ public class Goods extends BaseTimeEntity {
     @Column(nullable = false)
     private GoodsCategory category; // 상품 카테고리
 
+    private LocalDateTime reservationStartTime; // 예약구매 시작 시간
+
     public Goods(Long sellerId, GoodsRegistrationReqDto goodsDto) {
         this.sellerId = sellerId;
         this.goodsName = goodsDto.getGoodsName();
@@ -56,6 +59,7 @@ public class Goods extends BaseTimeEntity {
         this.goodsPrice = goodsDto.getGoodsPrice();
         this.stockQuantity = goodsDto.getStockQuantity();
         this.category = goodsDto.getCategory();
+        this.reservationStartTime = goodsDto.getReservationStartTime();
     }
 
     // 재고 수량 감소 메소드

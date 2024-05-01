@@ -17,6 +17,7 @@ public class FeignWishListRespDto {
         private int orderQuantity;
         private Long goodsId;
         private String goodsName;
+        private LocalDateTime reservationStartTime;
         private int unitPrice;
     }
 
@@ -39,6 +40,8 @@ public class FeignWishListRespDto {
         private int stockQuantity; // 상품의 남은 재고 수
         private String category;
         private int wishGoodsQuantity; // 장바구니에 담은 상품 수량
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+        private LocalDateTime reservationStartTime;
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
         private LocalDateTime addToWishListDate; // 장바구니에 추가한 시간
     }

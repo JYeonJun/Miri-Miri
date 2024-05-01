@@ -22,6 +22,7 @@ import com.miri.orderservice.dto.order.RequestOrderDto.ReturnOrderReqDto;
 import com.miri.orderservice.dto.order.ResponseOrderDto.CreateOrderRespDto;
 import com.miri.orderservice.dto.order.ResponseOrderDto.OrderGoodsRespDto;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +63,9 @@ public class OrderServiceImpl implements OrderService {
         // 위시리스트 유효성 검사
         List<WishListOrderedRespDto> foundWishLists = validateWishLists(userId, wishListIds);
 
+        // 주문하려는 상품이 구매 가능한 시간인지 검사하기!!
+        validateReservationTime(foundWishLists);
+
         // 재고 감소 처리
         Map<Long, Integer> goodsIdToOrderQuantityMap = generateGoodsIdToOrderQuantityMap(foundWishLists);
         decreaseStocks(goodsIdToOrderQuantityMap);
@@ -92,6 +96,20 @@ public class OrderServiceImpl implements OrderService {
         return foundWishLists;
     }
 
+    private static void validateReservationTime(List<WishListOrderedRespDto> foundWishLists) {
+        LocalDateTime now = LocalDateTime.now();
+        for (WishListOrderedRespDto wishList : foundWishLists) {
+            // 주문하려는 상품의 예약구매 시작 시간 확인
+            LocalDateTime reservationStartTime = wishList.getReservationStartTime();
+
+            // 예약구매 시작 시간이 설정되어 있고, 현재 시간이 예약 시작 시간보다 이전인 경우,
+            // 또는 예약 시작 시간이 설정되어 있지 않은 경우(즉각 구매가능한 상품) 예외 발생
+            if (reservationStartTime != null && now.isBefore(reservationStartTime)) {
+                throw new CustomApiException("상품 " + wishList.getGoodsName() + "은(는) 아직 주문할 수 있는 시간이 아닙니다.");
+            }
+        }
+    }
+
     private Map<Long, Integer> generateGoodsIdToOrderQuantityMap(List<WishListOrderedRespDto> foundWishLists) {
         return foundWishLists.stream()
                 .collect(Collectors.toMap(
@@ -112,7 +130,7 @@ public class OrderServiceImpl implements OrderService {
         for (WishListOrderedRespDto foundWishList : foundWishLists) {
             OrderDetail orderDetail = new OrderDetail(order, foundWishList);
             orderDetails.add(orderDetail);
-            orderGoods.add(new OrderGoodsRespDto(orderDetail, foundWishList.getGoodsName()));
+            orderGoods.add(new OrderGoodsRespDto(orderDetail, foundWishList.getGoodsName(), foundWishList.getReservationStartTime()));
         }
         orderDetailRepository.saveAll(orderDetails);
         shippingRepository.saveAll(

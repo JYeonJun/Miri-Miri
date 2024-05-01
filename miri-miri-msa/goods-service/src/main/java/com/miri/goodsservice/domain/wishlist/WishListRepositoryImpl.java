@@ -49,6 +49,7 @@ public class WishListRepositoryImpl implements WishListRepositoryCustom {
                         goods.stockQuantity,
                         categoryExpression,
                         wishList.quantity,
+                        goods.reservationStartTime,
                         wishList.createdDate
                 ))
                 .from(wishList)

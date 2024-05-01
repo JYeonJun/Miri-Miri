@@ -31,10 +31,7 @@ public class GoodsRepositoryImpl implements GoodsRepositoryCustom {
     public Page<GoodsListDto> findPagingGoods(Pageable pageable) {
         JPAQuery<GoodsListDto> query = queryFactory
                 .select(Projections.constructor(GoodsListDto.class,
-                        goods.id,
-                        goods.goodsName,
-                        goods.goodsPrice,
-                        goods.category
+                        goods
                 ))
                 .from(goods)
                 .offset(pageable.getOffset())
@@ -73,6 +70,7 @@ public class GoodsRepositoryImpl implements GoodsRepositoryCustom {
                         goods.goodsPrice,
                         goods.stockQuantity,
                         categoryExpression,
+                        goods.reservationStartTime,
                         goods.createdDate,
                         goods.lastModifiedDate
                 ))

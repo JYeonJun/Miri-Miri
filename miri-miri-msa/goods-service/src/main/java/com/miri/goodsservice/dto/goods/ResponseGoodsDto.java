@@ -1,7 +1,8 @@
 package com.miri.goodsservice.dto.goods;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.miri.goodsservice.domain.goods.Goods;
-import com.miri.goodsservice.domain.goods.GoodsCategory;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,8 @@ public class ResponseGoodsDto {
         private int goodsPrice;
         private int stockQuantity;
         private String category;
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+        private LocalDateTime reservationStartTime;
 
         public GoodsRegistrationRespDto(Goods goods) {
             this.sellerId = goods.getSellerId();
@@ -24,6 +27,7 @@ public class ResponseGoodsDto {
             this.goodsPrice = goods.getGoodsPrice();
             this.stockQuantity = goods.getStockQuantity();
             this.category = goods.getCategory().getValue();
+            this.reservationStartTime = goods.getReservationStartTime();
         }
     }
 
@@ -39,12 +43,15 @@ public class ResponseGoodsDto {
         private String goodsName;
         private int goodsPrice;
         private String category;
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+        private LocalDateTime reservationStartTime;
 
-        public GoodsListDto(Long goodsId, String goodsName, int goodsPrice, GoodsCategory category) {
-            this.goodsId = goodsId;
-            this.goodsName = goodsName;
-            this.goodsPrice = goodsPrice;
-            this.category = category.getValue();
+        public GoodsListDto(Goods goods) {
+            this.goodsId = goods.getId();
+            this.goodsName = goods.getGoodsName();
+            this.goodsPrice = goods.getGoodsPrice();
+            this.category = goods.getCategory().getValue();
+            this.reservationStartTime = goods.getReservationStartTime();
         }
     }
 
@@ -58,6 +65,8 @@ public class ResponseGoodsDto {
         private int goodsPrice;
         private int stockQuantity;
         private String category;
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+        private LocalDateTime reservationStartTime;
 
         public GoodsDetailRespDto(Goods goods, String sellerName) {
             this.goodsId = goods.getId();
@@ -68,6 +77,7 @@ public class ResponseGoodsDto {
             this.goodsPrice = goods.getGoodsPrice();
             this.stockQuantity = goods.getStockQuantity();
             this.category = goods.getCategory().getValue();
+            this.reservationStartTime = goods.getReservationStartTime();
         }
     }
 }
