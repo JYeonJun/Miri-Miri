@@ -2,8 +2,8 @@ package com.miri.userservice.dto.user;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.RegisterGoodsListRespDto;
-import com.miri.coremodule.dto.goods.FeignGoodsRespDto.WishListRespDto;
 import com.miri.coremodule.dto.order.FeignOrderRespDto.OrderGoodsListRespDto;
+import com.miri.coremodule.dto.wishlist.FeignWishListRespDto.WishListRespDto;
 import com.miri.userservice.domain.user.User;
 import java.time.LocalDateTime;
 import lombok.Data;

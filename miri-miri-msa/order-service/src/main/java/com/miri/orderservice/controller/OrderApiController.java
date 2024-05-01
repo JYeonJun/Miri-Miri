@@ -4,8 +4,8 @@ import static com.miri.orderservice.dto.order.RequestOrderDto.CreateOrderReqDto;
 import static com.miri.orderservice.dto.order.RequestOrderDto.ReturnOrderReqDto;
 
 import com.miri.coremodule.dto.ResponseDto;
+import com.miri.coremodule.dto.order.FeignOrderRespDto.OrderGoodsListRespDto;
 import com.miri.orderservice.dto.order.ResponseOrderDto.CreateOrderRespDto;
-import com.miri.orderservice.dto.order.ResponseOrderDto.OrderGoodsListRespDto;
 import com.miri.orderservice.service.order.OrderService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;

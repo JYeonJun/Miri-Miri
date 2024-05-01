@@ -3,10 +3,14 @@ package com.miri.goodsservice.domain.wishlist;
 import static com.miri.goodsservice.domain.goods.QGoods.goods;
 import static com.miri.goodsservice.domain.wishlist.QWishList.wishList;
 
-import com.miri.goodsservice.dto.wishlist.ResponseWishListDto.GoodsInWishListRespDto;
+import com.miri.coremodule.dto.wishlist.FeignWishListRespDto.GoodsInWishListRespDto;
+import com.miri.goodsservice.domain.goods.GoodsCategory;
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -27,10 +31,25 @@ public class WishListRepositoryImpl implements WishListRepositoryCustom {
 
     @Override
     public Page<GoodsInWishListRespDto> findPagingGoodsInWishList(Long userId, Pageable pageable) {
+        Expression<String> categoryExpression = new CaseBuilder()
+                .when(goods.category.eq(GoodsCategory.FASHION)).then("패션")
+                .when(goods.category.eq(GoodsCategory.BEAUTY)).then("뷰티")
+                .when(goods.category.eq(GoodsCategory.ETC)).then("기타")
+                .otherwise("알수없음");
+
+        NumberExpression<Integer> subTotalPriceExpression = wishList.quantity.multiply(goods.goodsPrice);
+
         JPAQuery<GoodsInWishListRespDto> query = queryFactory
                 .select(Projections.constructor(GoodsInWishListRespDto.class,
-                        wishList,
-                        goods
+                        wishList.id,
+                        goods.id,
+                        goods.goodsName,
+                        goods.goodsPrice,
+                        subTotalPriceExpression,
+                        goods.stockQuantity,
+                        categoryExpression,
+                        wishList.quantity,
+                        wishList.createdDate
                 ))
                 .from(wishList)
                 .leftJoin(wishList.goods, goods)

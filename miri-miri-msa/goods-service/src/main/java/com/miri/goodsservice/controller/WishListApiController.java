@@ -3,15 +3,12 @@ package com.miri.goodsservice.controller;
 import static com.miri.goodsservice.dto.wishlist.RequestWishListDto.WishListUpdateReqDto;
 
 import com.miri.coremodule.dto.ResponseDto;
-import com.miri.coremodule.dto.wishlist.FeignWishListReqDto.WishListOrderedReqDto;
-import com.miri.coremodule.dto.wishlist.FeignWishListRespDto.WishListOrderedRespDto;
+import com.miri.coremodule.dto.wishlist.FeignWishListRespDto.WishListRespDto;
 import com.miri.goodsservice.dto.wishlist.RequestWishListDto.AddToCartReqDto;
 import com.miri.goodsservice.dto.wishlist.ResponseWishListDto.AddToWishListRespDto;
-import com.miri.goodsservice.dto.wishlist.ResponseWishListDto.WishListRespDto;
 import com.miri.goodsservice.dto.wishlist.ResponseWishListDto.WishListUpdateRespDto;
 import com.miri.goodsservice.service.wishlist.WishListService;
 import jakarta.validation.Valid;
-import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;

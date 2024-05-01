@@ -1,11 +1,11 @@
 package com.miri.goodsservice.controller;
 
 import com.miri.coremodule.dto.ResponseDto;
+import com.miri.coremodule.dto.goods.FeignGoodsRespDto.RegisterGoodsListRespDto;
 import com.miri.goodsservice.dto.goods.RequestGoodsDto.GoodsRegistrationReqDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsDetailRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsListRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsRegistrationRespDto;
-import com.miri.goodsservice.dto.goods.ResponseGoodsDto.RegisterGoodsListRespDto;
 import com.miri.goodsservice.service.goods.GoodsService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;

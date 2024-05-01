@@ -1,9 +1,9 @@
 package com.miri.goodsservice.service.wishlist;
 
 import com.miri.coremodule.dto.wishlist.FeignWishListRespDto.WishListOrderedRespDto;
+import com.miri.coremodule.dto.wishlist.FeignWishListRespDto.WishListRespDto;
 import com.miri.goodsservice.dto.wishlist.RequestWishListDto.AddToCartReqDto;
 import com.miri.goodsservice.dto.wishlist.ResponseWishListDto.AddToWishListRespDto;
-import com.miri.goodsservice.dto.wishlist.ResponseWishListDto.WishListRespDto;
 import com.miri.goodsservice.dto.wishlist.ResponseWishListDto.WishListUpdateRespDto;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
