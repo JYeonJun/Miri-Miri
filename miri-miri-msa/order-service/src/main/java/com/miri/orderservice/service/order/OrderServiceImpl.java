@@ -62,18 +62,14 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public CreateOrderRespDto createOrder(Long userId, CreateOrderReqDto reqDto) {
-
-        CircuitBreaker circuitbreaker = circuitBreakerFactory.create("circuitbreaker");
-
         List<Long> wishListIds = reqDto.getWishListIds();
 
         // 위시리스트 유효성 검사
-        List<WishListOrderedRespDto> foundWishLists
-                = validateWishLists(userId, reqDto.getWishListIds(), circuitbreaker);
+        List<WishListOrderedRespDto> foundWishLists = validateWishLists(userId, wishListIds);
 
         // 재고 감소 처리
         Map<Long, Integer> goodsIdToOrderQuantityMap = generateGoodsIdToOrderQuantityMap(foundWishLists);
-        decreaseStocks(goodsIdToOrderQuantityMap, circuitbreaker);
+        decreaseStocks(goodsIdToOrderQuantityMap);
 
         // 주문 생성
         Order order = orderRepository.save(new Order(userId));
@@ -82,18 +78,19 @@ public class OrderServiceImpl implements OrderService {
         List<OrderGoodsRespDto> orderGoods = createOrderDetailsAndShippings(order, foundWishLists, reqDto.getAddress());
 
         // 위시리스트 삭제 요청
-        deleteOrderedWishLists(reqDto.getWishListIds(), circuitbreaker);
+        deleteOrderedWishLists(wishListIds);
 
         int totalOrderPrice = calculateTotalOrderPrice(foundWishLists);
 
         return new CreateOrderRespDto(order, orderGoods, totalOrderPrice);
     }
 
-    private List<WishListOrderedRespDto> validateWishLists(Long userId, List<Long> wishListIds,
-                                                           CircuitBreaker circuitbreaker) {
-        List<WishListOrderedRespDto> foundWishLists = circuitbreaker.run(
-                () -> goodsServiceClient.getOrderedWishLists(new WishListOrderedReqDto(userId, wishListIds)),
-                throwable -> null);
+    private List<WishListOrderedRespDto> validateWishLists(Long userId, List<Long> wishListIds) {
+        if (wishListIds.isEmpty()) {
+            throw new CustomApiException("위시리스트 ID 목록이 비어있습니다.");
+        }
+
+        List<WishListOrderedRespDto> foundWishLists = goodsServiceClient.getOrderedWishLists(new WishListOrderedReqDto(userId, wishListIds));
         if (foundWishLists == null || foundWishLists.size() != wishListIds.size()) {
             throw new CustomApiException("유효하지 않은 위시리스트 ID가 포함되어 있습니다.");
         }
@@ -108,13 +105,8 @@ public class OrderServiceImpl implements OrderService {
                         Integer::sum));// 동일한 키에 대한 값 병합
     }
 
-    private void decreaseStocks(Map<Long, Integer> goodsIdToOrderQuantityMap, CircuitBreaker circuitbreaker) {
-        circuitbreaker.run(
-                () -> goodsServiceClient.decreaseStock(goodsIdToOrderQuantityMap),
-                throwable -> {
-                    throw new CustomApiException("재고 감소 요청이 실패했습니다.");
-                }
-        );
+    private void decreaseStocks(Map<Long, Integer> goodsIdToOrderQuantityMap) {
+        goodsServiceClient.decreaseStock(goodsIdToOrderQuantityMap);
     }
 
     private List<OrderGoodsRespDto> createOrderDetailsAndShippings(Order order,
@@ -133,14 +125,8 @@ public class OrderServiceImpl implements OrderService {
         return orderGoods;
     }
 
-    private void deleteOrderedWishLists(List<Long> wishListIds, CircuitBreaker circuitbreaker) {
-        try {
-            goodsServiceClient.deleteOrderedWishLists(wishListIds);
-        } catch (Exception e) {
-            log.error(e.toString());
-            // TODO: 롤백 요청
-            throw new CustomApiException("위시리스트 목록 삭제에 실패하였습니다.");
-        }
+    private void deleteOrderedWishLists(List<Long> wishListIds) {
+        goodsServiceClient.deleteOrderedWishLists(wishListIds);
     }
 
     private int calculateTotalOrderPrice(List<WishListOrderedRespDto> foundWishLists) {
@@ -171,13 +157,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private Map<Long, OrderedGoodsDetailRespDto> fetchOrderedGoodsDetails(Set<Long> goodsIds) {
-        CircuitBreaker circuitbreaker = circuitBreakerFactory.create("circuitbreaker");
-        return circuitbreaker.run(
-                () -> goodsServiceClient.getOrderedGoodsDetailsAsMap(goodsIds),
-                throwable -> {
-                    log.error("주문한 상품 상세 정보 조회 에러", throwable);
-                    return Collections.emptyMap();
-                });
+        return goodsServiceClient.getOrderedGoodsDetailsAsMap(goodsIds);
     }
 
     private void mapGoodsInfoToOrderGoodsDto(OrderGoodsDto orderGoodsDto,
@@ -197,12 +177,7 @@ public class OrderServiceImpl implements OrderService {
         OrderDetail findOrderDetail = validateOrderDetail(userId, orderDetailId);
         validateCancelCondition(findOrderDetail);
 
-        CircuitBreaker circuitbreaker = circuitBreakerFactory.create("circuitbreaker");
-        circuitbreaker.run(
-                () -> goodsServiceClient.increaseStock(new GoodsStockIncreaseReqDto(findOrderDetail.getGoodsId(), findOrderDetail.getQuantity())),
-                throwable -> {
-                    throw new CustomApiException("재고 증가 요청에 실패했습니다.");
-                });
+        goodsServiceClient.increaseStock(new GoodsStockIncreaseReqDto(findOrderDetail.getGoodsId(), findOrderDetail.getQuantity()));
 
         updateOrderStatusToCanceled(findOrderDetail);
     }

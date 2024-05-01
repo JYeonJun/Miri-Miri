@@ -60,12 +60,7 @@ public class GoodsServiceImpl implements GoodsService {
     }
 
     private String getSellerName(Goods goods) {
-        CircuitBreaker circuitbreaker = circuitBreakerFactory.create("circuitbreaker");
-        return circuitbreaker.run(() -> userServiceClient.getUserNameById(goods.getSellerId()),
-                throwable -> {
-                    log.error("상품 상세 조회(goods-service -> user-service): 사용자 이름 요청");
-                    return null;
-                });
+        return userServiceClient.getUserNameById(goods.getSellerId());
     }
 
     @Override
@@ -83,6 +78,8 @@ public class GoodsServiceImpl implements GoodsService {
         for (Goods goods : goodsList) {
             Long goodsId = goods.getId();
             int remainStockQuantity = goods.decreaseStock(reqDtos.get(goodsId));
+            // TODO: 재고 부족은 추후 처리 예정
+            // BusinessException 발생!! -> ignoreExceptions 속성에 추가
             responseList.add(new GoodsStockRespDto(goodsId, remainStockQuantity));
         }
         return responseList;

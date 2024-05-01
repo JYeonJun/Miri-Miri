@@ -1,5 +1,6 @@
 package com.miri.userservice.service.user;
 
+import com.miri.coremodule.dto.ResponseDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.RegisterGoodsListRespDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.WishListRespDto;
 import com.miri.coremodule.dto.order.FeignOrderRespDto.OrderGoodsListRespDto;
@@ -17,11 +18,10 @@ import com.miri.userservice.dto.user.RequestUserDto.UpdateUserProfileReqDto;
 import com.miri.userservice.dto.user.ResponseUserDto.GetUserRespDto;
 import com.miri.userservice.dto.user.ResponseUserDto.UpdateUserProfileRespDto;
 import com.miri.userservice.util.AESUtils;
+import java.util.Optional;
+import java.util.function.BiFunction;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -99,46 +99,25 @@ public class UserServiceImpl implements UserService {
     @Override
     public GetUserRespDto getUserInfo(Long userId) {
         User findUser = findUserByIdOrThrow(userId);
-        CircuitBreaker circuitbreaker = circuitBreakerFactory.create("circuitbreaker");
 
         // 등록한 상품 목록(GoodsService)
-        RegisterGoodsListRespDto registerGoodsList = fetchRegisterGoodsList(userId, circuitbreaker);
+        RegisterGoodsListRespDto registerGoodsList = fetchServiceData(RegisterGoodsListRespDto.class, userId, goodsServiceClient::getRegisteredGoodsList);
 
         // 장바구니에 추가한 상품 목록(WishListService)
-        WishListRespDto wishListGoods = fetchWishListGoods(userId, circuitbreaker);
+        WishListRespDto wishListGoods = fetchServiceData(WishListRespDto.class, userId, goodsServiceClient::getWishListGoods);
 
         // 주문한 상품 목록(OrderService)
-        OrderGoodsListRespDto orderGoodsList = fetchOrderGoodsList(userId, circuitbreaker);
+        OrderGoodsListRespDto orderGoodsList = fetchServiceData(OrderGoodsListRespDto.class, userId, orderServiceClient::getOrderGoodsList);
 
         return new GetUserRespDto(findUser, registerGoodsList, wishListGoods, orderGoodsList);
     }
 
-    private RegisterGoodsListRespDto fetchRegisterGoodsList(Long userId, CircuitBreaker circuitbreaker) {
-        return circuitbreaker.run(() -> goodsServiceClient.getRegisteredGoodsList(String.valueOf(userId), 0).getData(),
-                throwable -> {
-                    log.error("마이페이지 정보 조회: 등록한 상품 목록 조회 실패");
-                    return null;
-                });
-    }
-
-    private WishListRespDto fetchWishListGoods(Long userId, CircuitBreaker circuitbreaker) {
-        WishListRespDto wishListGoods = circuitbreaker.run(
-                () -> goodsServiceClient.getWishListGoods(String.valueOf(userId), 0).getData(),
-                throwable -> {
-                    log.error("마이페이지 정보 조회: 위시리스트 목록 조회 실패");
-                    return null;
-                });
-        return wishListGoods;
-    }
-
-    private OrderGoodsListRespDto fetchOrderGoodsList(Long userId, CircuitBreaker circuitbreaker) {
-        OrderGoodsListRespDto orderGoodsList = circuitbreaker.run(
-                () -> orderServiceClient.getOrderGoodsList(String.valueOf(userId), 0).getData(),
-                throwable -> {
-                    log.error("마이페이지 정보 조회: 주문 목록 조회 실패");
-                    return null;
-                });
-        return orderGoodsList;
+    private <T> T fetchServiceData(Class<T> clazz, Long userId, BiFunction<String, Integer, ResponseDto<T>> serviceMethod) {
+        // 저장된 상품 목록을 가져오는 제네릭 메소드
+        ResponseDto<T> response = serviceMethod.apply(String.valueOf(userId), 0);
+        return Optional.ofNullable(response)
+                .map(ResponseDto::getData)
+                .orElse(null);
     }
 
     @Override
