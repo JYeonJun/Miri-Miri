@@ -3,6 +3,7 @@ package com.miri.goodsservice.domain.goods;
 import com.miri.coremodule.domain.BaseTimeEntity;
 import com.miri.coremodule.handler.ex.CustomApiException;
 import com.miri.goodsservice.dto.goods.RequestGoodsDto.GoodsRegistrationReqDto;
+import com.miri.goodsservice.dto.goods.RequestGoodsDto.UpdateRegisteredGoodsReqDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -74,5 +76,13 @@ public class Goods extends BaseTimeEntity {
 
     public void increaseStock(int stockQuantity) {
         this.stockQuantity += stockQuantity;
+    }
+
+    public void changeGoodsInfo(UpdateRegisteredGoodsReqDto reqDto) {
+        Optional.ofNullable(reqDto.getGoodsName()).ifPresent(goodsName -> this.goodsName = goodsName);
+        Optional.ofNullable(reqDto.getGoodsDescription()).ifPresent(goodsDescription -> this.goodsDescription = goodsDescription);
+        Optional.ofNullable(reqDto.getGoodsPrice()).ifPresent(goodsPrice -> this.goodsPrice = goodsPrice);
+        Optional.ofNullable(reqDto.getCategory()).ifPresent(category -> this.category = category);
+        Optional.ofNullable(reqDto.getReservationStartTime()).ifPresent(reservationStartTime -> this.reservationStartTime = reservationStartTime);
     }
 }
