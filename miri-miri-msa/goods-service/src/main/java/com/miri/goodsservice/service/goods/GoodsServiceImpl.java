@@ -9,9 +9,11 @@ import com.miri.goodsservice.client.UserServiceClient;
 import com.miri.goodsservice.domain.goods.Goods;
 import com.miri.goodsservice.domain.goods.GoodsRepository;
 import com.miri.goodsservice.dto.goods.RequestGoodsDto.GoodsRegistrationReqDto;
+import com.miri.goodsservice.dto.goods.RequestGoodsDto.UpdateRegisteredGoodsReqDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsDetailRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsListRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsRegistrationRespDto;
+import com.miri.goodsservice.dto.goods.ResponseGoodsDto.UpdateRegisteredGoodsRespDto;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -100,6 +102,16 @@ public class GoodsServiceImpl implements GoodsService {
                                 goods.getCategory().getValue()
                         )
                 ));
+    }
+
+    @Override
+    @Transactional
+    public UpdateRegisteredGoodsRespDto updateRegisteredGoods(Long userId, Long goodsId,
+                                                              UpdateRegisteredGoodsReqDto reqDto) {
+        Goods findGoods = goodsRepository.findByIdAndSellerId(goodsId, userId)
+                .orElseThrow(() -> new CustomApiException("상품 수정 권한이 없습니다."));
+        findGoods.changeGoodsInfo(reqDto);
+        return new UpdateRegisteredGoodsRespDto(findGoods);
     }
 
     private Goods findGoodsByIdOrThrow(Long goodsId) {

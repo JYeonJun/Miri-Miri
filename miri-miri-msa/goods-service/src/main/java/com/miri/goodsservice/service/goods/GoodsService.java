@@ -5,9 +5,11 @@ import com.miri.coremodule.dto.goods.FeignGoodsRespDto.GoodsStockRespDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.OrderedGoodsDetailRespDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.RegisterGoodsListRespDto;
 import com.miri.goodsservice.dto.goods.RequestGoodsDto.GoodsRegistrationReqDto;
+import com.miri.goodsservice.dto.goods.RequestGoodsDto.UpdateRegisteredGoodsReqDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsDetailRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsListRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsRegistrationRespDto;
+import com.miri.goodsservice.dto.goods.ResponseGoodsDto.UpdateRegisteredGoodsRespDto;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,7 +29,10 @@ public interface GoodsService {
     RegisterGoodsListRespDto findRegisterGoodsList(Long userId, Pageable pageable);
 
     List<GoodsStockRespDto> decreaseOrderedGoodsStock(Map<Long, Integer> reqDtos);
+
     GoodsStockRespDto increaseOrderedGoodsStock(GoodsStockIncreaseReqDto reqDto);
 
     Map<Long, OrderedGoodsDetailRespDto> getOrderedGoodsDetailsAsMap(Set<Long> goodsIds);
+
+    UpdateRegisteredGoodsRespDto updateRegisteredGoods(Long userId, Long goodsId, UpdateRegisteredGoodsReqDto reqDto);
 }

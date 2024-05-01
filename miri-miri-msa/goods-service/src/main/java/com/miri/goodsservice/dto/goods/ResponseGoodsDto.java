@@ -80,4 +80,26 @@ public class ResponseGoodsDto {
             this.reservationStartTime = goods.getReservationStartTime();
         }
     }
+
+    @Data
+    public static class UpdateRegisteredGoodsRespDto {
+        private Long goodsId;
+        private String goodsName;
+        private String goodsDescription;
+        private int goodsPrice;
+        private int stockQuantity;
+        private String category;
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+        private LocalDateTime reservationStartTime;
+
+        public UpdateRegisteredGoodsRespDto(Goods goods) {
+            this.goodsId = goods.getId();
+            this.goodsName = goods.getGoodsName();
+            this.goodsDescription = goods.getGoodsDescription();
+            this.goodsPrice = goods.getGoodsPrice();
+            this.stockQuantity = goods.getStockQuantity();
+            this.category = goods.getCategory().getValue();
+            this.reservationStartTime = goods.getReservationStartTime();
+        }
+    }
 }
