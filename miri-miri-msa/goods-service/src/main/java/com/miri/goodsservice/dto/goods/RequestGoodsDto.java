@@ -1,10 +1,13 @@
 package com.miri.goodsservice.dto.goods;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.miri.goodsservice.domain.goods.GoodsCategory;
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
 import lombok.Data;
 
 public class RequestGoodsDto {
@@ -27,5 +30,9 @@ public class RequestGoodsDto {
 
         @NotNull(message = "상품 카테고리는 필수 입력 값입니다.")
         private GoodsCategory category;
+
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @Future(message = "예약구매 시작 시간은 현재 시간 이후여야 합니다.")
+        private LocalDateTime reservationStartTime;
     }
 }

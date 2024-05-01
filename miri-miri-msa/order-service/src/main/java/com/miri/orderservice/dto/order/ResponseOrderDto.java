@@ -34,14 +34,17 @@ public class ResponseOrderDto {
         private int unitPrice;
         private int subTotalPrice;
         private String orderStatus;
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+        private LocalDateTime reservationStartTime;
 
-        public OrderGoodsRespDto(OrderDetail orderDetail, String goodsName) {
+        public OrderGoodsRespDto(OrderDetail orderDetail, String goodsName, LocalDateTime reservationStartTime) {
             this.goodsId = orderDetail.getGoodsId();
             this.goodsName = goodsName;
             this.quantity = orderDetail.getQuantity();
             this.unitPrice = orderDetail.getUnitPrice();
             this.subTotalPrice = this.unitPrice * this.quantity;
             this.orderStatus = orderDetail.getOrderStatus().getValue();
+            this.reservationStartTime = reservationStartTime;
         }
     }
 }

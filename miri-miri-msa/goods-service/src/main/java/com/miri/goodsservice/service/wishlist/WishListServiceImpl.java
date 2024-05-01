@@ -90,6 +90,7 @@ public class WishListServiceImpl implements WishListService {
                     .goodsId(goods.getId())
                     .goodsName(goods.getGoodsName())
                     .unitPrice(goods.getGoodsPrice())
+                    .reservationStartTime(goods.getReservationStartTime())
                     .build();
         })).collect(Collectors.toList());
     }

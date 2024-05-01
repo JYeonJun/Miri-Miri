@@ -36,11 +36,11 @@ public class GoodsApiController {
     }
 
     @PostMapping("/auth/goods")
-    public ResponseEntity<?> registerGoods(@RequestBody @Valid GoodsRegistrationReqDto goodsRegistrationReqDto,
+    public ResponseEntity<?> registerGoods(@RequestBody @Valid GoodsRegistrationReqDto reqDto,
                                            BindingResult bindingResult,
                                            @RequestHeader(USER_ID_HEADER) String userId) {
         GoodsRegistrationRespDto result
-                = goodsService.createGoods(Long.valueOf(userId), goodsRegistrationReqDto);
+                = goodsService.createGoods(Long.valueOf(userId), reqDto);
         return new ResponseEntity<>(new ResponseDto<>(1, "상품 등록에 성공했습니다.", result), HttpStatus.CREATED);
     }
 
