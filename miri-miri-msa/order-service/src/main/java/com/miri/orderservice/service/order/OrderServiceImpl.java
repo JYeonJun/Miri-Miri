@@ -23,14 +23,11 @@ import com.miri.orderservice.dto.order.ResponseOrderDto.OrderGoodsListRespDto;
 import com.miri.orderservice.dto.order.ResponseOrderDto.OrderGoodsRespDto;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
-import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -46,17 +43,15 @@ public class OrderServiceImpl implements OrderService {
     private final ShippingRepository shippingRepository;
     private final ReturnRequestRepository returnRequestRepository;
     private final GoodsServiceClient goodsServiceClient;
-    private final CircuitBreakerFactory circuitBreakerFactory;
 
     public OrderServiceImpl(OrderRepository orderRepository, OrderDetailRepository orderDetailRepository,
                             ShippingRepository shippingRepository, ReturnRequestRepository returnRequestRepository,
-                            GoodsServiceClient goodsServiceClient, CircuitBreakerFactory circuitBreakerFactory) {
+                            GoodsServiceClient goodsServiceClient) {
         this.orderRepository = orderRepository;
         this.orderDetailRepository = orderDetailRepository;
         this.shippingRepository = shippingRepository;
         this.returnRequestRepository = returnRequestRepository;
         this.goodsServiceClient = goodsServiceClient;
-        this.circuitBreakerFactory = circuitBreakerFactory;
     }
 
     @Override

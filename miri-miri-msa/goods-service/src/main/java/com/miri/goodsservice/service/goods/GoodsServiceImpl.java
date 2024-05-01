@@ -31,13 +31,10 @@ public class GoodsServiceImpl implements GoodsService {
 
     private final GoodsRepository goodsRepository;
     private final UserServiceClient userServiceClient;
-    private final CircuitBreakerFactory circuitBreakerFactory;
 
-    public GoodsServiceImpl(GoodsRepository goodsRepository, UserServiceClient userServiceClient,
-                            CircuitBreakerFactory circuitBreakerFactory) {
+    public GoodsServiceImpl(GoodsRepository goodsRepository, UserServiceClient userServiceClient) {
         this.goodsRepository = goodsRepository;
         this.userServiceClient = userServiceClient;
-        this.circuitBreakerFactory = circuitBreakerFactory;
     }
 
     @Override

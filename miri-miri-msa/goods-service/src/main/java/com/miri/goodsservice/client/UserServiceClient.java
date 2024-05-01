@@ -1,8 +1,6 @@
 package com.miri.goodsservice.client;
 
-import com.miri.coremodule.dto.wishlist.FeignWishListRespDto.WishListOrderedRespDto;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.openfeign.FeignClient;

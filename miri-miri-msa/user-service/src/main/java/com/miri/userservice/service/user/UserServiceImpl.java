@@ -21,7 +21,6 @@ import com.miri.userservice.util.AESUtils;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,20 +36,18 @@ public class UserServiceImpl implements UserService {
     private final AESUtils aesUtils;
     private final GoodsServiceClient goodsServiceClient;
     private final OrderServiceClient orderServiceClient;
-    private final CircuitBreakerFactory circuitBreakerFactory;
 
     public UserServiceImpl(UserRepository userRepository,
                            EmailVerificationCodeRepository emailVerificationCodeRepository,
                            BCryptPasswordEncoder passwordEncoder, AESUtils aesUtils,
                            GoodsServiceClient goodsServiceClient,
-                           OrderServiceClient orderServiceClient, CircuitBreakerFactory circuitBreakerFactory) {
+                           OrderServiceClient orderServiceClient) {
         this.userRepository = userRepository;
         this.emailVerificationCodeRepository = emailVerificationCodeRepository;
         this.passwordEncoder = passwordEncoder;
         this.aesUtils = aesUtils;
         this.goodsServiceClient = goodsServiceClient;
         this.orderServiceClient = orderServiceClient;
-        this.circuitBreakerFactory = circuitBreakerFactory;
     }
 
     @Override
@@ -101,18 +98,22 @@ public class UserServiceImpl implements UserService {
         User findUser = findUserByIdOrThrow(userId);
 
         // 등록한 상품 목록(GoodsService)
-        RegisterGoodsListRespDto registerGoodsList = fetchServiceData(RegisterGoodsListRespDto.class, userId, goodsServiceClient::getRegisteredGoodsList);
+        RegisterGoodsListRespDto registerGoodsList = fetchServiceData(RegisterGoodsListRespDto.class, userId,
+                goodsServiceClient::getRegisteredGoodsList);
 
         // 장바구니에 추가한 상품 목록(WishListService)
-        WishListRespDto wishListGoods = fetchServiceData(WishListRespDto.class, userId, goodsServiceClient::getWishListGoods);
+        WishListRespDto wishListGoods = fetchServiceData(WishListRespDto.class, userId,
+                goodsServiceClient::getWishListGoods);
 
         // 주문한 상품 목록(OrderService)
-        OrderGoodsListRespDto orderGoodsList = fetchServiceData(OrderGoodsListRespDto.class, userId, orderServiceClient::getOrderGoodsList);
+        OrderGoodsListRespDto orderGoodsList = fetchServiceData(OrderGoodsListRespDto.class, userId,
+                orderServiceClient::getOrderGoodsList);
 
         return new GetUserRespDto(findUser, registerGoodsList, wishListGoods, orderGoodsList);
     }
 
-    private <T> T fetchServiceData(Class<T> clazz, Long userId, BiFunction<String, Integer, ResponseDto<T>> serviceMethod) {
+    private <T> T fetchServiceData(Class<T> clazz, Long userId,
+                                   BiFunction<String, Integer, ResponseDto<T>> serviceMethod) {
         // 저장된 상품 목록을 가져오는 제네릭 메소드
         ResponseDto<T> response = serviceMethod.apply(String.valueOf(userId), 0);
         return Optional.ofNullable(response)
