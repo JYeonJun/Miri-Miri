@@ -18,7 +18,7 @@ public interface UserServiceClient {
     @GetMapping("/api/internal/users/{userId}/name")
     String getUserNameById(@PathVariable("userId") Long userId);
 
-    default List<WishListOrderedRespDto> getUserNameFallback(Throwable e) {
+    default String getUserNameFallback(Throwable e) {
         log.error("등록 상품 조회: 상품 판매자 이름 조회 실패");
         return null;
     }
