@@ -1,6 +1,6 @@
 package com.miri.orderservice.domain.order;
 
-import com.miri.orderservice.dto.order.ResponseOrderDto.OrderGoodsDto;
+import com.miri.coremodule.dto.order.FeignOrderRespDto.OrderGoodsDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

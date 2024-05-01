@@ -2,8 +2,8 @@ package com.miri.userservice.service.user;
 
 import com.miri.coremodule.dto.ResponseDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.RegisterGoodsListRespDto;
-import com.miri.coremodule.dto.goods.FeignGoodsRespDto.WishListRespDto;
 import com.miri.coremodule.dto.order.FeignOrderRespDto.OrderGoodsListRespDto;
+import com.miri.coremodule.dto.wishlist.FeignWishListRespDto.WishListRespDto;
 import com.miri.coremodule.handler.ex.CustomApiException;
 import com.miri.userservice.client.GoodsServiceClient;
 import com.miri.userservice.client.OrderServiceClient;

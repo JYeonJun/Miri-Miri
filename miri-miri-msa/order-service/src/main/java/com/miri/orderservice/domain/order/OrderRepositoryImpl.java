@@ -3,10 +3,12 @@ package com.miri.orderservice.domain.order;
 import static com.miri.orderservice.domain.order.QOrder.order;
 import static com.miri.orderservice.domain.order.QOrderDetail.orderDetail;
 
-import com.miri.orderservice.dto.order.ResponseOrderDto.OrderGoodsDto;
+import com.miri.coremodule.dto.order.FeignOrderRespDto.OrderGoodsDto;
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -27,11 +29,23 @@ public class OrderRepositoryImpl implements OrderRepositoryCustom {
 
     @Override
     public Page<OrderGoodsDto> findPagingOrderList(Long userId, Pageable pageable) {
+        Expression<String> orderStatusExpression = new CaseBuilder()
+                .when(orderDetail.orderStatus.eq(OrderStatus.PENDING)).then("대기")
+                .when(orderDetail.orderStatus.eq(OrderStatus.IN_TRANSIT)).then("배송 중")
+                .when(orderDetail.orderStatus.eq(OrderStatus.DELIVERED)).then("배송 완료")
+                .when(orderDetail.orderStatus.eq(OrderStatus.CANCELED)).then("주문 취소")
+                .when(orderDetail.orderStatus.eq(OrderStatus.RETURN_IN_PROGRESS)).then("반품 중")
+                .when(orderDetail.orderStatus.eq(OrderStatus.RETURN_COMPLETED)).then("반품 완료")
+                .otherwise("알수없음");
 
         JPAQuery<OrderGoodsDto> query = queryFactory
                 .select(Projections.constructor(OrderGoodsDto.class,
-                        order,
-                        orderDetail
+                        order.id,
+                        orderDetail.id,
+                        orderDetail.goodsId,
+                        orderStatusExpression,
+                        orderDetail.quantity,
+                        orderDetail.createdDate
                 ))
 
                 .from(orderDetail)

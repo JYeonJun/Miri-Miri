@@ -1,9 +1,9 @@
 package com.miri.orderservice.service.order;
 
+import com.miri.coremodule.dto.order.FeignOrderRespDto.OrderGoodsListRespDto;
 import com.miri.orderservice.dto.order.RequestOrderDto.CreateOrderReqDto;
 import com.miri.orderservice.dto.order.RequestOrderDto.ReturnOrderReqDto;
 import com.miri.orderservice.dto.order.ResponseOrderDto.CreateOrderRespDto;
-import com.miri.orderservice.dto.order.ResponseOrderDto.OrderGoodsListRespDto;
 import org.springframework.data.domain.Pageable;
 
 public interface OrderService {

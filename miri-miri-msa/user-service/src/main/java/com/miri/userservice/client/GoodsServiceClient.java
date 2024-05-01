@@ -2,7 +2,7 @@ package com.miri.userservice.client;
 
 import com.miri.coremodule.dto.ResponseDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.RegisterGoodsListRespDto;
-import com.miri.coremodule.dto.goods.FeignGoodsRespDto.WishListRespDto;
+import com.miri.coremodule.dto.wishlist.FeignWishListRespDto.WishListRespDto;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

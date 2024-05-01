@@ -4,16 +4,20 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 
 public class FeignOrderRespDto {
 
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class OrderGoodsListRespDto {
         private Page<OrderGoodsDto> orders;
     }
 
     @Data
+    @NoArgsConstructor
     public static class OrderGoodsDto {
         private Long orderId; // 주문 ID
         private Long orderDetailId; // 상세 주문 ID
@@ -25,5 +29,15 @@ public class FeignOrderRespDto {
         private String category; // 상품 카테고리
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
         private LocalDateTime orderDate; // 주문 날짜
+
+        public OrderGoodsDto(Long orderId, Long orderDetailId, Long goodsId, String orderStatus, int orderQuantity,
+                             LocalDateTime orderDate) {
+            this.orderId = orderId;
+            this.orderDetailId = orderDetailId;
+            this.goodsId = goodsId;
+            this.orderStatus = orderStatus;
+            this.orderQuantity = orderQuantity;
+            this.orderDate = orderDate;
+        }
     }
 }
