@@ -102,4 +102,10 @@ public class ResponseGoodsDto {
             this.reservationStartTime = goods.getReservationStartTime();
         }
     }
+
+    @Data
+    @AllArgsConstructor
+    public static class GoodsStockQuantityRespDto {
+        private int goodsStockQuantity;
+    }
 }

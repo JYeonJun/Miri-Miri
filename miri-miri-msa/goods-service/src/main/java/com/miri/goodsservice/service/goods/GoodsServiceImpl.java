@@ -13,6 +13,7 @@ import com.miri.goodsservice.dto.goods.RequestGoodsDto.UpdateRegisteredGoodsReqD
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsDetailRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsListRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsRegistrationRespDto;
+import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsStockQuantityRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.UpdateRegisteredGoodsRespDto;
 import java.util.ArrayList;
 import java.util.List;
@@ -112,6 +113,13 @@ public class GoodsServiceImpl implements GoodsService {
                 .orElseThrow(() -> new CustomApiException("상품 수정 권한이 없습니다."));
         findGoods.changeGoodsInfo(reqDto);
         return new UpdateRegisteredGoodsRespDto(findGoods);
+    }
+
+    @Override
+    public GoodsStockQuantityRespDto getGoodsStockQuantity(Long goodsId) {
+        // TODO: 추후 레디스에서 재고 조회 고려하기!!
+        Goods findGoods = findGoodsByIdOrThrow(goodsId);
+        return new GoodsStockQuantityRespDto(findGoods.getStockQuantity());
     }
 
     private Goods findGoodsByIdOrThrow(Long goodsId) {
