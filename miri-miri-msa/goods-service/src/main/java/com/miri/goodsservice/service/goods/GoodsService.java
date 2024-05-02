@@ -9,6 +9,7 @@ import com.miri.goodsservice.dto.goods.RequestGoodsDto.UpdateRegisteredGoodsReqD
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsDetailRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsListRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsRegistrationRespDto;
+import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsStockQuantityRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.UpdateRegisteredGoodsRespDto;
 import java.util.List;
 import java.util.Map;
@@ -35,4 +36,6 @@ public interface GoodsService {
     Map<Long, OrderedGoodsDetailRespDto> getOrderedGoodsDetailsAsMap(Set<Long> goodsIds);
 
     UpdateRegisteredGoodsRespDto updateRegisteredGoods(Long userId, Long goodsId, UpdateRegisteredGoodsReqDto reqDto);
+
+    GoodsStockQuantityRespDto getGoodsStockQuantity(Long goodsId);
 }

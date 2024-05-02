@@ -7,6 +7,7 @@ import com.miri.goodsservice.dto.goods.RequestGoodsDto.UpdateRegisteredGoodsReqD
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsDetailRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsListRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsRegistrationRespDto;
+import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsStockQuantityRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.UpdateRegisteredGoodsRespDto;
 import com.miri.goodsservice.service.goods.GoodsService;
 import jakarta.validation.Valid;
@@ -77,6 +78,12 @@ public class GoodsApiController {
 
         UpdateRegisteredGoodsRespDto result = goodsService.updateRegisteredGoods(Long.valueOf(userId), goodsId, reqDto);
         return new ResponseEntity<>(new ResponseDto<>(1, "상품 정보 수정에 성공하였습니다.", result), HttpStatus.OK);
+    }
+
+    @GetMapping("/goods/{goodsId}/stock")
+    public ResponseEntity<?> getGoodsStockQuantity(@PathVariable("goodsId") Long goodsId) {
+        GoodsStockQuantityRespDto result = goodsService.getGoodsStockQuantity(goodsId);
+        return new ResponseEntity<>(new ResponseDto<>(1, "상품 재고 수량 조회에 성공하였습니다.", result), HttpStatus.OK);
     }
 
     // TODO: 상품 재고 추가 기능
