@@ -3,17 +3,20 @@ package com.miri.apigatewayservice.filter;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -39,13 +42,11 @@ public class JwtAuthorizationFilter extends AbstractGatewayFilterFactory<JwtAuth
     private static final String ADMIN_PATH_PREFIX = "/api/admin/";
     private static final String INTERNAL_API_PATH_PREFIX = "/api/internal/";
 
-    private final SecretKey signingKey;
-    private final JwtParser jwtParser;
+    private final Environment env;
 
-    public JwtAuthorizationFilter(@Value("${token.secret}") String secret) {
+    public JwtAuthorizationFilter(Environment env) {
         super(Config.class);
-        this.signingKey = Keys.hmacShaKeyFor(Base64.getEncoder().encode(secret.getBytes()));
-        this.jwtParser = Jwts.parserBuilder().setSigningKey(signingKey).build();
+        this.env = env;
     }
 
     public static class Config {
@@ -118,7 +119,15 @@ public class JwtAuthorizationFilter extends AbstractGatewayFilterFactory<JwtAuth
     }
 
     private Claims parseJwt(String jwt) {
+
+        byte[] secretKeyBytes = Base64.getEncoder().encode(env.getProperty("token.secret").getBytes());
+        SecretKey signingKey = new SecretKeySpec(secretKeyBytes, SignatureAlgorithm.HS512.getJcaName());
+
         try {
+            JwtParser jwtParser = Jwts.parserBuilder()
+                    .setSigningKey(signingKey)
+                    .build();
+
             return jwtParser.parseClaimsJws(jwt).getBody();
         } catch (Exception ex) {
             log.error("JWT parsing error", ex);
