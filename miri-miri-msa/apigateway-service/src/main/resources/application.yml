@@ -9,8 +9,11 @@ eureka:
       defaultZone: http://localhost:8761/eureka
 
 spring:
-  profiles:
-    include: secret
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
   application:
     name: apigateway-service
   cloud:
@@ -53,12 +56,20 @@ spring:
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
-            - JwtAuthorizationFilter
 
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
             - Path=/user-service/api/**
+            - Method=GET,POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+
+        - id: user-actuator
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/actuator/**
             - Method=GET,POST
           filters:
             - RemoveRequestHeader=Cookie
@@ -92,12 +103,20 @@ spring:
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/goods-service/(?<segment>.*), /$\{segment}
-            - JwtAuthorizationFilter
 
         - id: goods-service
           uri: lb://GOODS-SERVICE
           predicates:
             - Path=/goods-service/api/**
+            - Method=GET,POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/goods-service/(?<segment>.*), /$\{segment}
+
+        - id: goods-actuator
+          uri: lb://GOODS-SERVICE
+          predicates:
+            - Path=/goods-service/actuator/**
             - Method=GET,POST
           filters:
             - RemoveRequestHeader=Cookie
@@ -131,7 +150,6 @@ spring:
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/order-service/(?<segment>.*), /$\{segment}
-            - JwtAuthorizationFilter
 
         - id: order-service
           uri: lb://ORDER-SERVICE
@@ -141,3 +159,18 @@ spring:
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/order-service/(?<segment>.*), /$\{segment}
+
+        - id: order-actuator
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/order-service/actuator/**
+            - Method=GET,POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/order-service/(?<segment>.*), /$\{segment}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh, health, beans, httpexchanges, busrefresh
