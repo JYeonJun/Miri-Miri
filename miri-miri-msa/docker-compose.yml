@@ -56,6 +56,16 @@ services:
     networks:
       - miri-network
 
+  goods-redis:
+    container_name: goods_redis
+    image: redis
+    ports:
+      - "6381:6379"
+    volumes:
+      - redis_goods_data:/data
+    networks:
+      - miri-network
+
   # user-service:
   #   build:
   #     context: ./user-service
@@ -73,6 +83,7 @@ volumes:
   miri_order_data:
   miri_goods_data:
   redis_user_data:
+  redis_goods_data:
 
 networks:
   miri-network:

@@ -29,6 +29,10 @@ spring:
     driver-class-name: org.mariadb.jdbc.Driver
     username: root
     password: ${database.password}
+  data:
+    redis:
+      host: localhost
+      port: 6381
 
 logging:
   level:

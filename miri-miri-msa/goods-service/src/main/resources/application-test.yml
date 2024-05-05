@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8082
   servlet:
     encoding:
       charset: utf-8
@@ -29,5 +29,5 @@ spring:
 
 logging:
   level:
-    '[com.miri.userservice]': DEBUG
+    '[com.miri.goodsservice]': DEBUG
     '[org.hibernate.type]': TRACE
