@@ -27,15 +27,24 @@ public interface GoodsService {
     // 상품 상세 정보 조회
     GoodsDetailRespDto findGoods(Long goodsId);
 
+    // 등록상 상품 목록 조회
     RegisterGoodsListRespDto findRegisterGoodsList(Long userId, Pageable pageable);
 
+    // 상품 재고 감소
     List<GoodsStockRespDto> decreaseOrderedGoodsStock(Map<Long, Integer> reqDtos);
 
+    // 상품 재고 증가
     GoodsStockRespDto increaseOrderedGoodsStock(GoodsStockIncreaseReqDto reqDto);
 
+    // 주문한 상품에 대한 상품 정보 조회
     Map<Long, OrderedGoodsDetailRespDto> getOrderedGoodsDetailsAsMap(Set<Long> goodsIds);
 
+    // 상품 정보 수정
     UpdateRegisteredGoodsRespDto updateRegisteredGoods(Long userId, Long goodsId, UpdateRegisteredGoodsReqDto reqDto);
 
+    // 상품 재고 조회
     GoodsStockQuantityRespDto getGoodsStockQuantity(Long goodsId);
+
+    // 예약 구매 상품에 대한 재고 감소
+    void processOrderForGoods(Long userId, Long goodsId, Integer quantity);
 }
