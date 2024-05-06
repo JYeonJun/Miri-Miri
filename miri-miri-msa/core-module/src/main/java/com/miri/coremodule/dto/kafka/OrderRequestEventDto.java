@@ -9,10 +9,9 @@ import lombok.ToString;
 
 @Getter
 @ToString
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderRequestEventReqDto implements Serializable {
+public class OrderRequestEventDto implements Serializable {
     private Long userId;
     private Long goodsId;
     private Integer quantity;

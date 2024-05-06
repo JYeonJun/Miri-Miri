@@ -1,7 +1,7 @@
 package com.miri.goodsservice.config.kafka;
 
 import com.google.common.collect.ImmutableMap;
-import com.miri.coremodule.dto.kafka.OrderRequestEventReqDto;
+import com.miri.coremodule.dto.kafka.OrderRequestEventDto;
 import java.util.Map;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -24,7 +24,7 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public ProducerFactory<String, OrderRequestEventReqDto> producerFactory() {
+    public ProducerFactory<String, OrderRequestEventDto> producerFactory() {
         return new DefaultKafkaProducerFactory<>(producerConfigurations());
     }
 
@@ -39,7 +39,7 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, OrderRequestEventReqDto> kafkaTemplate() {
+    public KafkaTemplate<String, OrderRequestEventDto> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 }
