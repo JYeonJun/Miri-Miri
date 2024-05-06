@@ -53,4 +53,14 @@ public class RequestGoodsDto {
         @Future(message = "예약구매 시작 시간은 현재 시간 이후여야 합니다.")
         private LocalDateTime reservationStartTime;
     }
+
+    @Data
+    public static class OrderGoodsReqDto {
+        @NotNull
+        private Long goodsId;
+
+        @NotNull
+        @Min(value = 1)
+        private Integer quantity;
+    }
 }

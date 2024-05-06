@@ -3,6 +3,7 @@ package com.miri.goodsservice.facade;
 import com.miri.coremodule.dto.kafka.OrderRequestEventDto;
 import com.miri.coremodule.dto.kafka.StockRollbackEventDto;
 import com.miri.coremodule.handler.ex.CustomApiException;
+import com.miri.goodsservice.dto.goods.RequestGoodsDto.OrderGoodsReqDto;
 import com.miri.goodsservice.service.goods.GoodsService;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,9 @@ public class RedissonLockStockFacade {
         this.goodsService = goodsService;
     }
 
-    public void processOrderForGoods(Long userId, Long goodsId, Integer quantity) {
+    public void processOrderForGoods(Long userId, OrderGoodsReqDto reqDto) {
+        Long goodsId = reqDto.getGoodsId();
+        Integer quantity = reqDto.getQuantity();
         RLock lock = redissonClient.getLock(GOODS_LOCK_PREFIX + goodsId);
 
         try {
@@ -46,10 +49,10 @@ public class RedissonLockStockFacade {
     }
 
     public void increaseGoodsStock(StockRollbackEventDto stockRollbackEventDto) {
-        RLock lock = redissonClient.getLock(GOODS_LOCK_PREFIX + stockRollbackEventDto.getGoodsId());
-
         Long goodsId = stockRollbackEventDto.getGoodsId();
         Integer quantity = stockRollbackEventDto.getQuantity();
+
+        RLock lock = redissonClient.getLock(GOODS_LOCK_PREFIX + goodsId);
 
         try {
             if (!lock.tryLock(5, 1, TimeUnit.SECONDS)) {
