@@ -1,6 +1,7 @@
 package com.miri.goodsservice.config.kafka;
 
 import com.google.common.collect.ImmutableMap;
+import com.miri.coremodule.config.KafkaProperties;
 import com.miri.coremodule.dto.kafka.StockRollbackEventDto;
 import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
