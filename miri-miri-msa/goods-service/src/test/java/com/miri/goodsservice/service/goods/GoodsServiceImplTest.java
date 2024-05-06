@@ -2,6 +2,7 @@ package com.miri.goodsservice.service.goods;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.miri.coremodule.dto.kafka.StockRollbackEventDto;
 import com.miri.coremodule.handler.ex.OrderNotAvailableException;
 import com.miri.coremodule.handler.ex.StockUnavailableException;
 import com.miri.goodsservice.domain.goods.Goods;
@@ -69,12 +70,12 @@ class GoodsServiceImplTest {
         goodsRepository.saveAllAndFlush(goodsList);
     }
 
-    @AfterEach
+/*    @AfterEach
     public void delete() {
         redisStockService.deleteAllGoodsStock();
     }
 
-/*    @Test
+    @Test
     @DisplayName("100명의 사용자가 재고 감소 요청")
     public void processOrderForGoods_success() throws InterruptedException {
 
@@ -118,5 +119,33 @@ class GoodsServiceImplTest {
         })
                 .isInstanceOf(OrderNotAvailableException.class)
                 .hasMessageContaining("주문 가능 시간이 아닙니다.");
+    }
+
+    @Test
+    @DisplayName("100명의 사용자가 재고 증가 요청")
+    public void increaseOrderGoodsStock_success() throws InterruptedException {
+
+        long goodsId = 1L;
+
+        int threadCount = 100;
+        ExecutorService executorService = Executors.newFixedThreadPool(32);
+        CountDownLatch latch = new CountDownLatch(threadCount);
+
+        for (int i = 0; i < threadCount; i++) {
+            executorService.submit(() -> {
+                try {
+                    redissonLockStockFacade.increaseGoodsStock(new StockRollbackEventDto(goodsId, 1));
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+
+        Goods findGoods = goodsRepository.findById(goodsId).orElseThrow();
+
+        // 100 - (100 * 1) = 0
+        Assertions.assertThat(findGoods.getStockQuantity()).isEqualTo(300);
     }*/
 }
