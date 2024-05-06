@@ -1,7 +1,7 @@
 package com.miri.goodsservice.domain.goods;
 
 import com.miri.coremodule.domain.BaseTimeEntity;
-import com.miri.coremodule.handler.ex.CustomApiException;
+import com.miri.coremodule.handler.ex.StockUnavailableException;
 import com.miri.goodsservice.dto.goods.RequestGoodsDto.GoodsRegistrationReqDto;
 import com.miri.goodsservice.dto.goods.RequestGoodsDto.UpdateRegisteredGoodsReqDto;
 import jakarta.persistence.Column;
@@ -68,7 +68,7 @@ public class Goods extends BaseTimeEntity {
     public int decreaseStock(int quantity) {
         int restStock = this.stockQuantity - quantity;
         if (restStock < 0) {
-            throw new CustomApiException("상품의 재고가 부족합니다.");
+            throw new StockUnavailableException();
         }
         this.stockQuantity = restStock;
         return this.stockQuantity;
@@ -80,9 +80,11 @@ public class Goods extends BaseTimeEntity {
 
     public void changeGoodsInfo(UpdateRegisteredGoodsReqDto reqDto) {
         Optional.ofNullable(reqDto.getGoodsName()).ifPresent(goodsName -> this.goodsName = goodsName);
-        Optional.ofNullable(reqDto.getGoodsDescription()).ifPresent(goodsDescription -> this.goodsDescription = goodsDescription);
+        Optional.ofNullable(reqDto.getGoodsDescription())
+                .ifPresent(goodsDescription -> this.goodsDescription = goodsDescription);
         Optional.ofNullable(reqDto.getGoodsPrice()).ifPresent(goodsPrice -> this.goodsPrice = goodsPrice);
         Optional.ofNullable(reqDto.getCategory()).ifPresent(category -> this.category = category);
-        Optional.ofNullable(reqDto.getReservationStartTime()).ifPresent(reservationStartTime -> this.reservationStartTime = reservationStartTime);
+        Optional.ofNullable(reqDto.getReservationStartTime())
+                .ifPresent(reservationStartTime -> this.reservationStartTime = reservationStartTime);
     }
 }
