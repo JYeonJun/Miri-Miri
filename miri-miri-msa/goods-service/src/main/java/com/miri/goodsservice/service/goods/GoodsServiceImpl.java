@@ -4,7 +4,8 @@ import com.miri.coremodule.dto.goods.FeignGoodsReqDto.GoodsStockIncreaseReqDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.GoodsStockRespDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.OrderedGoodsDetailRespDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.RegisterGoodsListRespDto;
-import com.miri.coremodule.dto.kafka.OrderRequestEventReqDto;
+import com.miri.coremodule.dto.kafka.OrderRequestEventDto;
+import com.miri.coremodule.dto.kafka.StockRollbackEventDto;
 import com.miri.coremodule.handler.ex.CustomApiException;
 import com.miri.coremodule.handler.ex.OrderNotAvailableException;
 import com.miri.coremodule.handler.ex.StockUnavailableException;
@@ -135,24 +136,20 @@ public class GoodsServiceImpl implements GoodsService {
     }
 
     /**
-     * [상품 주문]
-     * 1. 레디스에서 상품 재고 조회
-     * - 재고가 부족하다면 재고 부족 예외 발생
-     * - 레디스에 상품 재고 정보가 없다면 데이터베이스에서 조회 후 캐싱
-     * 2. 데이터베이스로부터 상품 조회 구매 가능한 시간인지 검사
-     * - 구매가 불가능한 시간이라면 예외 발생
+     * [상품 주문] 1. 레디스에서 상품 재고 조회 - 재고가 부족하다면 재고 부족 예외 발생 - 레디스에 상품 재고 정보가 없다면 데이터베이스에서 조회 후 캐싱
+     * 2. 데이터베이스로부터 상품 조회 구매 가능한 시간인지 검사 - 구매가 불가능한 시간이라면 예외 발생
      * 3. 레디스 상품 재고 감소
      * 4. 데이터베이스 상품 재고 감소
      */
     @Override
     @Transactional
-    public OrderRequestEventReqDto processOrderForGoods(Long userId, Long goodsId, Integer quantity) {
-        Goods goods = ensureValidatedGoods(goodsId, quantity);
+    public OrderRequestEventDto processOrderForGoods(Long userId, Long goodsId, Integer quantity) {
+        Goods goods = validatedGoods(goodsId, quantity);
         reduceStocks(goods, quantity);
-        return new OrderRequestEventReqDto(userId, goods.getId(), quantity, goods.getGoodsPrice());
+        return new OrderRequestEventDto(userId, goods.getId(), quantity, goods.getGoodsPrice());
     }
 
-    private Goods ensureValidatedGoods(Long goodsId, Integer quantity) {
+    private Goods validatedGoods(Long goodsId, Integer quantity) {
         Integer goodsStock = redisStockService.getGoodsStock(goodsId);
         Goods goods;
 
@@ -175,7 +172,14 @@ public class GoodsServiceImpl implements GoodsService {
     }
 
     private void reduceStocks(Goods goods, int quantity) { // 레디스 & 데이터베이스 상품 재고 감소
-        redisStockService.decreaseGoodsStock(goods.getId(), quantity);
+        // TODO: 데이터베이스와 레디스 간 정합성 맞추기
+        try{
+            redisStockService.decreaseGoodsStock(goods.getId(), quantity);
+        } catch (Exception e) {
+            log.error("레디스 상품 재고 감소 중 오류가 발생했습니다. goodsId={}, quantity={}", goods.getId(), quantity, e);
+            throw new CustomApiException("레디스 상품 재고 증가 처리 중 예외 발생");
+        }
+
         goods.decreaseStock(quantity);
     }
 
@@ -192,9 +196,33 @@ public class GoodsServiceImpl implements GoodsService {
     }
 
     @Override
-    public void publishOrderCreatedEvent(OrderRequestEventReqDto orderRequestEventReqDto) {
+    public void publishOrderCreatedEvent(OrderRequestEventDto orderRequestEventDto) {
         log.debug("[상품 주문]: To 주문 서비스 이벤트 발행");
-        kafkaSender.sendOrderRequestEvent(KafkaVO.ORDER_REQUEST_TOPIC, orderRequestEventReqDto);
+        kafkaSender.sendOrderRequestEvent(KafkaVO.ORDER_REQUEST_TOPIC, orderRequestEventDto);
+    }
+
+    @Override
+    @Transactional
+    public void increaseOrderGoodsStock(Long goodsId, Integer quantity) {
+
+        Goods goods = findGoodsByIdOrThrow(goodsId);
+        goods.increaseStock(quantity);
+
+        // 레디스에서 상품 재고 조회
+        Integer redisStock = redisStockService.getGoodsStock(goodsId);
+
+        try {
+            if (redisStock == null) {
+                // 레디스에 정보가 없는 경우, 데이터베이스에서 재고 정보를 가져와 레디스에 설정
+                redisStockService.setGoodsStock(goodsId, goods.getStockQuantity(), 10, TimeUnit.MINUTES);
+            } else {
+                // 레디스에 정보가 있는 경우, 재고 증가
+                redisStockService.increaseGoodsStock(goodsId, quantity);
+            }
+        } catch (Exception e) {
+            log.error("레디스 상품 재고 증가 중 오류가 발생했습니다. goodsId={}, quantity={}", goodsId, quantity, e);
+            throw new CustomApiException("레디스 상품 재고 증가 처리 중 예외 발생");
+        }
     }
 
     private Goods findGoodsByIdOrThrow(Long goodsId) {
