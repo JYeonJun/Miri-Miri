@@ -4,6 +4,7 @@ import com.miri.coremodule.dto.goods.FeignGoodsReqDto.GoodsStockIncreaseReqDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.GoodsStockRespDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.OrderedGoodsDetailRespDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.RegisterGoodsListRespDto;
+import com.miri.coremodule.dto.kafka.OrderRequestEventReqDto;
 import com.miri.goodsservice.dto.goods.RequestGoodsDto.GoodsRegistrationReqDto;
 import com.miri.goodsservice.dto.goods.RequestGoodsDto.UpdateRegisteredGoodsReqDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsDetailRespDto;
@@ -27,15 +28,27 @@ public interface GoodsService {
     // 상품 상세 정보 조회
     GoodsDetailRespDto findGoods(Long goodsId);
 
+    // 등록상 상품 목록 조회
     RegisterGoodsListRespDto findRegisterGoodsList(Long userId, Pageable pageable);
 
+    // 상품 재고 감소
     List<GoodsStockRespDto> decreaseOrderedGoodsStock(Map<Long, Integer> reqDtos);
 
+    // 상품 재고 증가
     GoodsStockRespDto increaseOrderedGoodsStock(GoodsStockIncreaseReqDto reqDto);
 
+    // 주문한 상품에 대한 상품 정보 조회
     Map<Long, OrderedGoodsDetailRespDto> getOrderedGoodsDetailsAsMap(Set<Long> goodsIds);
 
+    // 상품 정보 수정
     UpdateRegisteredGoodsRespDto updateRegisteredGoods(Long userId, Long goodsId, UpdateRegisteredGoodsReqDto reqDto);
 
+    // 상품 재고 조회
     GoodsStockQuantityRespDto getGoodsStockQuantity(Long goodsId);
+
+    // 예약 구매 상품에 대한 재고 감소
+    OrderRequestEventReqDto processOrderForGoods(Long userId, Long goodsId, Integer quantity);
+
+    // 주문 이벤트 발행
+    void publishOrderCreatedEvent(OrderRequestEventReqDto orderRequestEventReqDto);
 }

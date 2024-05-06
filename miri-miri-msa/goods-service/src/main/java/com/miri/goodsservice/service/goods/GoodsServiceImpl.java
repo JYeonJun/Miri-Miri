@@ -4,7 +4,11 @@ import com.miri.coremodule.dto.goods.FeignGoodsReqDto.GoodsStockIncreaseReqDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.GoodsStockRespDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.OrderedGoodsDetailRespDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.RegisterGoodsListRespDto;
+import com.miri.coremodule.dto.kafka.OrderRequestEventReqDto;
 import com.miri.coremodule.handler.ex.CustomApiException;
+import com.miri.coremodule.handler.ex.OrderNotAvailableException;
+import com.miri.coremodule.handler.ex.StockUnavailableException;
+import com.miri.coremodule.vo.KafkaVO;
 import com.miri.goodsservice.client.UserServiceClient;
 import com.miri.goodsservice.domain.goods.Goods;
 import com.miri.goodsservice.domain.goods.GoodsRepository;
@@ -15,10 +19,14 @@ import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsListRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsRegistrationRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsStockQuantityRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.UpdateRegisteredGoodsRespDto;
+import com.miri.goodsservice.service.kafka.KafkaSender;
+import com.miri.goodsservice.service.redis.RedisStockService;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -32,10 +40,15 @@ public class GoodsServiceImpl implements GoodsService {
 
     private final GoodsRepository goodsRepository;
     private final UserServiceClient userServiceClient;
+    private final RedisStockService redisStockService;
+    private final KafkaSender kafkaSender;
 
-    public GoodsServiceImpl(GoodsRepository goodsRepository, UserServiceClient userServiceClient) {
+    public GoodsServiceImpl(GoodsRepository goodsRepository, UserServiceClient userServiceClient,
+                            RedisStockService redisStockService, KafkaSender kafkaSender) {
         this.goodsRepository = goodsRepository;
         this.userServiceClient = userServiceClient;
+        this.redisStockService = redisStockService;
+        this.kafkaSender = kafkaSender;
     }
 
     @Override
@@ -117,9 +130,71 @@ public class GoodsServiceImpl implements GoodsService {
 
     @Override
     public GoodsStockQuantityRespDto getGoodsStockQuantity(Long goodsId) {
-        // TODO: 추후 레디스에서 재고 조회 고려하기!!
         Goods findGoods = findGoodsByIdOrThrow(goodsId);
         return new GoodsStockQuantityRespDto(findGoods.getStockQuantity());
+    }
+
+    /**
+     * [상품 주문]
+     * 1. 레디스에서 상품 재고 조회
+     * - 재고가 부족하다면 재고 부족 예외 발생
+     * - 레디스에 상품 재고 정보가 없다면 데이터베이스에서 조회 후 캐싱
+     * 2. 데이터베이스로부터 상품 조회 구매 가능한 시간인지 검사
+     * - 구매가 불가능한 시간이라면 예외 발생
+     * 3. 레디스 상품 재고 감소
+     * 4. 데이터베이스 상품 재고 감소
+     */
+    @Override
+    @Transactional
+    public OrderRequestEventReqDto processOrderForGoods(Long userId, Long goodsId, Integer quantity) {
+        Goods goods = ensureValidatedGoods(goodsId, quantity);
+        reduceStocks(goods, quantity);
+        return new OrderRequestEventReqDto(userId, goods.getId(), quantity, goods.getGoodsPrice());
+    }
+
+    private Goods ensureValidatedGoods(Long goodsId, Integer quantity) {
+        Integer goodsStock = redisStockService.getGoodsStock(goodsId);
+        Goods goods;
+
+        if (goodsStock != null) { // 레디스에 캐시된 정보가 존재하는 경우
+            checkStockAvailability(quantity, goodsStock);
+            goods = findGoodsByIdOrThrow(goodsId); // 상품 정보가 필요한 경우에만 데이터베이스 조회
+        } else { // 레디스에 캐시된 정보가 없는 경우
+            goods = retrieveAndCacheGoodsStock(goodsId);
+            checkStockAvailability(quantity, goods.getStockQuantity());
+        }
+
+        checkReservationTime(goods.getReservationStartTime());
+        return goods;
+    }
+
+    private Goods retrieveAndCacheGoodsStock(Long goodsId) { // 데이터베이스로부터 상품 조회 후 레디스에 저장
+        Goods goods = findGoodsByIdOrThrow(goodsId);
+        redisStockService.setGoodsStock(goodsId, goods.getStockQuantity(), 10, TimeUnit.MINUTES);
+        return goods;
+    }
+
+    private void reduceStocks(Goods goods, int quantity) { // 레디스 & 데이터베이스 상품 재고 감소
+        redisStockService.decreaseGoodsStock(goods.getId(), quantity);
+        goods.decreaseStock(quantity);
+    }
+
+    private void checkStockAvailability(int quantity, int goodsStock) {
+        if (goodsStock < quantity) {
+            throw new StockUnavailableException();
+        }
+    }
+
+    private void checkReservationTime(LocalDateTime reservationStartTime) {
+        if (LocalDateTime.now().isBefore(reservationStartTime)) {
+            throw new OrderNotAvailableException();
+        }
+    }
+
+    @Override
+    public void publishOrderCreatedEvent(OrderRequestEventReqDto orderRequestEventReqDto) {
+        log.debug("[상품 주문]: To 주문 서비스 이벤트 발행");
+        kafkaSender.sendOrderRequestEvent(KafkaVO.ORDER_REQUEST_TOPIC, orderRequestEventReqDto);
     }
 
     private Goods findGoodsByIdOrThrow(Long goodsId) {
