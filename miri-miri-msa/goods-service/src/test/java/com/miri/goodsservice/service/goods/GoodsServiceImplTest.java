@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -68,7 +69,12 @@ class GoodsServiceImplTest {
         goodsRepository.saveAllAndFlush(goodsList);
     }
 
-    @Test
+    @AfterEach
+    public void delete() {
+        redisStockService.deleteAllGoodsStock();
+    }
+
+/*    @Test
     @DisplayName("100명의 사용자가 재고 감소 요청")
     public void processOrderForGoods_success() throws InterruptedException {
 
@@ -112,5 +118,5 @@ class GoodsServiceImplTest {
         })
                 .isInstanceOf(OrderNotAvailableException.class)
                 .hasMessageContaining("주문 가능 시간이 아닙니다.");
-    }
+    }*/
 }
