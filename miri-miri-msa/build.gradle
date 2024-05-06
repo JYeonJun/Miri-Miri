@@ -23,6 +23,10 @@ subprojects {
         /* test 롬복 사용 */
         testCompileOnly 'org.projectlombok:lombok:1.18.32'
         testAnnotationProcessor 'org.projectlombok:lombok:1.18.32'
+
+        /* kafka */
+        implementation 'org.springframework.kafka:spring-kafka'
+        implementation 'com.google.guava:guava:31.1-jre'
     }
 
     group = 'com.miri'
