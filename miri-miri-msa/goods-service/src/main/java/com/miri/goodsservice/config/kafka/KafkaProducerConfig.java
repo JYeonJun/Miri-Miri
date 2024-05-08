@@ -1,8 +1,8 @@
 package com.miri.goodsservice.config.kafka;
 
-import com.google.common.collect.ImmutableMap;
 import com.miri.coremodule.config.KafkaProperties;
 import com.miri.coremodule.dto.kafka.OrderRequestEventDto;
+import java.util.HashMap;
 import java.util.Map;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -30,17 +30,17 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public Map<String, Object> producerConfigurations() {
-        return ImmutableMap.<String, Object>builder()
-                .put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getServer())
-                .put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class)
-                .put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class)
-                .put(ProducerConfig.ACKS_CONFIG, "all") // 높은 신뢰성 설정
-                .build();
+    public KafkaTemplate<String, OrderRequestEventDto> kafkaTemplate() {
+        return new KafkaTemplate<>(producerFactory());
     }
 
     @Bean
-    public KafkaTemplate<String, OrderRequestEventDto> kafkaTemplate() {
-        return new KafkaTemplate<>(producerFactory());
+    public Map<String, Object> producerConfigurations() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getServer());
+        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        props.put(ProducerConfig.ACKS_CONFIG, "all");
+        return props;
     }
 }

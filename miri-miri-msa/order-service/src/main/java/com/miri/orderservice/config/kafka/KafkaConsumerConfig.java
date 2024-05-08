@@ -1,9 +1,9 @@
 package com.miri.orderservice.config.kafka;
 
-import com.google.common.collect.ImmutableMap;
 import com.miri.coremodule.config.KafkaProperties;
 import com.miri.coremodule.dto.kafka.OrderRequestEventDto;
 import com.miri.coremodule.dto.kafka.OrderUpdateEventDto;
+import java.util.HashMap;
 import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -25,36 +25,51 @@ public class KafkaConsumerConfig {
         this.kafkaProperties = kafkaProperties;
     }
 
-    @Bean
-    public ConsumerFactory<String, Object> kafkaConsumer() {
+    private Map<String, Object> getConsumerConfigurations(JsonDeserializer<?> deserializer) {
+        Map<String, Object> consumerConfigurations = new HashMap<>();
+        consumerConfigurations.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getServer());
+        consumerConfigurations.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaProperties.getGroupId());
+        consumerConfigurations.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        consumerConfigurations.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializer.getClass());
+        consumerConfigurations.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
+        return consumerConfigurations;
+    }
 
-        JsonDeserializer<Object> deserializer = new JsonDeserializer<>();
+    @Bean
+    public ConsumerFactory<String, OrderRequestEventDto> kafkaOrderRequestConsumer() {
+
+        JsonDeserializer<OrderRequestEventDto> deserializer = new JsonDeserializer<>();
 
         deserializer.addTrustedPackages("*");
 
-        Map<String, Object> consumerConfigurations =
-                ImmutableMap.<String, Object>builder()
-                        .put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getServer())
-                        .put(ConsumerConfig.GROUP_ID_CONFIG, kafkaProperties.getGroupId())
-                        .put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class)
-                        .put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializer)
-                        .put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest")
-                        .build();
+        return new DefaultKafkaConsumerFactory<>(getConsumerConfigurations(deserializer)
+                , new StringDeserializer()
+                , deserializer);
+    }
 
-        return new DefaultKafkaConsumerFactory<>(consumerConfigurations, new StringDeserializer(), deserializer);
+    @Bean
+    public ConsumerFactory<String, OrderUpdateEventDto> kafkaOrderUpdateConsumer() {
+
+        JsonDeserializer<OrderUpdateEventDto> deserializer = new JsonDeserializer<>();
+
+        deserializer.addTrustedPackages("*");
+
+        return new DefaultKafkaConsumerFactory<>(getConsumerConfigurations(deserializer)
+                , new StringDeserializer()
+                , deserializer);
     }
 
     @Bean
     ConcurrentKafkaListenerContainerFactory<String, OrderRequestEventDto> kafkaOrderRequestContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, OrderRequestEventDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(kafkaConsumer());
+        factory.setConsumerFactory(kafkaOrderRequestConsumer());
         return factory;
     }
 
     @Bean
     ConcurrentKafkaListenerContainerFactory<String, OrderUpdateEventDto> kafkaOrderUpdateContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, OrderUpdateEventDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(kafkaConsumer());
+        factory.setConsumerFactory(kafkaOrderUpdateConsumer());
         return factory;
     }
 }
