@@ -22,7 +22,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: mariadb1234
-      MYSQL_DATABASE: miri_user
+      MYSQL_DATABASE: miri_order
       TZ: Asia/Seoul
     ports:
       - 3309:3306
@@ -37,12 +37,27 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: mariadb1234
-      MYSQL_DATABASE: miri_user
+      MYSQL_DATABASE: miri_goods
       TZ: Asia/Seoul
     ports:
       - 3310:3306
     volumes:
       - miri_goods_data:/var/lib/mysql
+    networks:
+      - miri-network
+
+  payment-mariadb:
+    container_name: payment_mariadb
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: mariadb1234
+      MYSQL_DATABASE: miri_payment
+      TZ: Asia/Seoul
+    ports:
+      - 3311:3306
+    volumes:
+      - miri_payment_data:/var/lib/mysql
     networks:
       - miri-network
 
@@ -90,6 +105,7 @@ volumes:
   miri_user_data:
   miri_order_data:
   miri_goods_data:
+  miri_payment_data:
   redis_user_data:
   redis_goods_data:
 
