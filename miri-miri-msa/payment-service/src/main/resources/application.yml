@@ -1,5 +1,5 @@
 server:
-  port: 8082
+  port: 8083
 
 eureka:
   client:
@@ -10,7 +10,7 @@ eureka:
 
 spring:
   application:
-    name: goods-service
+    name: payment-service
   rabbitmq:
     host: localhost
     port: 5672
@@ -23,20 +23,15 @@ spring:
     hibernate:
       ddl-auto: update
   datasource:
-#    url: jdbc:mariadb://goods_mariadb:3306/miri_goods
-#    driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://localhost:3310/miri_goods
+#    url: jdbc:mariadb://payment_mariadb:3306/miri_payment
+    url: jdbc:mariadb://localhost:3311/miri_payment
     driver-class-name: org.mariadb.jdbc.Driver
     username: root
     password: ${database.password}
-  data:
-    redis:
-      host: localhost
-      port: 6381
 
 logging:
   level:
-    com.miri.goodsservice: DEBUG
+    com.miri.paymentservice: DEBUG
     org:
       springframework:
         transaction:

@@ -10,13 +10,17 @@ import lombok.ToString;
 public class PaymentRequestEventDto {
     private Long userId;
     private Long orderId;
-    private Integer totalPrice;
+    private Long goodsId;
+    private Integer quantity;
+    private Integer goodsPrice;
     private String traceId;
 
     public PaymentRequestEventDto(OrderRequestEventDto orderRequestEventDto, Long orderId) {
         this.userId = orderRequestEventDto.getUserId();
         this.orderId = orderId;
-        this.totalPrice = orderRequestEventDto.getGoodsPrice() * orderRequestEventDto.getQuantity();
+        this.goodsId = orderRequestEventDto.getGoodsId();
+        this.quantity = orderRequestEventDto.getQuantity();
+        this.goodsPrice = orderRequestEventDto.getGoodsPrice();
         traceId = orderRequestEventDto.getTraceId();
     }
 }
