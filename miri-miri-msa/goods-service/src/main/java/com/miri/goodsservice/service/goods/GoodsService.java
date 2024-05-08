@@ -49,10 +49,7 @@ public interface GoodsService {
     GoodsStockQuantityRespDto getGoodsStockQuantity(Long goodsId);
 
     // 예약 구매 상품에 대한 재고 감소
-    OrderRequestEventDto processOrderForGoods(Long userId, OrderGoodsReqDto reqDto);
-
-    // 주문 이벤트 발행
-    void publishOrderCreatedEvent(OrderRequestEventDto orderRequestEventDto);
+    void processOrderForGoods(Long userId, OrderGoodsReqDto reqDto);
 
     // 예약 구매 상품에 대한 재고 증가
     void increaseOrderGoodsStock(Long goodsId, Integer quantity);

@@ -32,6 +32,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -145,13 +146,13 @@ public class GoodsServiceImpl implements GoodsService {
      */
     @Override
     @Transactional
-    public OrderRequestEventDto processOrderForGoods(Long userId, OrderGoodsReqDto reqDto) {
+    public void processOrderForGoods(Long userId, OrderGoodsReqDto reqDto) {
         Long goodsId = reqDto.getGoodsId();
         Integer quantity = reqDto.getQuantity();
         Goods goods = validatedGoods(goodsId, quantity);
         reduceStocks(goods, quantity);
-        return new OrderRequestEventDto(userId, goodsId, quantity,
-                goods.getGoodsPrice(), reqDto.getAddress(), UUID.randomUUID().toString());
+        kafkaSender.sendOrderRequestEvent(KafkaVO.ORDER_REQUEST_TOPIC,
+                createOrderRequestEventDto(userId, reqDto, goodsId, quantity, goods));
     }
 
     private Goods validatedGoods(Long goodsId, Integer quantity) {
@@ -166,7 +167,10 @@ public class GoodsServiceImpl implements GoodsService {
             checkStockAvailability(quantity, goods.getStockQuantity());
         }
 
-        checkReservationTime(goods.getReservationStartTime());
+        LocalDateTime reservationStartTime = goods.getReservationStartTime();
+        if (reservationStartTime != null) {
+            checkReservationTime(reservationStartTime);
+        }
         return goods;
     }
 
@@ -200,10 +204,10 @@ public class GoodsServiceImpl implements GoodsService {
         }
     }
 
-    @Override
-    public void publishOrderCreatedEvent(OrderRequestEventDto orderRequestEventDto) {
-        log.debug("[상품 주문]: To 주문 서비스 이벤트 발행");
-        kafkaSender.sendOrderRequestEvent(KafkaVO.ORDER_REQUEST_TOPIC, orderRequestEventDto);
+    private OrderRequestEventDto createOrderRequestEventDto(Long userId, OrderGoodsReqDto reqDto, Long goodsId,
+                                                            Integer quantity, Goods goods) {
+        return new OrderRequestEventDto(userId, goodsId, quantity,
+                goods.getGoodsPrice(), reqDto.getAddress(), UUID.randomUUID().toString());
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.miri.goodsservice.facade;
 
-import com.miri.coremodule.dto.kafka.OrderRequestEventDto;
 import com.miri.coremodule.dto.kafka.StockRollbackEventDto;
 import com.miri.coremodule.handler.ex.CustomApiException;
 import com.miri.goodsservice.dto.goods.RequestGoodsDto.OrderGoodsReqDto;
@@ -35,8 +34,7 @@ public class RedissonLockStockFacade {
                 throw new CustomApiException("수요가 많아 주문 요청에 실패하였습니다.");
             }
 
-            OrderRequestEventDto orderRequestEventDto = goodsService.processOrderForGoods(userId, reqDto);
-            goodsService.publishOrderCreatedEvent(orderRequestEventDto);
+            goodsService.processOrderForGoods(userId, reqDto);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             log.error("[상품 주문 처리] 스레드 인터럽트 에러, userId={}, goodsId={}", userId, goodsId, e);
