@@ -1,4 +1,4 @@
-package com.miri.goodsservice.config.kafka;
+package com.miri.coremodule.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

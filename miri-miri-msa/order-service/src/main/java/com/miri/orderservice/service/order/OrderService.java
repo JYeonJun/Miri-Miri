@@ -1,6 +1,9 @@
 package com.miri.orderservice.service.order;
 
+import com.miri.coremodule.dto.kafka.OrderRequestEventDto;
 import com.miri.coremodule.dto.order.FeignOrderRespDto.OrderGoodsListRespDto;
+import com.miri.orderservice.domain.order.Order;
+import com.miri.orderservice.domain.order.OrderDetail;
 import com.miri.orderservice.dto.order.RequestOrderDto.CreateOrderReqDto;
 import com.miri.orderservice.dto.order.RequestOrderDto.ReturnOrderReqDto;
 import com.miri.orderservice.dto.order.ResponseOrderDto.CreateOrderRespDto;
@@ -19,4 +22,8 @@ public interface OrderService {
 
     // 반품 요청
     void returnOrder(Long userId, Long orderDetailId, ReturnOrderReqDto reqDto);
+
+    void processOrder(OrderRequestEventDto orderRequestEventDto);
+
+    void updateOrderStatusOnFailure(Long orderId);
 }

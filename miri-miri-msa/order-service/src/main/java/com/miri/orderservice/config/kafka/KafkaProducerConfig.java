@@ -1,7 +1,8 @@
-package com.miri.goodsservice.config.kafka;
+package com.miri.orderservice.config.kafka;
 
 import com.miri.coremodule.config.KafkaProperties;
-import com.miri.coremodule.dto.kafka.OrderRequestEventDto;
+import com.miri.coremodule.dto.kafka.PaymentRequestEventDto;
+import com.miri.coremodule.dto.kafka.StockRollbackEventDto;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -25,13 +26,23 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public ProducerFactory<String, OrderRequestEventDto> producerFactory() {
+    public ProducerFactory<String, PaymentRequestEventDto> producerPaymentFactory() {
         return new DefaultKafkaProducerFactory<>(producerConfigurations());
     }
 
     @Bean
-    public KafkaTemplate<String, OrderRequestEventDto> kafkaTemplate() {
-        return new KafkaTemplate<>(producerFactory());
+    public KafkaTemplate<String, PaymentRequestEventDto> kafkaPaymentTemplate() {
+        return new KafkaTemplate<>(producerPaymentFactory());
+    }
+
+    @Bean
+    public ProducerFactory<String, StockRollbackEventDto> producerRollbackFactory() {
+        return new DefaultKafkaProducerFactory<>(producerConfigurations());
+    }
+
+    @Bean
+    public KafkaTemplate<String, StockRollbackEventDto> kafkaRollbackTemplate() {
+        return new KafkaTemplate<>(producerRollbackFactory());
     }
 
     @Bean

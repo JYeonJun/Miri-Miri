@@ -1,7 +1,8 @@
 package com.miri.goodsservice.config.kafka;
 
-import com.google.common.collect.ImmutableMap;
+import com.miri.coremodule.config.KafkaProperties;
 import com.miri.coremodule.dto.kafka.StockRollbackEventDto;
+import java.util.HashMap;
 import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -30,14 +31,12 @@ public class KafkaConsumerConfig {
 
         deserializer.addTrustedPackages("*");
 
-        Map<String, Object> consumerConfigurations =
-                ImmutableMap.<String, Object>builder()
-                        .put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getServer())
-                        .put(ConsumerConfig.GROUP_ID_CONFIG, kafkaProperties.getGroupId())
-                        .put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class)
-                        .put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializer)
-                        .put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest")
-                        .build();
+        Map<String, Object> consumerConfigurations = new HashMap<>();
+        consumerConfigurations.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getServer());
+        consumerConfigurations.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaProperties.getGroupId());
+        consumerConfigurations.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        consumerConfigurations.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializer.getClass());
+        consumerConfigurations.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
 
         return new DefaultKafkaConsumerFactory<>(consumerConfigurations, new StringDeserializer(), deserializer);
     }
