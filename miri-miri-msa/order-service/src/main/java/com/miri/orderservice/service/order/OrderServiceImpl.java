@@ -3,11 +3,13 @@ package com.miri.orderservice.service.order;
 import com.miri.coremodule.dto.goods.FeignGoodsReqDto.GoodsStockIncreaseReqDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.OrderedGoodsDetailRespDto;
 import com.miri.coremodule.dto.kafka.OrderRequestEventDto;
+import com.miri.coremodule.dto.kafka.PaymentRequestEventDto;
 import com.miri.coremodule.dto.order.FeignOrderRespDto.OrderGoodsDto;
 import com.miri.coremodule.dto.order.FeignOrderRespDto.OrderGoodsListRespDto;
 import com.miri.coremodule.dto.wishlist.FeignWishListReqDto.WishListOrderedReqDto;
 import com.miri.coremodule.dto.wishlist.FeignWishListRespDto.WishListOrderedRespDto;
 import com.miri.coremodule.handler.ex.CustomApiException;
+import com.miri.coremodule.vo.KafkaVO;
 import com.miri.orderservice.client.GoodsServiceClient;
 import com.miri.orderservice.domain.order.Order;
 import com.miri.orderservice.domain.order.OrderDetail;
@@ -23,6 +25,7 @@ import com.miri.orderservice.dto.order.RequestOrderDto.CreateOrderReqDto;
 import com.miri.orderservice.dto.order.RequestOrderDto.ReturnOrderReqDto;
 import com.miri.orderservice.dto.order.ResponseOrderDto.CreateOrderRespDto;
 import com.miri.orderservice.dto.order.ResponseOrderDto.OrderGoodsRespDto;
+import com.miri.orderservice.service.kafka.KafkaSender;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -46,15 +49,17 @@ public class OrderServiceImpl implements OrderService {
     private final ShippingRepository shippingRepository;
     private final ReturnRequestRepository returnRequestRepository;
     private final GoodsServiceClient goodsServiceClient;
+    private final KafkaSender kafkaSender;
 
     public OrderServiceImpl(OrderRepository orderRepository, OrderDetailRepository orderDetailRepository,
                             ShippingRepository shippingRepository, ReturnRequestRepository returnRequestRepository,
-                            GoodsServiceClient goodsServiceClient) {
+                            GoodsServiceClient goodsServiceClient, KafkaSender kafkaSender) {
         this.orderRepository = orderRepository;
         this.orderDetailRepository = orderDetailRepository;
         this.shippingRepository = shippingRepository;
         this.returnRequestRepository = returnRequestRepository;
         this.goodsServiceClient = goodsServiceClient;
+        this.kafkaSender = kafkaSender;
     }
 
     @Override
@@ -245,6 +250,24 @@ public class OrderServiceImpl implements OrderService {
 
     private void processReturnRequest(OrderDetail findOrderDetail, ReturnOrderReqDto reqDto) {
         returnRequestRepository.save(new ReturnRequest(findOrderDetail, reqDto.getReason()));
+    }
+
+    @Override
+    @Transactional
+    public void processOrder(OrderRequestEventDto orderRequestEventDto) {
+        Order order = orderRepository.save(new Order(orderRequestEventDto.getUserId()));
+        OrderDetail orderDetail = orderDetailRepository.save(new OrderDetail(order, orderRequestEventDto));
+        shippingRepository.save(new Shipping(orderDetail.getId(), orderRequestEventDto.getAddress()));
+        kafkaSender.sendPaymentRequestEvent(KafkaVO.PAYMENT_REQUEST_TOPIC,
+                new PaymentRequestEventDto(orderRequestEventDto, order.getId()));
+    }
+
+    @Override
+    @Transactional
+    public void updateOrderStatusOnFailure(Long orderId) {
+        orderRepository.findById(orderId).orElseThrow(() -> new CustomApiException("존재하지 않는 주문입니다."));
+        orderDetailRepository.updateOrderStatusByOrderId(orderId, OrderStatus.CANCELED);
+        shippingRepository.updateShippingStatusByOrderDetailsOrderId(orderId, ShippingStatus.CANCELED);
     }
 
     private Shipping findShippingByOrderDetailIdOrElseThrow(Long orderDetailId) {
