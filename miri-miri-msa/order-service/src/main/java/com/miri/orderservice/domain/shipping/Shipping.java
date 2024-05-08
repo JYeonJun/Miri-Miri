@@ -53,5 +53,6 @@ public class Shipping extends BaseTimeEntity {
         this.orderDetailId = orderDetailId;
         this.trackingNumber = UUID.randomUUID().toString();
         this.address = address;
+        this.shippingStatus = ShippingStatus.PENDING;
     }
 }
