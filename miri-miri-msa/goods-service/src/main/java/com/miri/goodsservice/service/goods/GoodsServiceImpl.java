@@ -14,6 +14,7 @@ import com.miri.goodsservice.client.UserServiceClient;
 import com.miri.goodsservice.domain.goods.Goods;
 import com.miri.goodsservice.domain.goods.GoodsRepository;
 import com.miri.goodsservice.dto.goods.RequestGoodsDto.GoodsRegistrationReqDto;
+import com.miri.goodsservice.dto.goods.RequestGoodsDto.OrderGoodsReqDto;
 import com.miri.goodsservice.dto.goods.RequestGoodsDto.UpdateRegisteredGoodsReqDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsDetailRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsListRespDto;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -143,10 +145,13 @@ public class GoodsServiceImpl implements GoodsService {
      */
     @Override
     @Transactional
-    public OrderRequestEventDto processOrderForGoods(Long userId, Long goodsId, Integer quantity) {
+    public OrderRequestEventDto processOrderForGoods(Long userId, OrderGoodsReqDto reqDto) {
+        Long goodsId = reqDto.getGoodsId();
+        Integer quantity = reqDto.getQuantity();
         Goods goods = validatedGoods(goodsId, quantity);
         reduceStocks(goods, quantity);
-        return new OrderRequestEventDto(userId, goods.getId(), quantity, goods.getGoodsPrice());
+        return new OrderRequestEventDto(userId, goodsId, quantity,
+                goods.getGoodsPrice(), reqDto.getAddress(), UUID.randomUUID().toString());
     }
 
     private Goods validatedGoods(Long goodsId, Integer quantity) {
@@ -172,15 +177,15 @@ public class GoodsServiceImpl implements GoodsService {
     }
 
     private void reduceStocks(Goods goods, int quantity) { // 레디스 & 데이터베이스 상품 재고 감소
+
         // TODO: 데이터베이스와 레디스 간 정합성 맞추기
         try{
+            goods.decreaseStock(quantity);
             redisStockService.decreaseGoodsStock(goods.getId(), quantity);
         } catch (Exception e) {
             log.error("레디스 상품 재고 감소 중 오류가 발생했습니다. goodsId={}, quantity={}", goods.getId(), quantity, e);
             throw new CustomApiException("레디스 상품 재고 증가 처리 중 예외 발생");
         }
-
-        goods.decreaseStock(quantity);
     }
 
     private void checkStockAvailability(int quantity, int goodsStock) {
