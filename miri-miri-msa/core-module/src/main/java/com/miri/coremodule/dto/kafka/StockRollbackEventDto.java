@@ -12,4 +12,11 @@ import lombok.ToString;
 public class StockRollbackEventDto {
     private Long goodsId;
     private Integer quantity;
+    private String traceId;
+
+    public StockRollbackEventDto(OrderRequestEventDto orderRequestEventDto) {
+        this.goodsId = orderRequestEventDto.getGoodsId();
+        this.quantity = orderRequestEventDto.getQuantity();
+        this.traceId = orderRequestEventDto.getTraceId();
+    }
 }
