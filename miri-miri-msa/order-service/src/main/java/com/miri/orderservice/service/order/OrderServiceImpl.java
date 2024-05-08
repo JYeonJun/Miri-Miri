@@ -2,6 +2,7 @@ package com.miri.orderservice.service.order;
 
 import com.miri.coremodule.dto.goods.FeignGoodsReqDto.GoodsStockIncreaseReqDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.OrderedGoodsDetailRespDto;
+import com.miri.coremodule.dto.kafka.OrderRequestEventDto;
 import com.miri.coremodule.dto.order.FeignOrderRespDto.OrderGoodsDto;
 import com.miri.coremodule.dto.order.FeignOrderRespDto.OrderGoodsListRespDto;
 import com.miri.coremodule.dto.wishlist.FeignWishListReqDto.WishListOrderedReqDto;
@@ -17,6 +18,7 @@ import com.miri.orderservice.domain.returnrequest.ReturnRequest;
 import com.miri.orderservice.domain.returnrequest.ReturnRequestRepository;
 import com.miri.orderservice.domain.shipping.Shipping;
 import com.miri.orderservice.domain.shipping.ShippingRepository;
+import com.miri.orderservice.domain.shipping.ShippingStatus;
 import com.miri.orderservice.dto.order.RequestOrderDto.CreateOrderReqDto;
 import com.miri.orderservice.dto.order.RequestOrderDto.ReturnOrderReqDto;
 import com.miri.orderservice.dto.order.ResponseOrderDto.CreateOrderRespDto;
@@ -89,7 +91,8 @@ public class OrderServiceImpl implements OrderService {
             throw new CustomApiException("위시리스트 ID 목록이 비어있습니다.");
         }
 
-        List<WishListOrderedRespDto> foundWishLists = goodsServiceClient.getOrderedWishLists(new WishListOrderedReqDto(userId, wishListIds));
+        List<WishListOrderedRespDto> foundWishLists = goodsServiceClient.getOrderedWishLists(
+                new WishListOrderedReqDto(userId, wishListIds));
         if (foundWishLists == null || foundWishLists.size() != wishListIds.size()) {
             throw new CustomApiException("유효하지 않은 위시리스트 ID가 포함되어 있습니다.");
         }
@@ -130,7 +133,8 @@ public class OrderServiceImpl implements OrderService {
         for (WishListOrderedRespDto foundWishList : foundWishLists) {
             OrderDetail orderDetail = new OrderDetail(order, foundWishList);
             orderDetails.add(orderDetail);
-            orderGoods.add(new OrderGoodsRespDto(orderDetail, foundWishList.getGoodsName(), foundWishList.getReservationStartTime()));
+            orderGoods.add(new OrderGoodsRespDto(orderDetail, foundWishList.getGoodsName(),
+                    foundWishList.getReservationStartTime()));
         }
         orderDetailRepository.saveAll(orderDetails);
         shippingRepository.saveAll(
@@ -188,11 +192,29 @@ public class OrderServiceImpl implements OrderService {
     public void cancelOrder(Long userId, Long orderDetailId) {
 
         OrderDetail findOrderDetail = validateOrderDetail(userId, orderDetailId);
-        validateCancelCondition(findOrderDetail);
+        Shipping shipping = findShippingByOrderDetailIdOrElseThrow(findOrderDetail.getId());
+        validateCancelCondition(shipping);
 
-        goodsServiceClient.increaseStock(new GoodsStockIncreaseReqDto(findOrderDetail.getGoodsId(), findOrderDetail.getQuantity()));
+        // TODO: 재고증가 이벤트 발행
+        goodsServiceClient.increaseStock(
+                new GoodsStockIncreaseReqDto(findOrderDetail.getGoodsId(), findOrderDetail.getQuantity()));
 
         updateOrderStatusToCanceled(findOrderDetail);
+        updateShippingStatusToCanceled(shipping);
+    }
+
+    private void validateCancelCondition(Shipping shipping) {
+        if (shipping.getShippingStatus() != ShippingStatus.PENDING) {
+            throw new CustomApiException("주문 취소가 불가능한 상태입니다.");
+        }
+    }
+
+    private void updateOrderStatusToCanceled(OrderDetail findOrderDetail) {
+        findOrderDetail.changeOrderStatus(OrderStatus.CANCELED);
+    }
+
+    private void updateShippingStatusToCanceled(Shipping shipping) {
+        shipping.changeShippingStatus(ShippingStatus.CANCELED);
     }
 
     @Override
@@ -200,23 +222,11 @@ public class OrderServiceImpl implements OrderService {
     public void returnOrder(Long userId, Long orderDetailId, ReturnOrderReqDto reqDto) {
         OrderDetail findOrderDetail = validateOrderDetail(userId, orderDetailId);
 
-        validateReturnCondition(findOrderDetail);
+        Shipping shipping = findShippingByOrderDetailIdOrElseThrow(findOrderDetail.getId());
+
+        validateReturnCondition(shipping);
 
         processReturnRequest(findOrderDetail, reqDto);
-    }
-
-    private void validateReturnCondition(OrderDetail findOrderDetail) {
-        LocalDate now = LocalDate.now();
-        if (findOrderDetail.getOrderStatus() == OrderStatus.DELIVERED
-                && !now.isAfter(findOrderDetail.getLastModifiedDate().toLocalDate().plusDays(1))) {
-            return;
-        }
-        throw new CustomApiException("반품이 불가능한 상태입니다.");
-    }
-
-    private void processReturnRequest(OrderDetail findOrderDetail, ReturnOrderReqDto reqDto) {
-        findOrderDetail.changeOrderStatus(OrderStatus.RETURN_IN_PROGRESS);
-        returnRequestRepository.save(new ReturnRequest(findOrderDetail, reqDto.getReason()));
     }
 
     private OrderDetail validateOrderDetail(Long userId, Long orderDetailId) {
@@ -224,13 +234,21 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new CustomApiException("유효하지 않은 주문입니다."));
     }
 
-    private void validateCancelCondition(OrderDetail findOrderDetail) {
-        if (findOrderDetail.getOrderStatus() != OrderStatus.PENDING) {
-            throw new CustomApiException("주문 취소가 불가능한 상태입니다.");
+    private void validateReturnCondition(Shipping shipping) {
+        LocalDate now = LocalDate.now();
+        if (shipping.getShippingStatus() == ShippingStatus.DELIVERED
+                && !now.isAfter(shipping.getLastModifiedDate().toLocalDate().plusDays(1))) {
+            return;
         }
+        throw new CustomApiException("반품이 불가능한 상태입니다.");
     }
 
-    private void updateOrderStatusToCanceled(OrderDetail findOrderDetail) {
-        findOrderDetail.changeOrderStatus(OrderStatus.CANCELED);
+    private void processReturnRequest(OrderDetail findOrderDetail, ReturnOrderReqDto reqDto) {
+        returnRequestRepository.save(new ReturnRequest(findOrderDetail, reqDto.getReason()));
+    }
+
+    private Shipping findShippingByOrderDetailIdOrElseThrow(Long orderDetailId) {
+        return shippingRepository.findByOrderDetailId(orderDetailId)
+                .orElseThrow(() -> new CustomApiException("고객센터 문의 부탁드립니다."));
     }
 }

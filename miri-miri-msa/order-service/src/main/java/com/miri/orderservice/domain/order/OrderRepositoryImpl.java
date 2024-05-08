@@ -30,12 +30,8 @@ public class OrderRepositoryImpl implements OrderRepositoryCustom {
     @Override
     public Page<OrderGoodsDto> findPagingOrderList(Long userId, Pageable pageable) {
         Expression<String> orderStatusExpression = new CaseBuilder()
-                .when(orderDetail.orderStatus.eq(OrderStatus.PENDING)).then("대기")
-                .when(orderDetail.orderStatus.eq(OrderStatus.IN_TRANSIT)).then("배송 중")
-                .when(orderDetail.orderStatus.eq(OrderStatus.DELIVERED)).then("배송 완료")
                 .when(orderDetail.orderStatus.eq(OrderStatus.CANCELED)).then("주문 취소")
-                .when(orderDetail.orderStatus.eq(OrderStatus.RETURN_IN_PROGRESS)).then("반품 중")
-                .when(orderDetail.orderStatus.eq(OrderStatus.RETURN_COMPLETED)).then("반품 완료")
+                .when(orderDetail.orderStatus.eq(OrderStatus.COMPLETED)).then("주문 완료")
                 .otherwise("알수없음");
 
         JPAQuery<OrderGoodsDto> query = queryFactory

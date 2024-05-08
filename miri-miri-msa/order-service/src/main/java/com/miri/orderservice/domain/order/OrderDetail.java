@@ -1,6 +1,7 @@
 package com.miri.orderservice.domain.order;
 
 import com.miri.coremodule.domain.BaseTimeEntity;
+import com.miri.coremodule.dto.kafka.OrderRequestEventDto;
 import com.miri.coremodule.dto.wishlist.FeignWishListRespDto.WishListOrderedRespDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -52,7 +53,15 @@ public class OrderDetail extends BaseTimeEntity {
         this.goodsId = foundWishList.getGoodsId();
         this.quantity = foundWishList.getOrderQuantity();
         this.unitPrice = foundWishList.getUnitPrice();
-        this.orderStatus = OrderStatus.PENDING;
+        this.orderStatus = OrderStatus.COMPLETED;
+    }
+
+    public OrderDetail(Order order, OrderRequestEventDto orderRequestEventDto) {
+        this.order = order;
+        this.goodsId = orderRequestEventDto.getGoodsId();
+        this.quantity = orderRequestEventDto.getQuantity();
+        this.unitPrice = orderRequestEventDto.getGoodsPrice();
+        this.orderStatus = OrderStatus.COMPLETED;
     }
 
     public void changeOrderStatus(OrderStatus orderStatus) {
