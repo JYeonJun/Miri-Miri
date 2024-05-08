@@ -1,6 +1,5 @@
 package com.miri.goodsservice.facade;
 
-import com.miri.coremodule.dto.kafka.OrderRequestEventDto;
 import com.miri.coremodule.dto.kafka.StockRollbackEventDto;
 import com.miri.coremodule.handler.ex.CustomApiException;
 import com.miri.goodsservice.dto.goods.RequestGoodsDto.OrderGoodsReqDto;
@@ -27,7 +26,6 @@ public class RedissonLockStockFacade {
 
     public void processOrderForGoods(Long userId, OrderGoodsReqDto reqDto) {
         Long goodsId = reqDto.getGoodsId();
-        Integer quantity = reqDto.getQuantity();
         RLock lock = redissonClient.getLock(GOODS_LOCK_PREFIX + goodsId);
 
         try {
@@ -36,9 +34,7 @@ public class RedissonLockStockFacade {
                 throw new CustomApiException("수요가 많아 주문 요청에 실패하였습니다.");
             }
 
-            OrderRequestEventDto orderRequestEventDto
-                    = goodsService.processOrderForGoods(userId, goodsId, quantity);
-            goodsService.publishOrderCreatedEvent(orderRequestEventDto);
+            goodsService.processOrderForGoods(userId, reqDto);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             log.error("[상품 주문 처리] 스레드 인터럽트 에러, userId={}, goodsId={}", userId, goodsId, e);
@@ -51,6 +47,7 @@ public class RedissonLockStockFacade {
     public void increaseGoodsStock(StockRollbackEventDto stockRollbackEventDto) {
         Long goodsId = stockRollbackEventDto.getGoodsId();
         Integer quantity = stockRollbackEventDto.getQuantity();
+        String traceId = stockRollbackEventDto.getTraceId();
 
         RLock lock = redissonClient.getLock(GOODS_LOCK_PREFIX + goodsId);
 
@@ -63,7 +60,7 @@ public class RedissonLockStockFacade {
             goodsService.increaseOrderGoodsStock(goodsId, quantity);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            log.debug("[상품 재고 증가] 스레드 인터럽트 에러, goodsId={}, quantity={}", goodsId, quantity, e);
+            log.debug("[상품 주문]: 재고 증가 스레드 인터럽트 에러, traceId={}, goodsId={}, quantity={}", traceId, goodsId, quantity, e);
             throw new CustomApiException("상품 재고 증가 롤백 처리 중 에러가 발생했습니다.");
         } finally {
             lock.unlock();
