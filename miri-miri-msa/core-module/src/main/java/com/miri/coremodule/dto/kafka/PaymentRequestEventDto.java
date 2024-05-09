@@ -1,5 +1,6 @@
 package com.miri.coremodule.dto.kafka;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -7,6 +8,7 @@ import lombok.ToString;
 @Getter
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
 public class PaymentRequestEventDto {
     private Long userId;
     private Long orderId;
@@ -15,12 +17,9 @@ public class PaymentRequestEventDto {
     private Integer goodsPrice;
     private String traceId;
 
-    public PaymentRequestEventDto(OrderRequestEventDto orderRequestEventDto, Long orderId) {
-        this.userId = orderRequestEventDto.getUserId();
-        this.orderId = orderId;
-        this.goodsId = orderRequestEventDto.getGoodsId();
-        this.quantity = orderRequestEventDto.getQuantity();
-        this.goodsPrice = orderRequestEventDto.getGoodsPrice();
-        traceId = orderRequestEventDto.getTraceId();
+    public static PaymentRequestEventDto fromOrderRequest(OrderRequestEventDto orderRequestEventDto, Long orderId) {
+        return new PaymentRequestEventDto(orderRequestEventDto.getUserId(), orderId, orderRequestEventDto.getGoodsId(),
+                orderRequestEventDto.getQuantity(), orderRequestEventDto.getGoodsPrice(),
+                orderRequestEventDto.getTraceId());
     }
 }
