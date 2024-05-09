@@ -21,6 +21,7 @@ import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsListRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsRegistrationRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsStockQuantityRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.UpdateRegisteredGoodsRespDto;
+import com.miri.goodsservice.event.GoodsToOrderEvent;
 import com.miri.goodsservice.service.kafka.KafkaSender;
 import com.miri.goodsservice.service.redis.RedisStockService;
 import java.time.LocalDateTime;
@@ -33,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,14 +47,14 @@ public class GoodsServiceImpl implements GoodsService {
     private final GoodsRepository goodsRepository;
     private final UserServiceClient userServiceClient;
     private final RedisStockService redisStockService;
-    private final KafkaSender kafkaSender;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public GoodsServiceImpl(GoodsRepository goodsRepository, UserServiceClient userServiceClient,
-                            RedisStockService redisStockService, KafkaSender kafkaSender) {
+                            RedisStockService redisStockService, ApplicationEventPublisher applicationEventPublisher) {
         this.goodsRepository = goodsRepository;
         this.userServiceClient = userServiceClient;
         this.redisStockService = redisStockService;
-        this.kafkaSender = kafkaSender;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Override
@@ -151,8 +153,7 @@ public class GoodsServiceImpl implements GoodsService {
         Integer quantity = reqDto.getQuantity();
         Goods goods = validatedGoods(goodsId, quantity);
         reduceStocks(goods, quantity);
-        kafkaSender.sendOrderRequestEvent(KafkaVO.ORDER_REQUEST_TOPIC,
-                createOrderRequestEventDto(userId, reqDto, goodsId, quantity, goods));
+        applicationEventPublisher.publishEvent(new GoodsToOrderEvent(this, userId, reqDto, goods.getGoodsPrice()));
     }
 
     private Goods validatedGoods(Long goodsId, Integer quantity) {
@@ -202,12 +203,6 @@ public class GoodsServiceImpl implements GoodsService {
         if (LocalDateTime.now().isBefore(reservationStartTime)) {
             throw new OrderNotAvailableException();
         }
-    }
-
-    private OrderRequestEventDto createOrderRequestEventDto(Long userId, OrderGoodsReqDto reqDto, Long goodsId,
-                                                            Integer quantity, Goods goods) {
-        return new OrderRequestEventDto(userId, goodsId, quantity,
-                goods.getGoodsPrice(), reqDto.getAddress(), UUID.randomUUID().toString());
     }
 
     @Override
