@@ -14,9 +14,8 @@ public class OrderUpdateEventDto {
     private Long orderId;
     private String traceId;
 
-    public OrderUpdateEventDto(PaymentRequestEventDto paymentRequestEventDto) {
-        this.userId = paymentRequestEventDto.getUserId();
-        this.orderId = paymentRequestEventDto.getOrderId();
-        this.traceId = paymentRequestEventDto.getTraceId();
+    public static OrderUpdateEventDto fromPaymentRequest(PaymentRequestEventDto paymentRequestEventDto) {
+        return new OrderUpdateEventDto(paymentRequestEventDto.getUserId(), paymentRequestEventDto.getOrderId(),
+                paymentRequestEventDto.getTraceId());
     }
 }

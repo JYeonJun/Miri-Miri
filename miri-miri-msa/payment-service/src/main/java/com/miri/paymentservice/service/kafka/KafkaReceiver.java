@@ -1,10 +1,8 @@
 package com.miri.paymentservice.service.kafka;
 
-import com.miri.coremodule.dto.kafka.OrderUpdateEventDto;
 import com.miri.coremodule.dto.kafka.PaymentRequestEventDto;
-import com.miri.coremodule.dto.kafka.StockRollbackEventDto;
 import com.miri.coremodule.vo.KafkaVO;
-import com.miri.paymentservice.service.payment.PaymentService;
+import com.miri.paymentservice.service.payment.PaymentInternalService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -13,26 +11,15 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class KafkaReceiver {
 
-    private final PaymentService paymentService;
-    private final KafkaSender kafkaSender;
+    private final PaymentInternalService paymentInternalService;
 
-    public KafkaReceiver(PaymentService paymentService, KafkaSender kafkaSender) {
-        this.paymentService = paymentService;
-        this.kafkaSender = kafkaSender;
+    public KafkaReceiver(PaymentInternalService paymentInternalService) {
+        this.paymentInternalService = paymentInternalService;
     }
 
     @KafkaListener(topics = KafkaVO.PAYMENT_REQUEST_TOPIC, containerFactory = "kafkaContainerFactory")
     public void receivePaymentRequestEvent(PaymentRequestEventDto paymentRequestEventDto) {
-        try {
-            paymentService.processPaymentEvent(paymentRequestEventDto);
-        } catch (Exception e) {
-            log.error("[상품 주문]: 결제 처리 중 장애 발생 error={}", e.getMessage());
-            handlePaymentFailure(paymentRequestEventDto);
-        }
-    }
-
-    private void handlePaymentFailure(PaymentRequestEventDto paymentRequestEventDto) {
-        kafkaSender.sendOrderUpdateRequestEvent(KafkaVO.ORDER_UPDATE_TOPIC, new OrderUpdateEventDto(paymentRequestEventDto));
-        kafkaSender.sendRollbackRequestEvent(KafkaVO.STOCK_ROLLBACK_TOPIC, new StockRollbackEventDto(paymentRequestEventDto));
+        log.debug("traceId={}, 카프카 결제 이벤트 소비", paymentRequestEventDto.getTraceId());
+        paymentInternalService.processPaymentEvent(paymentRequestEventDto);
     }
 }

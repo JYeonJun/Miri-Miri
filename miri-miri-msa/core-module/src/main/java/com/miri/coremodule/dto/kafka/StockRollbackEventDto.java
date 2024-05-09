@@ -20,9 +20,8 @@ public class StockRollbackEventDto {
         this.traceId = orderRequestEventDto.getTraceId();
     }
 
-    public StockRollbackEventDto(PaymentRequestEventDto paymentRequestEventDto) {
-        this.goodsId = paymentRequestEventDto.getGoodsId();
-        this.quantity = paymentRequestEventDto.getQuantity();
-        this.traceId = paymentRequestEventDto.getTraceId();
+    public static StockRollbackEventDto fromPaymentRequest(PaymentRequestEventDto paymentRequestEventDto) {
+        return new StockRollbackEventDto(paymentRequestEventDto.getGoodsId(), paymentRequestEventDto.getQuantity(),
+                paymentRequestEventDto.getTraceId());
     }
 }
