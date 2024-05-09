@@ -1,31 +1,30 @@
 package com.miri.paymentservice.service.payment;
 
-import com.miri.coremodule.dto.kafka.OrderUpdateEventDto;
 import com.miri.coremodule.dto.kafka.PaymentRequestEventDto;
-import com.miri.coremodule.dto.kafka.StockRollbackEventDto;
-import com.miri.coremodule.vo.KafkaVO;
 import com.miri.paymentservice.domain.payment.Payment;
 import com.miri.paymentservice.domain.payment.PaymentRepository;
 import com.miri.paymentservice.domain.payment.PaymentStatus;
+import com.miri.paymentservice.event.PaymentAbortedEvent;
 import com.miri.paymentservice.service.kafka.KafkaSender;
 import java.util.Random;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
 @Transactional(readOnly = true)
-public class PaymentServiceImpl implements PaymentService {
+public class PaymentInternalServiceImpl implements PaymentInternalService {
 
     private final PaymentRepository paymentRepository;
     private final Random random = new Random();
+    private final ApplicationEventPublisher applicationEventPublisher;
 
-    private final KafkaSender kafkaSender;
-
-    public PaymentServiceImpl(PaymentRepository paymentRepository, KafkaSender kafkaSender) {
+    public PaymentInternalServiceImpl(PaymentRepository paymentRepository,
+                                      ApplicationEventPublisher applicationEventPublisher) {
         this.paymentRepository = paymentRepository;
-        this.kafkaSender = kafkaSender;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Override
@@ -36,7 +35,8 @@ public class PaymentServiceImpl implements PaymentService {
         Payment payment = enterPaymentScreen(paymentRequestEventDto);
 
         if (!attemptPayment(payment) || !processPayment(payment)) {
-            handlePaymentAborted(paymentRequestEventDto);
+            log.debug("traceId={}, PaymentAbortedEvent 발행", paymentRequestEventDto.getTraceId());
+            applicationEventPublisher.publishEvent(new PaymentAbortedEvent(this, paymentRequestEventDto));
         }
     }
 
@@ -49,7 +49,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     private boolean processPayment(Payment payment) {
-        return processChangePaymentStatus("결제 실패 이탈", payment, PaymentStatus.PAYMENT_COMPLETED);
+        return processChangePaymentStatus("결제 중 이탈", payment, PaymentStatus.PAYMENT_COMPLETED);
     }
 
     private boolean processChangePaymentStatus(String failLogMessage, Payment payment, PaymentStatus paymentStatus) {
@@ -62,12 +62,5 @@ public class PaymentServiceImpl implements PaymentService {
         // 이탈하지 않았다면 결제 상태 변경
         payment.changePaymentStatus(paymentStatus);
         return true;
-    }
-
-    private void handlePaymentAborted(PaymentRequestEventDto paymentRequestEventDto) {
-        // 주문 상태 변경 이벤트 발행
-        kafkaSender.sendOrderUpdateRequestEvent(KafkaVO.ORDER_UPDATE_TOPIC, new OrderUpdateEventDto(paymentRequestEventDto));
-        // 상품 재고 롤백 이벤트 발행
-        kafkaSender.sendRollbackRequestEvent(KafkaVO.STOCK_ROLLBACK_TOPIC, new StockRollbackEventDto(paymentRequestEventDto));
     }
 }
