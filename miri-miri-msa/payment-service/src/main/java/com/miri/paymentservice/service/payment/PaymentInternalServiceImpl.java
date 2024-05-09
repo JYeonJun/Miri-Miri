@@ -38,6 +38,7 @@ public class PaymentInternalServiceImpl implements PaymentInternalService {
             log.debug("traceId={}, PaymentAbortedEvent 발행", paymentRequestEventDto.getTraceId());
             applicationEventPublisher.publishEvent(new PaymentAbortedEvent(this, paymentRequestEventDto));
         }
+        log.debug("traceId={}, 결제 완료", paymentRequestEventDto.getTraceId());
     }
 
     private Payment enterPaymentScreen(PaymentRequestEventDto paymentRequestEventDto) {
