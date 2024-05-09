@@ -11,7 +11,6 @@ import com.miri.orderservice.domain.shipping.Shipping;
 import com.miri.orderservice.domain.shipping.ShippingRepository;
 import com.miri.orderservice.domain.shipping.ShippingStatus;
 import com.miri.orderservice.event.OrderToPaymentEvent;
-import com.miri.orderservice.service.kafka.KafkaSender;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -25,16 +24,14 @@ public class OrderInternalServiceImpl implements OrderInternalService {
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final ShippingRepository shippingRepository;
-    private final KafkaSender kafkaSender;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     public OrderInternalServiceImpl(OrderRepository orderRepository, OrderDetailRepository orderDetailRepository,
-                                    ShippingRepository shippingRepository, KafkaSender kafkaSender,
+                                    ShippingRepository shippingRepository,
                                     ApplicationEventPublisher applicationEventPublisher) {
         this.orderRepository = orderRepository;
         this.orderDetailRepository = orderDetailRepository;
         this.shippingRepository = shippingRepository;
-        this.kafkaSender = kafkaSender;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
