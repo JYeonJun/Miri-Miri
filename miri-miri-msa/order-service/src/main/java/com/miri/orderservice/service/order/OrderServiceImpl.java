@@ -252,24 +252,6 @@ public class OrderServiceImpl implements OrderService {
         returnRequestRepository.save(new ReturnRequest(findOrderDetail, reqDto.getReason()));
     }
 
-    @Override
-    @Transactional
-    public void processOrder(OrderRequestEventDto orderRequestEventDto) {
-        Order order = orderRepository.save(new Order(orderRequestEventDto.getUserId()));
-        OrderDetail orderDetail = orderDetailRepository.save(new OrderDetail(order, orderRequestEventDto));
-        shippingRepository.save(new Shipping(orderDetail.getId(), orderRequestEventDto.getAddress()));
-        kafkaSender.sendPaymentRequestEvent(KafkaVO.PAYMENT_REQUEST_TOPIC,
-                new PaymentRequestEventDto(orderRequestEventDto, order.getId()));
-    }
-
-    @Override
-    @Transactional
-    public void updateOrderStatusOnFailure(Long orderId) {
-        orderRepository.findById(orderId).orElseThrow(() -> new CustomApiException("존재하지 않는 주문입니다."));
-        orderDetailRepository.updateOrderStatusByOrderId(orderId, OrderStatus.CANCELED);
-        shippingRepository.updateShippingStatusByOrderDetailsOrderId(orderId, ShippingStatus.CANCELED);
-    }
-
     private Shipping findShippingByOrderDetailIdOrElseThrow(Long orderDetailId) {
         return shippingRepository.findByOrderDetailId(orderDetailId)
                 .orElseThrow(() -> new CustomApiException("고객센터 문의 부탁드립니다."));

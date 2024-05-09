@@ -14,14 +14,13 @@ public class StockRollbackEventDto {
     private Integer quantity;
     private String traceId;
 
-    public StockRollbackEventDto(OrderRequestEventDto orderRequestEventDto) {
-        this.goodsId = orderRequestEventDto.getGoodsId();
-        this.quantity = orderRequestEventDto.getQuantity();
-        this.traceId = orderRequestEventDto.getTraceId();
-    }
-
     public static StockRollbackEventDto fromPaymentRequest(PaymentRequestEventDto paymentRequestEventDto) {
         return new StockRollbackEventDto(paymentRequestEventDto.getGoodsId(), paymentRequestEventDto.getQuantity(),
                 paymentRequestEventDto.getTraceId());
+    }
+
+    public static StockRollbackEventDto fromOrderRequest(OrderRequestEventDto orderRequestEventDto) {
+        return new StockRollbackEventDto(orderRequestEventDto.getGoodsId(), orderRequestEventDto.getQuantity(),
+                orderRequestEventDto.getTraceId());
     }
 }
