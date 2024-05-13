@@ -4,15 +4,13 @@ import com.miri.coremodule.dto.goods.FeignGoodsReqDto.GoodsStockIncreaseReqDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.GoodsStockRespDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.OrderedGoodsDetailRespDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.RegisterGoodsListRespDto;
-import com.miri.coremodule.dto.kafka.OrderRequestEventDto;
-import com.miri.coremodule.dto.kafka.StockRollbackEventDto;
+import com.miri.goodsservice.domain.goods.Goods;
 import com.miri.goodsservice.dto.goods.RequestGoodsDto.GoodsRegistrationReqDto;
 import com.miri.goodsservice.dto.goods.RequestGoodsDto.OrderGoodsReqDto;
 import com.miri.goodsservice.dto.goods.RequestGoodsDto.UpdateRegisteredGoodsReqDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsDetailRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsListRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsRegistrationRespDto;
-import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsStockQuantityRespDto;
 import com.miri.goodsservice.dto.goods.ResponseGoodsDto.UpdateRegisteredGoodsRespDto;
 import java.util.List;
 import java.util.Map;
@@ -46,11 +44,13 @@ public interface GoodsService {
     UpdateRegisteredGoodsRespDto updateRegisteredGoods(Long userId, Long goodsId, UpdateRegisteredGoodsReqDto reqDto);
 
     // 상품 재고 조회
-    GoodsStockQuantityRespDto getGoodsStockQuantity(Long goodsId);
+    Integer getGoodsStockQuantity(Long goodsId);
 
     // 예약 구매 상품에 대한 재고 감소
-    void processOrderForGoods(Long userId, OrderGoodsReqDto reqDto);
+    void processOrderForGoods(Long userId, int goodsPrice, OrderGoodsReqDto reqDto);
 
     // 예약 구매 상품에 대한 재고 증가
     void increaseOrderGoodsStock(Long goodsId, Integer quantity);
+
+    Goods checkOrderTime(Long goodsId);
 }

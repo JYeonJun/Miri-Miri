@@ -3,6 +3,7 @@ package com.miri.goodsservice.facade;
 import com.miri.coremodule.dto.kafka.StockRollbackEventDto;
 import com.miri.coremodule.handler.ex.CustomApiException;
 import com.miri.goodsservice.dto.goods.RequestGoodsDto.OrderGoodsReqDto;
+import com.miri.goodsservice.dto.goods.ResponseGoodsDto.GoodsStockQuantityRespDto;
 import com.miri.goodsservice.service.goods.GoodsService;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
@@ -24,46 +25,48 @@ public class RedissonLockStockFacade {
         this.goodsService = goodsService;
     }
 
-    public void processOrderForGoods(Long userId, OrderGoodsReqDto reqDto) {
-        Long goodsId = reqDto.getGoodsId();
-        RLock lock = redissonClient.getLock(GOODS_LOCK_PREFIX + goodsId);
+    private interface LockCallback<T> {
+        T doInLock() throws InterruptedException;
+    }
 
+    private <T> T executeWithLock(Long goodsId, LockCallback<T> callback) {
+        RLock lock = redissonClient.getLock(GOODS_LOCK_PREFIX + goodsId);
         try {
             if (!lock.tryLock(5, 1, TimeUnit.SECONDS)) {
-                log.error("상품 재고 감소 LOCK 획득 실패");
-                throw new CustomApiException("수요가 많아 주문 요청에 실패하였습니다.");
+                log.error("상품 재고 관리 LOCK 획득 실패");
+                throw new CustomApiException("요청이 많아 처리에 실패하였습니다.");
             }
 
-            goodsService.processOrderForGoods(userId, reqDto);
+            log.debug("락 획득 성공");
+            return callback.doInLock();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            log.error("[상품 주문 처리] 스레드 인터럽트 에러, userId={}, goodsId={}", userId, goodsId, e);
-            throw new CustomApiException("주문 처리 중 에러가 발생했습니다.");
+            log.error("처리 중 에러가 발생했습니다.");
+            throw new CustomApiException("상품 재고 처리 중 에러가 발생했습니다.");
         } finally {
             lock.unlock();
+            log.debug("락 반납");
         }
     }
 
-    public void increaseGoodsStock(StockRollbackEventDto stockRollbackEventDto) {
-        Long goodsId = stockRollbackEventDto.getGoodsId();
-        Integer quantity = stockRollbackEventDto.getQuantity();
-        String traceId = stockRollbackEventDto.getTraceId();
+    public GoodsStockQuantityRespDto getGoodsStockQuantity(Long goodsId) {
+        return executeWithLock(goodsId, () -> {
+            Integer goodsStock = goodsService.getGoodsStockQuantity(goodsId);
+            return new GoodsStockQuantityRespDto(goodsStock);
+        });
+    }
 
-        RLock lock = redissonClient.getLock(GOODS_LOCK_PREFIX + goodsId);
+    public void processOrderForGoods(Long userId, OrderGoodsReqDto reqDto) {
+        executeWithLock(reqDto.getGoodsId(), () -> {
+//            goodsService.processOrderForGoods(userId, reqDto);
+            return null;
+        });
+    }
 
-        try {
-            if (!lock.tryLock(5, 1, TimeUnit.SECONDS)) {
-                log.error("상품 재고 증가 LOCK 획득 실패");
-                throw new CustomApiException("요청이 많아 실패하였습니다.");
-            }
-
-            goodsService.increaseOrderGoodsStock(goodsId, quantity);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            log.debug("[상품 주문]: 재고 증가 스레드 인터럽트 에러, traceId={}, goodsId={}, quantity={}", traceId, goodsId, quantity, e);
-            throw new CustomApiException("상품 재고 증가 롤백 처리 중 에러가 발생했습니다.");
-        } finally {
-            lock.unlock();
-        }
+    public void increaseGoodsStock(StockRollbackEventDto reqDto) {
+        executeWithLock(reqDto.getGoodsId(), () -> {
+            goodsService.increaseOrderGoodsStock(reqDto.getGoodsId(), reqDto.getQuantity());
+            return null;
+        });
     }
 }
