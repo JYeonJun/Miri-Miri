@@ -87,4 +87,8 @@ public class Goods extends BaseTimeEntity {
         Optional.ofNullable(reqDto.getReservationStartTime())
                 .ifPresent(reservationStartTime -> this.reservationStartTime = reservationStartTime);
     }
+
+    public void updateStock(int stock) {
+        this.stockQuantity = stock;
+    }
 }
