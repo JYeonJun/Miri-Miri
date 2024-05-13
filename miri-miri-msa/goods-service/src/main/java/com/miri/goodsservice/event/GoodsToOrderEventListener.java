@@ -23,7 +23,7 @@ public class GoodsToOrderEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onOrderSuccess(GoodsToOrderEvent event) {
         String traceId = UUID.randomUUID().toString();
-        log.info("traceId={}, 카프카 결제 요청 이벤트 발행", traceId);
+        log.info("traceId={}, 주문 요청 이벤트 발행", traceId);
         kafkaSender.sendOrderRequestEvent(KafkaVO.ORDER_REQUEST_TOPIC,
                 createOrderRequestEventDto(event, traceId));
     }
