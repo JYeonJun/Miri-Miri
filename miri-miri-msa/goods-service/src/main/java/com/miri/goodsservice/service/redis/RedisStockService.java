@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -73,6 +74,27 @@ public class RedisStockService {
         }
 
         log.info("상품 재고 증가 성공. goodsId={}, newStock={}", goodsId, result);
+    }
+
+    public void increaseGoodsStockWithLuaBatch(Map<Long, Integer> goodsIdToQuantityMap) {
+        String luaScript =
+                "for i=1,#KEYS do\n" +
+                        "   local stock = redis.call('get', KEYS[i])\n" +
+                        "   if stock ~= false then\n" +
+                        "       local newStock = redis.call('incrby', KEYS[i], ARGV[i])\n" +
+                        "       redis.call('sadd', 'dirty_goods', KEYS[i])\n" + // 'dirty' 목록에 추가
+                        "   end\n" +
+                        "end";
+
+        // 스크립트 실행을 위한 키와 값 설정
+        List<String> keys = goodsIdToQuantityMap.keySet().stream()
+                .map(goodsId -> "goods_stock:" + goodsId)
+                .collect(Collectors.toList());
+        List<String> values = goodsIdToQuantityMap.values().stream()
+                .map(String::valueOf)
+                .toList();
+
+        redisTemplate.execute(new DefaultRedisScript<Void>(luaScript, Void.class), keys, values.toArray());
     }
 
     // 상품 재고 감소

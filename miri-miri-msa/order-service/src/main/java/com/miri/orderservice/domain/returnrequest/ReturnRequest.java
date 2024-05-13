@@ -1,5 +1,6 @@
 package com.miri.orderservice.domain.returnrequest;
 
+import com.miri.coremodule.domain.BaseTimeEntity;
 import com.miri.coremodule.domain.CreatedDateEntity;
 import com.miri.orderservice.domain.order.OrderDetail;
 import com.miri.orderservice.domain.order.OrderStatus;
@@ -26,7 +27,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Table(name = "return_requests")
-public class ReturnRequest extends CreatedDateEntity {
+public class ReturnRequest extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

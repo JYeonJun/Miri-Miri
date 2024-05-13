@@ -2,6 +2,7 @@ package com.miri.goodsservice.service.goods;
 
 import com.miri.goodsservice.domain.goods.Goods;
 import com.miri.goodsservice.domain.goods.GoodsRepository;
+import com.miri.goodsservice.service.redis.RedisStockService;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,9 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class GoodsInternalServiceImpl implements GoodsInternalService{
 
     private final GoodsRepository goodsRepository;
+    private final RedisStockService redisStockService;
 
-    public GoodsInternalServiceImpl(GoodsRepository goodsRepository) {
+    public GoodsInternalServiceImpl(GoodsRepository goodsRepository, RedisStockService redisStockService) {
         this.goodsRepository = goodsRepository;
+        this.redisStockService = redisStockService;
     }
 
     @Override
@@ -26,5 +29,10 @@ public class GoodsInternalServiceImpl implements GoodsInternalService{
         Set<Long> goodsIds = allStocks.keySet();
         List<Goods> goodsList = goodsRepository.findAllById(goodsIds);
         goodsList.forEach(goods -> goods.updateStock(allStocks.get(goods.getId())));
+    }
+
+    @Override
+    public void increaseOrderGoodsStockBatch(Map<Long, Integer> goodsIdToQuantityMap) {
+        redisStockService.increaseGoodsStockWithLuaBatch(goodsIdToQuantityMap);
     }
 }
