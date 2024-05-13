@@ -1,5 +1,9 @@
 package com.miri.goodsservice.service.redis;
 
+import com.miri.goodsservice.domain.goods.Goods;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import org.assertj.core.api.Assertions;
@@ -21,11 +25,30 @@ class RedisStockServiceTest {
     private final int timeout = 5;
     private final TimeUnit unit = TimeUnit.MINUTES;
 
-    @BeforeEach
+    /*@BeforeEach
     void setUp() {
         goodsId = ThreadLocalRandom.current().nextLong(1, Long.MAX_VALUE); // 임의의 goodsId 생성
         redisStockService.setGoodsStock(goodsId, initialStock, timeout, unit);
-    }
+    }*/
+
+/*    @Test
+    void setIfAbsent() throws InterruptedException {
+        int threadCount = 100;
+        ExecutorService executorService = Executors.newFixedThreadPool(32);
+        CountDownLatch latch = new CountDownLatch(threadCount);
+
+        for (int i = 0; i < threadCount; i++) {
+            executorService.submit(() -> {
+                try {
+                    redisStockService.setGoodsStock(5L, 5, 5, TimeUnit.MINUTES);
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+    }*/
 
     @Test
     void givenInitialStock_whenGetGoodsStock_thenEqualsInitialStock() {

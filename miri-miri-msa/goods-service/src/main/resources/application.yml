@@ -9,6 +9,8 @@ eureka:
       defaultZone: http://localhost:8761/eureka
 
 spring:
+  profiles:
+    active: dev
   application:
     name: goods-service
   rabbitmq:
@@ -37,15 +39,15 @@ spring:
 logging:
   level:
     com.miri.goodsservice: DEBUG
-    org:
-      springframework:
-        transaction:
-          interceptor:
-            TransactionInterceptor: TRACE
-        kafka:
-          core:
-            KafkaTemplate: TRACE
-            DefaultKafkaProducerFactory: TRACE
+#    org:
+#      springframework:
+#        transaction:
+#          interceptor:
+#            TransactionInterceptor: TRACE
+#        kafka:
+#          core:
+#            KafkaTemplate: TRACE
+#            DefaultKafkaProducerFactory: TRACE
 
 management:
   endpoints:

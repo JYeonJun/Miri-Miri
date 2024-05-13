@@ -8,6 +8,7 @@ import com.miri.coremodule.handler.ex.StockUnavailableException;
 import com.miri.goodsservice.domain.goods.Goods;
 import com.miri.goodsservice.domain.goods.GoodsCategory;
 import com.miri.goodsservice.domain.goods.GoodsRepository;
+import com.miri.goodsservice.dto.goods.RequestGoodsDto.OrderGoodsReqDto;
 import com.miri.goodsservice.facade.RedissonLockStockFacade;
 import com.miri.goodsservice.service.redis.RedisStockService;
 import java.time.LocalDateTime;
@@ -41,7 +42,10 @@ class GoodsServiceImplTest {
     @Autowired
     private RedisStockService redisStockService;
 
-    @BeforeEach
+    @Autowired
+    private GoodsService goodsService;
+
+/*    @BeforeEach
     public void insert() {
 
         List<Goods> goodsList = new ArrayList<>();
@@ -70,14 +74,14 @@ class GoodsServiceImplTest {
         goodsRepository.saveAllAndFlush(goodsList);
     }
 
-/*    @AfterEach
+    @AfterEach
     public void delete() {
         redisStockService.deleteAllGoodsStock();
-    }
+    }*/
 
-    @Test
-    @DisplayName("100명의 사용자가 재고 감소 요청")
-    public void processOrderForGoods_success() throws InterruptedException {
+  /*  @Test
+    @DisplayName("재고 조회 레디스 락 테스트")
+    public void getGoodsStockQuantity_test() throws InterruptedException {
 
         int threadCount = 100;
         ExecutorService executorService = Executors.newFixedThreadPool(32);
@@ -86,7 +90,32 @@ class GoodsServiceImplTest {
         for (int i = 0; i < threadCount; i++) {
             executorService.submit(() -> {
                 try {
-                    redissonLockStockFacade.processOrderForGoods(1L, 1L, 1);
+                    redissonLockStockFacade.getGoodsStockQuantity(1L);
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+    }
+
+    @Test
+    @DisplayName("100명의 사용자가 재고 감소 요청")
+    public void processOrderForGoods_success() throws InterruptedException {
+
+        OrderGoodsReqDto orderGoodsReqDto = new OrderGoodsReqDto();
+        orderGoodsReqDto.setGoodsId(1L);
+        orderGoodsReqDto.setQuantity(1);
+        orderGoodsReqDto.setAddress("경상도");
+        int threadCount = 100;
+        ExecutorService executorService = Executors.newFixedThreadPool(32);
+        CountDownLatch latch = new CountDownLatch(threadCount);
+
+        for (int i = 0; i < threadCount; i++) {
+            executorService.submit(() -> {
+                try {
+                    redissonLockStockFacade.processOrderForGoods(1L, orderGoodsReqDto);
                 } finally {
                     latch.countDown();
                 }
