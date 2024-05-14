@@ -1,11 +1,9 @@
 package com.miri.orderservice.controller;
 
-import static com.miri.orderservice.dto.order.RequestOrderDto.CreateOrderReqDto;
 import static com.miri.orderservice.dto.order.RequestOrderDto.ReturnOrderReqDto;
 
 import com.miri.coremodule.dto.ResponseDto;
 import com.miri.coremodule.dto.order.FeignOrderRespDto.OrderGoodsListRespDto;
-import com.miri.orderservice.dto.order.ResponseOrderDto.CreateOrderRespDto;
 import com.miri.orderservice.service.order.OrderService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -37,13 +35,13 @@ public class OrderApiController {
     }
 
     // 주문 기능
-    @PostMapping("/orders")
-    public ResponseEntity<?> createOrder(@RequestBody @Valid CreateOrderReqDto reqDto,
-                                         BindingResult bindingResult,
-                                         @RequestHeader(USER_ID_HEADER) Long userId) {
-        CreateOrderRespDto result = orderService.createOrder(userId, reqDto);
-        return new ResponseEntity<>(new ResponseDto<>(1, "주문이 완료되었습니다.", result), HttpStatus.CREATED);
-    }
+//    @PostMapping("/orders")
+//    public ResponseEntity<?> createOrder(@RequestBody @Valid CreateOrderReqDto reqDto,
+//                                         BindingResult bindingResult,
+//                                         @RequestHeader(USER_ID_HEADER) Long userId) {
+//        CreateOrderRespDto result = orderService.createOrder(userId, reqDto);
+//        return new ResponseEntity<>(new ResponseDto<>(1, "주문이 완료되었습니다.", result), HttpStatus.CREATED);
+//    }
 
     @GetMapping("/orders")
     public ResponseEntity<?> getOrderGoodsList(@RequestHeader("X-User-Id") Long userId,
