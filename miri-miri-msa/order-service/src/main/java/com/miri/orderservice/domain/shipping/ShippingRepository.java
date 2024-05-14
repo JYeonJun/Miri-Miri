@@ -21,8 +21,8 @@ public interface ShippingRepository extends JpaRepository<Shipping, Long> {
     int updateShippingStatusToInTransitIfOlderThanADay();
 
     @Modifying
-    @Query("UPDATE Shipping s SET s.shippingStatus = 'IN_TRANSIT' " +
-            "WHERE s.shippingStatus = 'PENDING' AND " +
+    @Query("UPDATE Shipping s SET s.shippingStatus = 'DELIVERED' " +
+            "WHERE s.shippingStatus = 'IN_TRANSIT' AND " +
             "FUNCTION('DATE', s.lastModifiedDate) < CURRENT_DATE")
     int updateShippingStatusToDeliveredIfOlderThanADay();
 }
