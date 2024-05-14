@@ -1,14 +1,13 @@
 package com.miri.orderservice.service.order;
 
-import com.miri.orderservice.client.GoodsServiceClient;
 import com.miri.orderservice.domain.order.OrderDetail;
 import com.miri.orderservice.domain.returnrequest.ReturnRequest;
 import com.miri.orderservice.domain.returnrequest.ReturnRequestRepository;
 import com.miri.orderservice.domain.shipping.ShippingRepository;
+import com.miri.orderservice.event.ReturnEvent;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,13 +18,13 @@ public class OrderStatusScheduler {
 
     private final ReturnRequestRepository returnRequestRepository;
     private final ShippingRepository shippingRepository;
-    private final GoodsServiceClient goodsServiceClient;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public OrderStatusScheduler(ReturnRequestRepository returnRequestRepository, ShippingRepository shippingRepository,
-                                GoodsServiceClient goodsServiceClient) {
+                                ApplicationEventPublisher applicationEventPublisher) {
         this.returnRequestRepository = returnRequestRepository;
         this.shippingRepository = shippingRepository;
-        this.goodsServiceClient = goodsServiceClient;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Scheduled(cron = "0 0 6 * * *")
@@ -49,17 +48,16 @@ public class OrderStatusScheduler {
     public void updateReturnStatusToCompleted() {
         // '반품 처리 중'인 상품의 상태를 '반품 완료'로 변경하고, 변경된 행의 수를 반환
         List<ReturnRequest> returnRequests = returnRequestRepository.findReturnRequestsToUpdate();
-        int count = returnRequestRepository.updateReturnStatusToCompletedOlderThanADay();
-        log.info("[반품 상태 업데이트]: 반품 처리 중 -> 반품 완료, count={}", count);
 
-        if (count > 0) {
+        if (!returnRequests.isEmpty()) {
+            int count = returnRequestRepository.updateReturnStatusToCompletedOlderThanADay();
+            log.info("[반품 상태 업데이트]: 반품 처리 중 -> 반품 완료, count={}", count);
             List<OrderDetail> orderDetails = returnRequests.stream().map(ReturnRequest::getOrderDetail).toList();
-            Map<Long, Integer> goodsIdToQuantityMap = orderDetails.stream()
-                    .collect(Collectors.groupingBy(OrderDetail::getGoodsId,
-                            Collectors.summingInt(OrderDetail::getQuantity)));
 
-            // 상품 재고 증가 요청
-            goodsServiceClient.increaseStock(goodsIdToQuantityMap);
+            for (OrderDetail orderDetail : orderDetails) {
+                applicationEventPublisher.publishEvent(
+                        new ReturnEvent(this, orderDetail.getGoodsId(), orderDetail.getQuantity()));
+            }
         }
     }
 }
