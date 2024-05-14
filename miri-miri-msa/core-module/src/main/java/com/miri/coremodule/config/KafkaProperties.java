@@ -9,5 +9,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "kafka")
 public class KafkaProperties {
     private String server;
-    private String groupId;
+    private String orderGroupId;
+    private String goodsGroupId;
+    private String paymentGroupId;
 }

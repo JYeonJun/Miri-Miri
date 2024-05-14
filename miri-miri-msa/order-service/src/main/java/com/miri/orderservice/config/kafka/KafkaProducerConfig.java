@@ -1,6 +1,7 @@
 package com.miri.orderservice.config.kafka;
 
 import com.miri.coremodule.config.KafkaProperties;
+import com.miri.coremodule.dto.kafka.CancelOrderEventDto;
 import com.miri.coremodule.dto.kafka.PaymentRequestEventDto;
 import com.miri.coremodule.dto.kafka.StockRollbackEventDto;
 import java.util.HashMap;
@@ -43,6 +44,16 @@ public class KafkaProducerConfig {
     @Bean
     public KafkaTemplate<String, StockRollbackEventDto> kafkaRollbackTemplate() {
         return new KafkaTemplate<>(producerRollbackFactory());
+    }
+
+    @Bean
+    public ProducerFactory<String, CancelOrderEventDto> producerCancelOrderFactory() {
+        return new DefaultKafkaProducerFactory<>(producerConfigurations());
+    }
+
+    @Bean
+    public KafkaTemplate<String, CancelOrderEventDto> kafkaCancelOrderTemplate() {
+        return new KafkaTemplate<>(producerCancelOrderFactory());
     }
 
     @Bean
