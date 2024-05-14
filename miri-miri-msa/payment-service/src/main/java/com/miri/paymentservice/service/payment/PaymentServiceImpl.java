@@ -5,7 +5,6 @@ import com.miri.paymentservice.domain.payment.Payment;
 import com.miri.paymentservice.domain.payment.PaymentRepository;
 import com.miri.paymentservice.domain.payment.PaymentStatus;
 import com.miri.paymentservice.event.PaymentAbortedEvent;
-import com.miri.paymentservice.service.kafka.KafkaSender;
 import java.util.Random;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -15,14 +14,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @Transactional(readOnly = true)
-public class PaymentInternalServiceImpl implements PaymentInternalService {
+public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final Random random = new Random();
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    public PaymentInternalServiceImpl(PaymentRepository paymentRepository,
-                                      ApplicationEventPublisher applicationEventPublisher) {
+    public PaymentServiceImpl(PaymentRepository paymentRepository,
+                              ApplicationEventPublisher applicationEventPublisher) {
         this.paymentRepository = paymentRepository;
         this.applicationEventPublisher = applicationEventPublisher;
     }
@@ -39,6 +38,12 @@ public class PaymentInternalServiceImpl implements PaymentInternalService {
             applicationEventPublisher.publishEvent(new PaymentAbortedEvent(this, paymentRequestEventDto));
         }
         log.debug("traceId={}, 결제 완료", paymentRequestEventDto.getTraceId());
+    }
+
+    @Override
+    @Transactional
+    public void updatePaymentStatusOnCancelOrder(Long orderId) {
+        paymentRepository.updatePaymentStatusByOrderId(orderId, PaymentStatus.REFUNDED);
     }
 
     private Payment enterPaymentScreen(PaymentRequestEventDto paymentRequestEventDto) {
