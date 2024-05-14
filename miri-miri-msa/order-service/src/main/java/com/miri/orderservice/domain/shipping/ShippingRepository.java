@@ -13,4 +13,16 @@ public interface ShippingRepository extends JpaRepository<Shipping, Long> {
     @Modifying
     @Query("UPDATE Shipping s SET s.shippingStatus = :status WHERE s.orderDetailId IN (SELECT od.id FROM OrderDetail od WHERE od.order.id = :orderId)")
     int updateShippingStatusByOrderDetailsOrderId(@Param("orderId") Long orderId, @Param("status") ShippingStatus status);
+
+    @Modifying
+    @Query("UPDATE Shipping s SET s.shippingStatus = 'IN_TRANSIT' " +
+            "WHERE s.shippingStatus = 'PENDING' AND " +
+            "FUNCTION('DATE', s.lastModifiedDate) < CURRENT_DATE")
+    int updateShippingStatusToInTransitIfOlderThanADay();
+
+    @Modifying
+    @Query("UPDATE Shipping s SET s.shippingStatus = 'DELIVERED' " +
+            "WHERE s.shippingStatus = 'IN_TRANSIT' AND " +
+            "FUNCTION('DATE', s.lastModifiedDate) < CURRENT_DATE")
+    int updateShippingStatusToDeliveredIfOlderThanADay();
 }

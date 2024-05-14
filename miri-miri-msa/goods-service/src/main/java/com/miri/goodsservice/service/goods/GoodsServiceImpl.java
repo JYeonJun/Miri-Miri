@@ -100,14 +100,6 @@ public class GoodsServiceImpl implements GoodsService {
     }
 
     @Override
-    @Transactional
-    public GoodsStockRespDto increaseOrderedGoodsStock(GoodsStockIncreaseReqDto reqDto) {
-        Goods findGoods = findGoodsByIdOrThrow(reqDto.getGoodsId());
-        findGoods.increaseStock(reqDto.getQuantity());
-        return new GoodsStockRespDto(reqDto.getGoodsId(), findGoods.getStockQuantity());
-    }
-
-    @Override
     @Transactional(readOnly = true)
     public Map<Long, OrderedGoodsDetailRespDto> getOrderedGoodsDetailsAsMap(Set<Long> goodsIds) {
         List<Goods> goodsList = goodsRepository.findByIdIn(goodsIds);

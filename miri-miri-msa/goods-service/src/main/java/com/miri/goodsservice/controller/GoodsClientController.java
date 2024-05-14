@@ -3,9 +3,11 @@ package com.miri.goodsservice.controller;
 import com.miri.coremodule.dto.goods.FeignGoodsReqDto.GoodsStockIncreaseReqDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.GoodsStockRespDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.OrderedGoodsDetailRespDto;
+import com.miri.goodsservice.service.goods.GoodsInternalService;
 import com.miri.goodsservice.service.goods.GoodsService;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +25,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class GoodsClientController {
 
     private final GoodsService goodsService;
+    private final GoodsInternalService goodsInternalService;
 
-    public GoodsClientController(GoodsService goodsService) {
+    public GoodsClientController(GoodsService goodsService, GoodsInternalService goodsInternalService) {
         this.goodsService = goodsService;
+        this.goodsInternalService = goodsInternalService;
     }
 
     // 주문한 상품 재고 감소 요청
@@ -45,8 +49,8 @@ public class GoodsClientController {
 
     // 주문 취소한 상품 재고 증가 요청
     @PostMapping("/goods/increase")
-    public ResponseEntity<?> increaseOrderedGoodsStock(@RequestBody GoodsStockIncreaseReqDto reqDto) {
-        GoodsStockRespDto result = goodsService.increaseOrderedGoodsStock(reqDto);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<?> increaseOrderedGoodsStock(@RequestBody Map<Long, Integer> goodsIdToQuantityMap) {
+        goodsInternalService.increaseOrderGoodsStockBatch(goodsIdToQuantityMap);
+        return ResponseEntity.ok(null);
     }
 }

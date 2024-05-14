@@ -34,9 +34,6 @@ public interface GoodsService {
     // 상품 재고 감소
     List<GoodsStockRespDto> decreaseOrderedGoodsStock(Map<Long, Integer> reqDtos);
 
-    // 상품 재고 증가
-    GoodsStockRespDto increaseOrderedGoodsStock(GoodsStockIncreaseReqDto reqDto);
-
     // 주문한 상품에 대한 상품 정보 조회
     Map<Long, OrderedGoodsDetailRespDto> getOrderedGoodsDetailsAsMap(Set<Long> goodsIds);
 

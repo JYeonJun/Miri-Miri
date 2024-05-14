@@ -1,12 +1,13 @@
 package com.miri.orderservice.service.order;
 
 import com.miri.orderservice.domain.order.OrderDetail;
-import com.miri.orderservice.domain.order.OrderDetailRepository;
-import com.miri.orderservice.domain.order.OrderStatus;
-import java.time.LocalDate;
-import java.util.Arrays;
+import com.miri.orderservice.domain.returnrequest.ReturnRequest;
+import com.miri.orderservice.domain.returnrequest.ReturnRequestRepository;
+import com.miri.orderservice.domain.shipping.ShippingRepository;
+import com.miri.orderservice.event.ReturnEvent;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,64 +16,48 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class OrderStatusScheduler {
 
-    private final OrderDetailRepository orderDetailRepository;
+    private final ReturnRequestRepository returnRequestRepository;
+    private final ShippingRepository shippingRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
-    public OrderStatusScheduler(OrderDetailRepository orderDetailRepository) {
-        this.orderDetailRepository = orderDetailRepository;
+    public OrderStatusScheduler(ReturnRequestRepository returnRequestRepository, ShippingRepository shippingRepository,
+                                ApplicationEventPublisher applicationEventPublisher) {
+        this.returnRequestRepository = returnRequestRepository;
+        this.shippingRepository = shippingRepository;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
-    // TODO: 상태 관리 스케줄링 기능 구현
-//    @Scheduled(cron = "0 0 6 * * *") // 매일 오전 6시에 실행
-//    @Transactional
-//    public void updateOrderStatus() {
-//        // 터질 수 있으니 페이징 방식처럼 나눠서 처리할 수도 있음(데이터가 많아도 처리 가능)
-//        // 스케줄러 3개로 나눠서 처리하는 게 좋다.
-//        log.info("OrderStatus Update Scheduler Start!!");
-//        List<OrderDetail> orderDetails = orderDetailRepository.findByOrderStatusIn( // 쿼리 날릴 때 시간도 함께 날려서
-//                Arrays.asList(OrderStatus.PENDING, OrderStatus.IN_TRANSIT, OrderStatus.RETURN_IN_PROGRESS));
-//
-//        LocalDate now = LocalDate.now();
-//
-//        // 차라리 필터를 써서 주문상태별로 나눠서 처리하기
-//
-//        for (OrderDetail orderDetail : orderDetails) {
-//            LocalDate lastModifiedDate = orderDetail.getLastModifiedDate().toLocalDate();
-//
-//            if (now.isAfter(lastModifiedDate)) { // 쿼리로 한 번에 처리하기!!
-//                switch (orderDetail.getOrderStatus()) {
-//                    case PENDING:
-//                        updateToInTransit(orderDetail);
-//                        break;
-//                    case IN_TRANSIT:
-//                        updateToDelivered(orderDetail);
-//                        break;
-//                    case RETURN_IN_PROGRESS:
-//                        updateToReturnCompleted(orderDetail);
-//                }
-//            }
-//        }
-//
-//        log.info("OrderStatus Update Scheduler End!!");
-//    }
-//
-//    private void updateToInTransit(OrderDetail orderDetail) {
-//        orderDetail.changeOrderStatus(OrderStatus.IN_TRANSIT);
-//        log.info("Order {} status changed to IN_TRANSIT", orderDetail.getId());
-//    }
-//
-//    private void updateToDelivered(OrderDetail orderDetail) {
-//        orderDetail.changeOrderStatus(OrderStatus.DELIVERED);
-//        log.info("Order {} status changed to DELIVERED", orderDetail.getId());
-//    }
-//
-//    private void updateToReturnCompleted(OrderDetail orderDetail) {
-////        Optional<Goods> goodsOpt = goodsRepository.findById(orderDetail.getGoodsId());
-////        goodsOpt.ifPresent(goods -> goods.increaseStock(orderDetail.getQuantity()));
-//        // ex) 1~ 10, 10개의 반품 1번은 양말 한개, 2번은 티셔츠 두개, 3번은 양말 세개
-//        // -> 실제로는 양말이랑 티셔츠에 대해 쿼리가 2번만 발생하면 된다. (첫번째 개선 방법)
-//        // orderDetail을 여러개 받으면 상품ID도 알 수 있으니 In절로 처리 가능 -> Set 같은 자료구조를 활용해서 상품 처리 가능
-//        // Map으로 상품ID와 개수를 처리해서
-//        orderDetail.changeOrderStatus(OrderStatus.RETURN_COMPLETED);
-//        log.info("Order {} status changed to RETURN_COMPLETED", orderDetail.getId());
-//    }
+    @Scheduled(cron = "0 0 6 * * *")
+    @Transactional
+    public void updatePendingToInTransit() {
+        // '배송 대기'인 배송의 상태를 '배송 중'으로 변경하고, 변경된 행의 수를 반환
+        int count = shippingRepository.updateShippingStatusToInTransitIfOlderThanADay();
+        log.info("[배송 상태 업데이트]: 배송 대기 -> 배송 중, count={}", count);
+    }
+
+    @Scheduled(cron = "0 0 6 * * *")
+    @Transactional
+    public void updateInTransitDelivered() {
+        // '배송 중'인 상품의 상태를 '배송 완료'로 변경하고, 변경된 행의 수를 반환
+        int count = shippingRepository.updateShippingStatusToDeliveredIfOlderThanADay();
+        log.info("[배송 상태 업데이트]: 배송 중 -> 배송 완료, count={}", count);
+    }
+
+    @Scheduled(cron = "0 0 6 * * *")
+    @Transactional
+    public void updateReturnStatusToCompleted() {
+        // '반품 처리 중'인 상품의 상태를 '반품 완료'로 변경하고, 변경된 행의 수를 반환
+        List<ReturnRequest> returnRequests = returnRequestRepository.findReturnRequestsToUpdate();
+
+        if (!returnRequests.isEmpty()) {
+            int count = returnRequestRepository.updateReturnStatusToCompletedOlderThanADay();
+            log.info("[반품 상태 업데이트]: 반품 처리 중 -> 반품 완료, count={}", count);
+            List<OrderDetail> orderDetails = returnRequests.stream().map(ReturnRequest::getOrderDetail).toList();
+
+            for (OrderDetail orderDetail : orderDetails) {
+                applicationEventPublisher.publishEvent(
+                        new ReturnEvent(this, orderDetail.getGoodsId(), orderDetail.getQuantity()));
+            }
+        }
+    }
 }

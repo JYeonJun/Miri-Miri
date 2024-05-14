@@ -1,6 +1,5 @@
 package com.miri.orderservice.client;
 
-import com.miri.coremodule.dto.goods.FeignGoodsReqDto.GoodsStockIncreaseReqDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.GoodsStockRespDto;
 import com.miri.coremodule.dto.goods.FeignGoodsRespDto.OrderedGoodsDetailRespDto;
 import com.miri.coremodule.dto.wishlist.FeignWishListReqDto.WishListOrderedReqDto;
@@ -67,10 +66,10 @@ public interface GoodsServiceClient {
 
     @CircuitBreaker(name = "increaseGoodsStockCircuitBreaker", fallbackMethod = "increaseGoodsStockFallback")
     @PostMapping("/api/internal/goods/increase")
-    GoodsStockRespDto increaseStock(@RequestBody GoodsStockIncreaseReqDto reqDto);
+    GoodsStockRespDto increaseStock(@RequestBody Map<Long, Integer> goodsIdToQuantityMap);
 
     default void increaseGoodsStockFallback(Throwable e) {
-        log.error("주문 취소: 상품 재고 증가 요청 실패");
+        log.error("상품 재고 증가 요청 실패");
         throw new CustomApiException("재고 증가 요청에 실패했습니다.");
     }
 }
