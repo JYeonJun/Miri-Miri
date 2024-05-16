@@ -33,8 +33,14 @@ spring:
     password: ${database.password}
   data:
     redis:
-      host: localhost
-      port: 6381
+      master:
+        host: localhost
+        port: 6381
+      slaves:
+        - host: localhost
+          port: 6382
+        - host: localhost
+          port: 6383
 
 logging:
   level:

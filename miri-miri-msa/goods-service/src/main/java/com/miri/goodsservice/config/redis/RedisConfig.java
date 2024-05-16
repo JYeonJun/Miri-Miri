@@ -1,8 +1,11 @@
 package com.miri.goodsservice.config.redis;
 
+import io.lettuce.core.ReadFrom;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisStaticMasterReplicaConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
@@ -21,7 +24,19 @@ public class RedisConfig {
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        return new LettuceConnectionFactory(redisProperties.getHost(), redisProperties.getPort());
+        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+                .readFrom(ReadFrom.REPLICA_PREFERRED)
+                .build();
+
+        RedisStaticMasterReplicaConfiguration masterReplicaConfig
+                = new RedisStaticMasterReplicaConfiguration(redisProperties.getMaster().getHost(),
+                redisProperties.getMaster().getPort());
+
+        redisProperties.getSlaves().forEach(slave -> {
+            masterReplicaConfig.addNode(slave.getHost(), slave.getPort());
+        });
+
+        return new LettuceConnectionFactory(masterReplicaConfig, clientConfig);
     }
 
     @Bean

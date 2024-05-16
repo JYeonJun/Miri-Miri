@@ -71,15 +71,41 @@ services:
     networks:
       - miri-network
 
-  goods-redis:
-    container_name: goods_redis
+  goods-redis-master:
+    container_name: goods_redis_master
     image: redis
     ports:
       - "6381:6379"
     volumes:
-      - redis_goods_data:/data
+      - redis_master_goods_data:/data
     networks:
       - miri-network
+
+  goods-redis-slave:
+    container_name: goods_redis_slave
+    image: redis
+    ports:
+      - "6382:6379"
+    volumes:
+      - redis_slave_goods_data:/data
+    command: redis-server --slaveof goods-redis-master 6379
+    networks:
+      - miri-network
+    depends_on:
+      - goods-redis-master
+
+  goods-redis-slave2:
+    container_name: goods_redis_slave2
+    image: redis
+    ports:
+      - "6383:6379"
+    volumes:
+      - redis_slave2_goods_data:/data
+    command: redis-server --slaveof goods-redis-master 6379
+    networks:
+      - miri-network
+    depends_on:
+      - goods-redis-master
 
   zookeeper:
     image: wurstmeister/zookeeper
@@ -107,13 +133,10 @@ volumes:
   miri_goods_data:
   miri_payment_data:
   redis_user_data:
-  redis_goods_data:
+  redis_master_goods_data:
+  redis_slave_goods_data:
+  redis_slave2_goods_data:
 
 networks:
   miri-network:
-    # driver: bridge
-    # ipam:
-    #   driver: default
-    #   config:
-    #     - subnet: 172.31.0.0/16
-    #       gateway: 172.31.0.1
+    driver: bridge
