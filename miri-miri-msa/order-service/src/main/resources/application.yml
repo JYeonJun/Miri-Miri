@@ -1,0 +1,50 @@
+server:
+  port: 8081
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+spring:
+  application:
+    name: order-service
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+  jpa:
+    open-in-view: false
+    properties:
+      '[hibernate.default_batch_fetch_size]': 100
+    hibernate:
+      ddl-auto: update
+  datasource:
+#    url: jdbc:mariadb://order_mariadb:3306/miri_order
+#    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://localhost:3309/miri_order
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: root
+    password: ${database.password}
+
+logging:
+  level:
+    com.miri.orderservice: DEBUG
+#    org:
+#      springframework:
+#        transaction:
+#          interceptor:
+#            TransactionInterceptor: TRACE
+#        kafka:
+#          core:
+#            KafkaTemplate: TRACE
+#            DefaultKafkaProducerFactory: TRACE
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh, health, beans, httpexchanges, busrefresh
