@@ -59,23 +59,24 @@
 </details>
 
 ## 📌**주요 기능**
-- **Redis Caching**을 통한 상품 재고 관리 및 동시성 처리
-- **Redis Replication**을 통한 레디스 분산 처리
-- **Kafka**를 통한 이벤트 기반 아키텍처 구축
-- **OpenFeign**을 활용한 마이크로서비스 간 통신
-- **Circuit Breaker**를 활용한 회복탄력성 증진
-- **Api Gateway**를 통한 마이크로서비스 아키텍처 구축
-- 스케줄러를 통한 주문 및 배송 상태 관리
-- **Spring Security, JWT**를 사용한 인증/인가
-- Google SMTP를 사용한 이메일 인증
+- **Kafka** 이벤트 기반 **상품 주문**
 <details>
-<summary><strong>상품 주문 플로우차트</strong></summary>
+<summary>상품 주문 플로우차트</summary>
 <div markdown="1">
 
 <p align="center"><img src="https://github.com/JYeonJun/miri-miri/assets/97449471/27f2efac-6248-4907-9a4e-ad2517f00e66"/></p>
 
 </div>
 </details>
+
+- **Redis Caching**을 통한 상품 재고 관리 및 동시성 처리
+- **Redis Replication**을 통한 레디스 분산 처리
+- **OpenFeign**을 활용한 마이크로서비스 간 통신
+- **Circuit Breaker**를 활용한 회복탄력성 증진
+- **Api Gateway**를 통한 마이크로서비스 아키텍처 구축
+- 스케줄러를 통한 주문 및 배송 상태 관리
+- **Spring Security, JWT**를 사용한 인증/인가
+- Google SMTP를 사용한 이메일 인증
 
 ## 📂**API 명세서**
 ([바로가기](https://documenter.getpostman.com/view/20733282/2sA3JRaKQo))
@@ -87,7 +88,7 @@
 - **Redis Replication을 사용한 상품 재고 관리** ([바로가기](https://yenjjun187.tistory.com/1042))
 - **트랜잭션과 카프카 이벤트 발행 사이 정합성 문제 해결** ([바로가기](https://yenjjun187.tistory.com/1043))
 
-## 실행 방법
+## 🤖실행 방법
 ### 실행 요구 사항
 <details>
 <summary>간략히</summary>
