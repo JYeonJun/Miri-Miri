@@ -11,7 +11,7 @@
 <summary>시스템 구조 이미지</summary>
 <div markdown="1">
 
-<p align="center"><img src="https://github.com/JYeonJun/miri-miri/assets/97449471/8d3ce055-4ef4-4a0b-971e-a439c07eb448"/></p>
+<p align="center"><img src="https://github.com/JYeonJun/miri-miri/assets/97449471/a8e38ce7-3e0a-4907-9053-0f022343a83f"/></p>
 
 </div>
 </details>
@@ -53,7 +53,7 @@
 <summary>ERD 이미지</summary>
 <div markdown="1">
 
-![image](https://github.com/JYeonJun/miri-miri/assets/97449471/35c9e664-0eb8-4838-a307-b771b7bd941a)
+<p align="center"><img src="https://github.com/JYeonJun/miri-miri/assets/97449471/cdec958a-9c93-4585-807a-3ec80673e957"/></p>
 
 </div>
 </details>
@@ -68,6 +68,14 @@
 - 스케줄러를 통한 주문 및 배송 상태 관리
 - **Spring Security, JWT**를 사용한 인증/인가
 - Google SMTP를 사용한 이메일 인증
+<details>
+<summary><strong>상품 주문 플로우차트</strong></summary>
+<div markdown="1">
+
+<p align="center"><img src="https://github.com/JYeonJun/miri-miri/assets/97449471/27f2efac-6248-4907-9a4e-ad2517f00e66"/></p>
+
+</div>
+</details>
 
 ## 📂**API 명세서**
 ([바로가기](https://documenter.getpostman.com/view/20733282/2sA3JRaKQo))
@@ -86,7 +94,8 @@
 <div markdown="1">
 
 1. 빈 폴더 생성
-2. application.yml, goods-service.yml, order-service.yml, payment-service.yml, user-service.yml 파일 생성
+2. application.yml, goods-service.yml, order-service.yml, payment-service.yml, user-service.yml 파일 생성(아래 참고)
+3. config-service의 application.yml 파일의 spring.cloud.config.server.native.search-locations 값으로 폴더 위치 지정
 
 **application.yml**
 ```yaml
@@ -118,7 +127,7 @@ database:
   password: mariadb1234
 ```
 
-**user-service.yml**
+**user-service.yml**
 ```yaml
 miri:
   mail:
@@ -128,8 +137,6 @@ miri:
 database:
   password: mariadb1234
 ```
-
-3. config-service의 application.yml 파일의 spring.cloud.config.server.native.search-locations 값으로 폴더 위치 지정
 
 </div>
 </details>
