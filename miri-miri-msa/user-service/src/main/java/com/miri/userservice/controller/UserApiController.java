@@ -67,8 +67,7 @@ public class UserApiController {
 
     @GetMapping("/auth/users")
     public ResponseEntity<?> getUserInfo(@RequestHeader(USER_ID_HEADER) Long userId) {
-        GetUserRespDto result
-                = userService.getUserInfo(userId);
+        GetUserRespDto result = userService.getUserInfo(userId);
         return new ResponseEntity<>(new ResponseDto<>(1, "사용자 정보가 조회되었습니다.", result), HttpStatus.OK);
     }
 }

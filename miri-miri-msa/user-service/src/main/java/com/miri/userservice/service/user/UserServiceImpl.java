@@ -19,8 +19,10 @@ import com.miri.userservice.dto.user.ResponseUserDto.GetUserRespDto;
 import com.miri.userservice.dto.user.ResponseUserDto.UpdateUserProfileRespDto;
 import com.miri.userservice.util.AESUtils;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -93,32 +95,42 @@ public class UserServiceImpl implements UserService {
         findUser.changePassword(passwordEncoder.encode(userPassword.getPassword()));
     }
 
+
     @Override
     public GetUserRespDto getUserInfo(Long userId) {
         User findUser = findUserByIdOrThrow(userId);
 
-        // 등록한 상품 목록(GoodsService)
-        RegisterGoodsListRespDto registerGoodsList = fetchServiceData(RegisterGoodsListRespDto.class, userId,
-                goodsServiceClient::getRegisteredGoodsList);
+        CompletableFuture<RegisterGoodsListRespDto> registerGoodsListFuture = getRegisteredGoodsListAsync(userId);
+        CompletableFuture<WishListRespDto> wishListGoodsFuture = getWishListGoodsAsync(userId);
+        CompletableFuture<OrderGoodsListRespDto> orderGoodsListFuture = getOrderGoodsListAsync(userId);
 
-        // 장바구니에 추가한 상품 목록(WishListService)
-        WishListRespDto wishListGoods = fetchServiceData(WishListRespDto.class, userId,
-                goodsServiceClient::getWishListGoods);
+        CompletableFuture.allOf(registerGoodsListFuture, wishListGoodsFuture, orderGoodsListFuture).join();
 
-        // 주문한 상품 목록(OrderService)
-        OrderGoodsListRespDto orderGoodsList = fetchServiceData(OrderGoodsListRespDto.class, userId,
-                orderServiceClient::getOrderGoodsList);
+        RegisterGoodsListRespDto registerGoodsList = registerGoodsListFuture.join();
+        WishListRespDto wishListGoods = wishListGoodsFuture.join();
+        OrderGoodsListRespDto orderGoodsList = orderGoodsListFuture.join();
 
         return new GetUserRespDto(findUser, registerGoodsList, wishListGoods, orderGoodsList);
     }
 
-    private <T> T fetchServiceData(Class<T> clazz, Long userId,
-                                   BiFunction<String, Integer, ResponseDto<T>> serviceMethod) {
-        // 저장된 상품 목록을 가져오는 제네릭 메소드
+    @Async
+    public CompletableFuture<RegisterGoodsListRespDto> getRegisteredGoodsListAsync(Long userId) {
+        return CompletableFuture.completedFuture(fetchServiceData(RegisterGoodsListRespDto.class, userId, goodsServiceClient::getRegisteredGoodsList));
+    }
+
+    @Async
+    public CompletableFuture<WishListRespDto> getWishListGoodsAsync(Long userId) {
+        return CompletableFuture.completedFuture(fetchServiceData(WishListRespDto.class, userId, goodsServiceClient::getWishListGoods));
+    }
+
+    @Async
+    public CompletableFuture<OrderGoodsListRespDto> getOrderGoodsListAsync(Long userId) {
+        return CompletableFuture.completedFuture(fetchServiceData(OrderGoodsListRespDto.class, userId, orderServiceClient::getOrderGoodsList));
+    }
+
+    private <T> T fetchServiceData(Class<T> clazz, Long userId, BiFunction<String, Integer, ResponseDto<T>> serviceMethod) {
         ResponseDto<T> response = serviceMethod.apply(String.valueOf(userId), 0);
-        return Optional.ofNullable(response)
-                .map(ResponseDto::getData)
-                .orElse(null);
+        return Optional.ofNullable(response).map(ResponseDto::getData).orElse(null);
     }
 
     @Override
