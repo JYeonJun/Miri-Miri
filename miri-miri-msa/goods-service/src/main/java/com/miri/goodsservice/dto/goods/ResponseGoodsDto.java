@@ -68,14 +68,14 @@ public class ResponseGoodsDto {
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
         private LocalDateTime reservationStartTime;
 
-        public GoodsDetailRespDto(Goods goods, String sellerName) {
+        public GoodsDetailRespDto(Goods goods, Integer goodsStock, String sellerName) {
             this.goodsId = goods.getId();
             this.sellerId = goods.getSellerId();
             this.sellerName = sellerName;
             this.goodsName = goods.getGoodsName();
             this.goodsDescription = goods.getGoodsDescription();
             this.goodsPrice = goods.getGoodsPrice();
-            this.stockQuantity = goods.getStockQuantity();
+            this.stockQuantity = goodsStock;
             this.category = goods.getCategory().getValue();
             this.reservationStartTime = goods.getReservationStartTime();
         }
