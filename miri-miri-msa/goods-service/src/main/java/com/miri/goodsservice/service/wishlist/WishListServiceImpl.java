@@ -75,8 +75,10 @@ public class WishListServiceImpl implements WishListService {
     @Override
     @Transactional
     public void deleteGoodsInWishList(Long userId, Long wishListId) {
-        wishListRepository.deleteByIdAndUserId(wishListId, userId);
-
+        int count = wishListRepository.deleteByIdAndUserId(wishListId, userId);
+        if (count == 0) {
+            throw new CustomApiException("해당 위시리스 상품을 삭제할 권한이 없습니다.");
+        }
     }
 
     @Override

@@ -34,15 +34,6 @@ public class OrderApiController {
         this.orderService = orderService;
     }
 
-    // 주문 기능
-//    @PostMapping("/orders")
-//    public ResponseEntity<?> createOrder(@RequestBody @Valid CreateOrderReqDto reqDto,
-//                                         BindingResult bindingResult,
-//                                         @RequestHeader(USER_ID_HEADER) Long userId) {
-//        CreateOrderRespDto result = orderService.createOrder(userId, reqDto);
-//        return new ResponseEntity<>(new ResponseDto<>(1, "주문이 완료되었습니다.", result), HttpStatus.CREATED);
-//    }
-
     @GetMapping("/orders")
     public ResponseEntity<?> getOrderGoodsList(@RequestHeader("X-User-Id") Long userId,
                                                @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
