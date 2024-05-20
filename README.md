@@ -30,6 +30,12 @@
     <img src="https://img.shields.io/badge/QueryDSL-59666C?style=for-the-badge&logo=QueryDSL&logoColor=white"/>
 </div>
 
+**데이터베이스 & 캐싱**
+<div>
+    <img src="https://img.shields.io/badge/MariaDB-003545?style=for-the-badge&logo=MariaDB&logoColor=white"/>
+    <img src="https://img.shields.io/badge/Redis-D92A2A?style=for-the-badge&logo=Redis&logoColor=white"/>
+</div>
+
 **메시징 시스템**
 <div>
     <img src="https://img.shields.io/badge/Apache Kafka-231F20?style=for-the-badge&logo=Apache Kafka&logoColor=white"/>
