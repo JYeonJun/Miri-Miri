@@ -30,6 +30,12 @@
     <img src="https://img.shields.io/badge/QueryDSL-59666C?style=for-the-badge&logo=QueryDSL&logoColor=white"/>
 </div>
 
+**데이터베이스 & 캐싱**
+<div>
+    <img src="https://img.shields.io/badge/MariaDB-003545?style=for-the-badge&logo=MariaDB&logoColor=white"/>
+    <img src="https://img.shields.io/badge/Redis-D92A2A?style=for-the-badge&logo=Redis&logoColor=white"/>
+</div>
+
 **메시징 시스템**
 <div>
     <img src="https://img.shields.io/badge/Apache Kafka-231F20?style=for-the-badge&logo=Apache Kafka&logoColor=white"/>
@@ -68,8 +74,9 @@
   - 데이터 가용성과 내구성을 보장하고, 읽기 성능 향상, 마스터-슬레이브 구조를 통해 데이터 복제와 장애 조치(Failover) 지원
 - **OpenFeign**을 활용한 마이크로서비스 간 통신
   - 마이크로서비스 간의 데이터 조회
-- **Circuit Breaker**를 활용한 회복탄력성 증진
-  - 마이크로서비스 아키텍처 서비스 간 장애 전파 방지
+- **Resilience4j**를 통한 마이크로서비스 통신 안전성 향상
+  - Circuit Breaker를 사용한 마이크로서비스 간 장애 전파 방지
+  - Time Limiter를 사용한 무한 대기 방지
 - **Api Gateway**를 통한 마이크로서비스 아키텍처 구축
   - 클라이언트 요청을 적절한 마이크로서비스로 라우팅, 인증/인가 기능 중앙 집중화
 - 스케줄러를 통한 주문 및 배송 상태 관리
