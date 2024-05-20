@@ -90,13 +90,20 @@
 ([바로가기](https://documenter.getpostman.com/view/20733282/2sA3JRaKQo))
 
 ## 📈**성능 최적화 및 트러블 슈팅**
-프로젝트 진행 과정에서 발생한 트러블 슈팅과 성능 최적화 사례를 공유합니다.<br/>
+프로젝트 진행 과정에서 발생한 성능 최적화 및 트러블 슈팅 사례를 공유합니다.<br/>
 #### **Redis Cache 쓰기 전략별(+ Lua 스크립트) 상품 주문 성능 개선 과정** ([자세히 보기](https://yenjjun187.tistory.com/1039))
-<p align="center"><img src="https://github.com/JYeonJun/miri-miri/assets/97449471/3ce54f99-5857-43a0-883e-704aa305a4c7" style="width:60%;"/></p>
+<p align="center"><img src="https://github.com/JYeonJun/miri-miri/assets/97449471/608674c9-7b5d-4eff-89c8-47564ceb64d5" style="width:70%;"/></p>
+
 
 - 캐시 쓰기 전략 변경: **Write-Through** → **Write-Back**
 - **Lua 스크립트** 적용: Redis의 원자성 활용한 **분산락(Lock) 해제**
 - TPS: `164.5` → `431.2` (**약 162.2% 성능 개선**)
+
+#### **비동기 통신을 통한 마이페이지 조회 성능 개선** ([자세히 보기](https://yenjjun187.tistory.com/1050))
+<p align="center"><img src="https://github.com/JYeonJun/miri-miri/assets/97449471/98aa9e69-94e5-4973-b1a0-4f0a29f6bf7b" style="width:70%;"/></p>
+
+- 동기 방식의 OpenFeign 호출을 Spring의 @**Async**와 **CompletableFuture**를 사용한 비동기 병렬 처리로 전환
+- TPS: `288.0` → `365.2` **(약 26.8% 성능 개선)**
 
 #### **트랜잭션과 카프카 이벤트 발행 사이 정합성 문제 해결** ([자세히 보기](https://yenjjun187.tistory.com/1043))
 - 문제 상황: MSA 환경에서 트랜잭션과 이벤트 발행의 실행 시점 차이로 인해 데이터 일관성 유지 문제 발생
