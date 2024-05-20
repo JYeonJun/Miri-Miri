@@ -14,19 +14,19 @@ public class DummyDevInit extends DummyObject {
 
     private final UserRepository userRepository;
 
-    @Bean
-    @Profile("dev")
-    CommandLineRunner devInit() {
-        return (args) -> {
-            if (userRepository.count() < 1000) {
-                for (int i = 0; i < 1000; i++) {
-                    String email = "user" + i + "@example.com";
-                    String userName = "User" + i;
-                    String phoneNumber = "010-1111-1111";
-                    String address = "Some Address" + i;
-                    userRepository.save(newUser(email, userName, phoneNumber, address));
-                }
-            }
-        };
-    }
+//    @Bean
+//    @Profile("dev")
+//    CommandLineRunner devInit() {
+//        return (args) -> {
+//            if (userRepository.count() < 1000) {
+//                for (int i = 0; i < 1000; i++) {
+//                    String email = "user" + i + "@example.com";
+//                    String userName = "User" + i;
+//                    String phoneNumber = "010-1111-1111";
+//                    String address = "Some Address" + i;
+//                    userRepository.save(newUser(email, userName, phoneNumber, address));
+//                }
+//            }
+//        };
+//    }
 }

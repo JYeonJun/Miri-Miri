@@ -74,10 +74,6 @@ public class Goods extends BaseTimeEntity {
         return this.stockQuantity;
     }
 
-    public void increaseStock(int stockQuantity) {
-        this.stockQuantity += stockQuantity;
-    }
-
     public void changeGoodsInfo(UpdateRegisteredGoodsReqDto reqDto) {
         Optional.ofNullable(reqDto.getGoodsName()).ifPresent(goodsName -> this.goodsName = goodsName);
         Optional.ofNullable(reqDto.getGoodsDescription())

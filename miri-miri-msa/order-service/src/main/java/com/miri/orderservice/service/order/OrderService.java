@@ -9,9 +9,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface OrderService {
 
-    // 장바구니에 담은 상품 주문 기능
-//    CreateOrderRespDto createOrder(Long userId, CreateOrderReqDto reqDto);
-
     // 주문한 상품 리스트 조회 기능
     OrderGoodsListRespDto getOrderGoodsList(Long userId, Pageable pageable);
 

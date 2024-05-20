@@ -70,7 +70,8 @@ public class GoodsServiceImpl implements GoodsService {
     public GoodsDetailRespDto findGoods(Long goodsId) {
         Goods findGoods = findGoodsByIdOrThrow(goodsId);
         String sellerName = getSellerName(findGoods);
-        return new GoodsDetailRespDto(findGoods, sellerName);
+        Integer goodsStock = redisStockService.getGoodsStock(goodsId);
+        return new GoodsDetailRespDto(findGoods, goodsStock, sellerName);
     }
 
     private String getSellerName(Goods goods) {

@@ -16,7 +16,7 @@ public interface WishListRepository extends JpaRepository<WishList, Long>, WishL
     @Query("SELECT wl FROM WishList wl JOIN FETCH wl.goods WHERE  wl.userId = :userId")
     List<WishList> findByUserIdWithGoods(@Param("userId") Long userId);
 
-    void deleteByIdAndUserId(Long wishListId, Long userId);
+    int deleteByIdAndUserId(Long wishListId, Long userId);
 
     @Query("SELECT wl FROM WishList wl JOIN FETCH wl.goods WHERE wl.id IN :wishListIds AND wl.userId = :userId")
     List<WishList> findByIdInAndUserIdWithGoods(List<Long> wishListIds, Long userId);
