@@ -32,6 +32,8 @@ public class KafkaConsumerConfig {
         consumerConfigurations.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         consumerConfigurations.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializer.getClass());
         consumerConfigurations.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
+        consumerConfigurations.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, "10000");
+        consumerConfigurations.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, "200");
         return consumerConfigurations;
     }
 
