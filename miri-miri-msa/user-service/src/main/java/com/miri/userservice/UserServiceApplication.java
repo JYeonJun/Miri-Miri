@@ -13,7 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @EnableJpaAuditing
 @EnableDiscoveryClient
 @EnableFeignClients
-//@EnableAsync
+@EnableAsync
 public class UserServiceApplication {
 
     public static void main(String[] args) {
