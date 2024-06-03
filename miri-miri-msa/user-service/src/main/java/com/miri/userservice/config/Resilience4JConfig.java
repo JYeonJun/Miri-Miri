@@ -2,6 +2,9 @@ package com.miri.userservice.config;
 
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig.SlidingWindowType;
+import io.github.resilience4j.retry.Retry;
+import io.github.resilience4j.retry.RetryConfig;
+import io.github.resilience4j.retry.RetryRegistry;
 import io.github.resilience4j.timelimiter.TimeLimiterConfig;
 import java.io.IOException;
 import java.time.Duration;
@@ -14,6 +17,25 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class Resilience4JConfig {
+
+    private final RetryRegistry retryRegistry;
+
+    public Resilience4JConfig(RetryRegistry retryRegistry) {
+        this.retryRegistry = retryRegistry;
+    }
+
+    @Bean
+    public Retry retry() {
+
+        return retryRegistry.retry(
+                "customRetry",
+                RetryConfig.custom()
+                        .maxAttempts(3) // 최대 재시도 횟수
+                        .waitDuration(Duration.ofMillis(1000)) // 재시도 간 대기 시간
+                        .retryExceptions(IOException.class, TimeoutException.class) // 재시도할 예외
+                        .build()
+        );
+    }
 
     @Bean
     public Customizer<Resilience4JCircuitBreakerFactory> globalCustomConfiguration() {
@@ -40,3 +62,4 @@ public class Resilience4JConfig {
                 .build());
     }
 }
+
