@@ -23,31 +23,35 @@ public class TransactionEventListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onOrderSuccess(ProcessOrderEvent event) {
-        OrderRequestEventDto orderRequestEventDto = event.getOrderRequestEventDto();
-        log.info("traceId={}, 카프카 결제 요청 이벤트 발행", orderRequestEventDto.getTraceId());
-        kafkaSender.sendPaymentRequestEvent(KafkaVO.PAYMENT_REQUEST_TOPIC,
-                PaymentRequestEventDto.fromOrderRequest(orderRequestEventDto, event.getOrderId()));
-    }
-
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_ROLLBACK)
-    public void onOrderFailure(ProcessOrderEvent event) {
-        OrderRequestEventDto orderRequestEventDto = event.getOrderRequestEventDto();
-        log.info("traceId={}, 주문 실패 이벤트 발행", orderRequestEventDto.getTraceId());
-        kafkaSender.sendRollbackRequestEvent(KafkaVO.STOCK_ROLLBACK_TOPIC,
-                StockRollbackEventDto.fromOrderRequest(orderRequestEventDto));
+        try {
+            OrderRequestEventDto orderRequestEventDto = event.getOrderRequestEventDto();
+            log.info("traceId={}, 카프카 결제 요청 이벤트 발행", orderRequestEventDto.getTraceId());
+            kafkaSender.sendPaymentRequestEvent(KafkaVO.PAYMENT_REQUEST_TOPIC,
+                    PaymentRequestEventDto.fromOrderRequest(orderRequestEventDto, event.getOrderId()));
+        } catch (Exception e) {
+            log.error("결제 요청 이벤트 발행 실패, 재시도 필요", e);
+        }
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onOrderStatusToCanceledSuccess(CancelOrderEvent event) {
-        log.info("카프카주문 취소 이벤트 발행");
-        kafkaSender.sendCancelOrderEvent(KafkaVO.CANCEL_ORDER_TOPIC,
-                new CancelOrderEventDto(event.getOrderId(), event.getGoodsId(), event.getQuantity()));
+        try {
+            log.info("카프카 주문 취소 이벤트 발행");
+            kafkaSender.sendCancelOrderEvent(KafkaVO.CANCEL_ORDER_TOPIC,
+                    new CancelOrderEventDto(event.getOrderId(), event.getGoodsId(), event.getQuantity()));
+        } catch (Exception e) {
+            log.error("주문 취소 이벤트 발행 실패, 재시도 필요", e);
+        }
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onReturnSuccess(ReturnEvent event) {
-        log.info("카프카 반품 완료 이벤트 발행");
-        kafkaSender.sendRollbackRequestEvent(KafkaVO.STOCK_ROLLBACK_TOPIC,
-                new StockRollbackEventDto(event.getGoodsId(), event.getQuantity(), null));
+        try {
+            log.info("카프카 반품 완료 이벤트 발행");
+            kafkaSender.sendRollbackRequestEvent(KafkaVO.STOCK_ROLLBACK_TOPIC,
+                    new StockRollbackEventDto(event.getGoodsId(), event.getQuantity(), null));
+        } catch (Exception e) {
+            log.error("반품 완료 이벤트 발행 실패, 재시도 필요", e);
+        }
     }
 }
