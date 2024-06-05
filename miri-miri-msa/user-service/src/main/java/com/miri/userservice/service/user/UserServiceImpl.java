@@ -38,18 +38,20 @@ public class UserServiceImpl implements UserService {
     private final AESUtils aesUtils;
     private final GoodsServiceClient goodsServiceClient;
     private final OrderServiceClient orderServiceClient;
+    private final AsyncUserService asyncUserService;
 
     public UserServiceImpl(UserRepository userRepository,
                            EmailVerificationCodeRepository emailVerificationCodeRepository,
                            BCryptPasswordEncoder passwordEncoder, AESUtils aesUtils,
                            GoodsServiceClient goodsServiceClient,
-                           OrderServiceClient orderServiceClient) {
+                           OrderServiceClient orderServiceClient, AsyncUserService asyncUserService) {
         this.userRepository = userRepository;
         this.emailVerificationCodeRepository = emailVerificationCodeRepository;
         this.passwordEncoder = passwordEncoder;
         this.aesUtils = aesUtils;
         this.goodsServiceClient = goodsServiceClient;
         this.orderServiceClient = orderServiceClient;
+        this.asyncUserService = asyncUserService;
     }
 
     @Override
@@ -100,32 +102,18 @@ public class UserServiceImpl implements UserService {
     public GetUserRespDto getUserInfo(Long userId) {
         User findUser = findUserByIdOrThrow(userId);
 
-        CompletableFuture<RegisterGoodsListRespDto> registerGoodsListFuture = getRegisteredGoodsListAsync(userId);
-        CompletableFuture<WishListRespDto> wishListGoodsFuture = getWishListGoodsAsync(userId);
-        CompletableFuture<OrderGoodsListRespDto> orderGoodsListFuture = getOrderGoodsListAsync(userId);
+        CompletableFuture<RegisterGoodsListRespDto> registerGoodsListFuture = asyncUserService.getRegisteredGoodsListAsync(userId);
+        CompletableFuture<WishListRespDto> wishListGoodsFuture = asyncUserService.getWishListGoodsAsync(userId);
+        CompletableFuture<OrderGoodsListRespDto> orderGoodsListFuture = asyncUserService.getOrderGoodsListAsync(userId);
 
         CompletableFuture.allOf(registerGoodsListFuture, wishListGoodsFuture, orderGoodsListFuture).join();
 
-        RegisterGoodsListRespDto registerGoodsList = registerGoodsListFuture.join();
-        WishListRespDto wishListGoods = wishListGoodsFuture.join();
-        OrderGoodsListRespDto orderGoodsList = orderGoodsListFuture.join();
-
-        return new GetUserRespDto(findUser, registerGoodsList, wishListGoods, orderGoodsList);
-    }
-
-    @Async
-    public CompletableFuture<RegisterGoodsListRespDto> getRegisteredGoodsListAsync(Long userId) {
-        return CompletableFuture.completedFuture(fetchServiceData(RegisterGoodsListRespDto.class, userId, goodsServiceClient::getRegisteredGoodsList));
-    }
-
-    @Async
-    public CompletableFuture<WishListRespDto> getWishListGoodsAsync(Long userId) {
-        return CompletableFuture.completedFuture(fetchServiceData(WishListRespDto.class, userId, goodsServiceClient::getWishListGoods));
-    }
-
-    @Async
-    public CompletableFuture<OrderGoodsListRespDto> getOrderGoodsListAsync(Long userId) {
-        return CompletableFuture.completedFuture(fetchServiceData(OrderGoodsListRespDto.class, userId, orderServiceClient::getOrderGoodsList));
+        return new GetUserRespDto(
+                findUser,
+                registerGoodsListFuture.join(),
+                wishListGoodsFuture.join(),
+                orderGoodsListFuture.join()
+        );
     }
 
     private <T> T fetchServiceData(Class<T> clazz, Long userId, BiFunction<String, Integer, ResponseDto<T>> serviceMethod) {
