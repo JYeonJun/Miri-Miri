@@ -116,11 +116,6 @@ public class UserServiceImpl implements UserService {
         );
     }
 
-    private <T> T fetchServiceData(Class<T> clazz, Long userId, BiFunction<String, Integer, ResponseDto<T>> serviceMethod) {
-        ResponseDto<T> response = serviceMethod.apply(String.valueOf(userId), 0);
-        return Optional.ofNullable(response).map(ResponseDto::getData).orElse(null);
-    }
-
     @Override
     public String findUserNameById(Long userId) {
         User findUser = findUserByIdOrThrow(userId);
