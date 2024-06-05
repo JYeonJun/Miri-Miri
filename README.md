@@ -98,10 +98,10 @@
 - TPS: `164.5` → `431.2` (**약 162.2% 성능 개선**)
 
 ### **비동기 통신을 통한 마이페이지 조회 성능 개선** ([자세히 보기](https://yenjjun187.tistory.com/1050))
-<p align="center"><img src="https://github.com/JYeonJun/miri-miri/assets/97449471/98aa9e69-94e5-4973-b1a0-4f0a29f6bf7b" style="width:70%;"/></p>
+<p align="center"><img src="https://github.com/JYeonJun/miri-miri/assets/97449471/b6c94dcf-36bc-464f-9650-36ec134d580f" style="width:70%;"/></p>
 
 - 동기 방식의 OpenFeign 호출을 Spring의 **@Async**와 **CompletableFuture**를 사용한 비동기 병렬 처리로 전환
-- TPS: `288.0` → `365.2` **(약 26.8% 성능 개선)**
+- TPS: `303.0` → `331.0` **(약 9.24% 성능 개선)**
 
 ### Resilience4j를 통한 마이크로서비스 간 통신 안전성 향상
 - 문제: 서비스 간 OpenFeign 통신 시 **장애 전파 문제** 발생
