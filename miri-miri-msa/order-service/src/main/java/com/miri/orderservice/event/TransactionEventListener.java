@@ -33,6 +33,19 @@ public class TransactionEventListener {
         }
     }
 
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_ROLLBACK)
+    public void onOrderFailure(ProcessOrderEvent event) {
+        try {
+            OrderRequestEventDto requestDto = event.getOrderRequestEventDto();
+            String traceId = requestDto.getTraceId();
+            log.info("traceId={}, 주문 실패: 카프카 재고 증가 이벤트 발행", traceId);
+            kafkaSender.sendRollbackRequestEvent(KafkaVO.STOCK_ROLLBACK_TOPIC,
+                    new StockRollbackEventDto(requestDto.getGoodsId(), requestDto.getQuantity(), traceId));
+        } catch (Exception e) {
+            log.error("재고 증가 이벤트 발행 실패, 재시도 필요", e);
+        }
+    }
+
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onOrderStatusToCanceledSuccess(CancelOrderEvent event) {
         try {
