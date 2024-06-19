@@ -129,7 +129,7 @@
 
 ### Outbox 패턴 vs @TransactionalEventListener
 - 장점: @TransactionalEventListener는 **구현이 간단**하고 **즉시 이벤트 발행**이 가능
-- 단점: 이벤트 발행이 실패 시 **재발행 불가**
+- 단점: 이벤트 발행 실패 시 **재발행 불가**
 - 보완: **Kafka**를 사용하여 시스템 장애 시에도 이벤트 발행이 가능하도록 보완
 
 ## 🤖실행 방법
