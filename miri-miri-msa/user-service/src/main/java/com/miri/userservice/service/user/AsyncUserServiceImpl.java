@@ -22,21 +22,21 @@ public class AsyncUserServiceImpl implements AsyncUserService {
         this.orderServiceClient = orderServiceClient;
     }
 
-    @Async
+    @Async("taskExecutor")
     @Override
     public CompletableFuture<RegisterGoodsListRespDto> getRegisteredGoodsListAsync(Long userId) {
         return CompletableFuture.supplyAsync(() ->
                 fetchServiceData(RegisterGoodsListRespDto.class, userId, goodsServiceClient::getRegisteredGoodsList));
     }
 
-    @Async
+    @Async("taskExecutor")
     @Override
     public CompletableFuture<WishListRespDto> getWishListGoodsAsync(Long userId) {
         return CompletableFuture.supplyAsync(() ->
                 fetchServiceData(WishListRespDto.class, userId, goodsServiceClient::getWishListGoods));
     }
 
-    @Async
+    @Async("taskExecutor")
     @Override
     public CompletableFuture<OrderGoodsListRespDto> getOrderGoodsListAsync(Long userId) {
         return CompletableFuture.supplyAsync(() ->
